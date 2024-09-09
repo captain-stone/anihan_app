@@ -36,6 +36,57 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
+  firebase_core: ^2.22.0
+  firebase_auth: ^4.13.0
+  auto_route: ^7.8.3
+  logger: ^2.0.2+1
+  flutter_facebook_auth: ^6.0.3
+  google_sign_in: ^6.2.1
+  shimmer: ^3.0.0
+  vibration: ^1.8.3
+
+
+
+  #? provider
+  path_provider: ^2.1.1
+  flutter_bloc:
+  equatable:
+  # flutter_local_notifications: ^16.1.0
+
+
+
+  #? databases
+  floor: ^1.4.1
+  injectable: ^2.3.0
+  get_it: ^7.6.2
+  firebase_database: ^10.3.5
+
+  #? internet
+  http:
+  dio:
+  retrofit:
+  internet_connection_checker: ^1.0.0+1
+
+
+  #? handlers
+  snippet_coder_utils: ^1.0.14
+  permission_handler: ^11.2.0
+
+
+  #? machine learning
+  flutter_tts: ^3.7.0
+
+  #? web
+  webview_flutter: ^4.2.2
+
+  #? media Players
+  # audioplayers: ^5.2.1
+  audioplayers: ^4.0.0
+  photo_view: ^0.14.0
+  animated_text_kit: ^4.2.2
+  json_annotation: ^4.8.1
+  image: ^4.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -46,6 +97,14 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
+  build_runner:
+  json_serializable: any
+  floor_generator:
+  auto_route_generator: ^7.3.1
+  injectable_generator: ^2.4.0
+  retrofit_generator:   
+  flutter_launcher_icons: ^0.13.1
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -59,7 +118,15 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
+  assets:
+      - assets/google_logo.png
+      - assets/logo.png
+      - assets/fertilizers.jpg
+      - assets/fruits.jpg
+      - assets/sapling.jpg
+      - assets/seeds.jpg
+      - assets/tools.jpg
+      - assets/vegetables.jpg
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
