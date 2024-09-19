@@ -15,6 +15,22 @@ abstract class _$AppRouters extends RootStackRouter {
 
   @override
   final Map<String, PageFactory> pagesMap = {
+    ChatsRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const ChatsPage(),
+      );
+    },
+    HomeNavigationRoute.name: (routeData) {
+      final args = routeData.argsAs<HomeNavigationRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: HomeNavigationPage(
+          args.uid,
+          key: args.key,
+        ),
+      );
+    },
     HomeRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -27,13 +43,105 @@ abstract class _$AppRouters extends RootStackRouter {
         child: const LoginPage(),
       );
     },
+    MyInformationFarmerRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const MyInformationFarmerPage(),
+      );
+    },
+    MyInformationRoute.name: (routeData) {
+      final args = routeData.argsAs<MyInformationRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: MyInformationPage(
+          args.uid,
+          key: args.key,
+        ),
+      );
+    },
+    NotificationRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const NotificationPage(),
+      );
+    },
     RegistrationFormRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
         child: const RegistrationFormPage(),
       );
     },
+    SellerRegistrationRoute.name: (routeData) {
+      final args = routeData.argsAs<SellerRegistrationRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: SellerRegistrationPage(
+          uid: args.uid,
+          fullName: args.fullName,
+          phoneNumber: args.phoneNumber,
+          key: args.key,
+        ),
+      );
+    },
+    WishListRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const WishListPage(),
+      );
+    },
   };
+}
+
+/// generated route for
+/// [ChatsPage]
+class ChatsRoute extends PageRouteInfo<void> {
+  const ChatsRoute({List<PageRouteInfo>? children})
+      : super(
+          ChatsRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'ChatsRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [HomeNavigationPage]
+class HomeNavigationRoute extends PageRouteInfo<HomeNavigationRouteArgs> {
+  HomeNavigationRoute({
+    required String? uid,
+    Key? key,
+    List<PageRouteInfo>? children,
+  }) : super(
+          HomeNavigationRoute.name,
+          args: HomeNavigationRouteArgs(
+            uid: uid,
+            key: key,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'HomeNavigationRoute';
+
+  static const PageInfo<HomeNavigationRouteArgs> page =
+      PageInfo<HomeNavigationRouteArgs>(name);
+}
+
+class HomeNavigationRouteArgs {
+  const HomeNavigationRouteArgs({
+    required this.uid,
+    this.key,
+  });
+
+  final String? uid;
+
+  final Key? key;
+
+  @override
+  String toString() {
+    return 'HomeNavigationRouteArgs{uid: $uid, key: $key}';
+  }
 }
 
 /// generated route for
@@ -65,6 +173,72 @@ class LoginRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [MyInformationFarmerPage]
+class MyInformationFarmerRoute extends PageRouteInfo<void> {
+  const MyInformationFarmerRoute({List<PageRouteInfo>? children})
+      : super(
+          MyInformationFarmerRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'MyInformationFarmerRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [MyInformationPage]
+class MyInformationRoute extends PageRouteInfo<MyInformationRouteArgs> {
+  MyInformationRoute({
+    required String? uid,
+    Key? key,
+    List<PageRouteInfo>? children,
+  }) : super(
+          MyInformationRoute.name,
+          args: MyInformationRouteArgs(
+            uid: uid,
+            key: key,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'MyInformationRoute';
+
+  static const PageInfo<MyInformationRouteArgs> page =
+      PageInfo<MyInformationRouteArgs>(name);
+}
+
+class MyInformationRouteArgs {
+  const MyInformationRouteArgs({
+    required this.uid,
+    this.key,
+  });
+
+  final String? uid;
+
+  final Key? key;
+
+  @override
+  String toString() {
+    return 'MyInformationRouteArgs{uid: $uid, key: $key}';
+  }
+}
+
+/// generated route for
+/// [NotificationPage]
+class NotificationRoute extends PageRouteInfo<void> {
+  const NotificationRoute({List<PageRouteInfo>? children})
+      : super(
+          NotificationRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'NotificationRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
 /// [RegistrationFormPage]
 class RegistrationFormRoute extends PageRouteInfo<void> {
   const RegistrationFormRoute({List<PageRouteInfo>? children})
@@ -74,6 +248,69 @@ class RegistrationFormRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'RegistrationFormRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [SellerRegistrationPage]
+class SellerRegistrationRoute
+    extends PageRouteInfo<SellerRegistrationRouteArgs> {
+  SellerRegistrationRoute({
+    required String uid,
+    required String fullName,
+    required int phoneNumber,
+    Key? key,
+    List<PageRouteInfo>? children,
+  }) : super(
+          SellerRegistrationRoute.name,
+          args: SellerRegistrationRouteArgs(
+            uid: uid,
+            fullName: fullName,
+            phoneNumber: phoneNumber,
+            key: key,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'SellerRegistrationRoute';
+
+  static const PageInfo<SellerRegistrationRouteArgs> page =
+      PageInfo<SellerRegistrationRouteArgs>(name);
+}
+
+class SellerRegistrationRouteArgs {
+  const SellerRegistrationRouteArgs({
+    required this.uid,
+    required this.fullName,
+    required this.phoneNumber,
+    this.key,
+  });
+
+  final String uid;
+
+  final String fullName;
+
+  final int phoneNumber;
+
+  final Key? key;
+
+  @override
+  String toString() {
+    return 'SellerRegistrationRouteArgs{uid: $uid, fullName: $fullName, phoneNumber: $phoneNumber, key: $key}';
+  }
+}
+
+/// generated route for
+/// [WishListPage]
+class WishListRoute extends PageRouteInfo<void> {
+  const WishListRoute({List<PageRouteInfo>? children})
+      : super(
+          WishListRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'WishListRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }

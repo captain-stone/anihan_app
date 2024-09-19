@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "286949897245",
+    "firebase_url": "https://captainstone-e005a-default-rtdb.firebaseio.com",
+    "project_id": "captainstone-e005a",
+    "storage_bucket": "captainstone-e005a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:286949897245:android:85f65a76d8e2ba259102f4",
+        "android_client_info": {
+          "package_name": "com.example.anihan_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "286949897245-pt1fjluia0m0manb6d6va1fvlp7i02gc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.anihan_app",
+            "certificate_hash": "7faaa3513bd00831c88c7a8417defd0d5b011c90"
+          }
+        },
+        {
+          "client_id": "286949897245-unj649oqvlu2ds8rkt1mielusvsq13an.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAeAjcaDd3w8ObvKXK5YtDgtyisgwuVwng"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "286949897245-unj649oqvlu2ds8rkt1mielusvsq13an.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

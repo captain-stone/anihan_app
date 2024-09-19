@@ -1,9 +1,12 @@
+import 'package:anihan_app/common/app_module.dart';
 import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/animation_theme.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await configureDependencies().then((value) => runApp(MyApp()));
 }
 
 class MyApp extends StatelessWidget {

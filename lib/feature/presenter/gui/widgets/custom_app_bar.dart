@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget {
+  Function(String value) onChangeSearchCrops;
+
+  CustomAppBar({required this.onChangeSearchCrops});
+
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      automaticallyImplyLeading: false,
       title: Row(
         children: [
-          IconButton(
-            icon: Icon(Icons.calendar_today),
-            onPressed: () {
-              // Placeholder for future calendar function
-            },
-          ),
-          SizedBox(width: 10),
+          // SizedBox(width: 10),
           Expanded(
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -20,11 +19,11 @@ class CustomAppBar extends StatelessWidget {
                 decoration: InputDecoration(
                   contentPadding: EdgeInsets.symmetric(vertical: 12.0),
                   hintText: 'Search a Crop!',
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12.0),
                     child: Icon(Icons.search, size: 24.0),
                   ),
-                  prefixIconConstraints: BoxConstraints(
+                  prefixIconConstraints: const BoxConstraints(
                     minWidth: 40,
                     minHeight: 40,
                   ),
@@ -32,33 +31,31 @@ class CustomAppBar extends StatelessWidget {
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(
+                    borderSide: const BorderSide(
                       color: Colors.black,
                       width: 1.0,
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(
+                    borderSide: const BorderSide(
                       color: Colors.green,
                       width: 2.0,
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(
+                    borderSide: const BorderSide(
                       color: Colors.black,
                       width: 1.0,
                     ),
                   ),
                 ),
-                onChanged: (value) {
-                  // Placeholder for future search function
-                },
+                onChanged: (value) => onChangeSearchCrops(value),
               ),
             ),
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           Stack(
             children: [
               IconButton(
@@ -67,7 +64,7 @@ class CustomAppBar extends StatelessWidget {
                   // Placeholder for future community function
                 },
               ),
-              Positioned(
+              const Positioned(
                 right: 4,
                 top: 4,
                 child: CircleAvatar(
@@ -84,7 +81,7 @@ class CustomAppBar extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           IconButton(
             icon: Icon(Icons.shopping_cart),
             onPressed: () {
