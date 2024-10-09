@@ -78,9 +78,9 @@ class _HomeNavigationPageState extends State<HomeNavigationPage> {
         // initialIndex: 12,
         routes: [
           const WishListRoute(),
-          const ChatsRoute(),
+          ChatsRoute(uid: widget.uid),
           const HomeRoute(),
-          const NotificationRoute(),
+          NotificationRoute(uid: widget.uid),
           MyInformationRoute(uid: widget.uid),
         ],
         builder: (context, child) {

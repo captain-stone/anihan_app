@@ -29,7 +29,7 @@ class SessionRepoImpl extends SessionsRepositories {
     //check the internet first
 
     if (!(await internetConnectionChecker.hasConnection)) {
-      return ApiResult.noInternetConenction();
+      return const ApiResult.noInternetConenction();
     } else {
       //since parameters are not empty procceed
       try {
@@ -53,11 +53,11 @@ class SessionRepoImpl extends SessionsRepositories {
                 "We sent you an email to verify your account. Please verify it first before logging in");
           }
         } else if (params == null && localLoginData != null) {
-          String username = localLoginData.username!;
-          String password = localLoginData.password!;
+          // String username = localLoginData.username!;
+          // String password = localLoginData.password!;
 
-          var user = await getUserCredential(username, password);
-          var token = await user!.getIdToken();
+          // var user = await getUserCredential(username, password);
+          // var token = await user!.getIdToken();
 
           // if (token == localLoginData.token) {
           return ApiResult.success(localLoginData);
@@ -95,7 +95,7 @@ class SessionRepoImpl extends SessionsRepositories {
     //CHECK IF THERES NO INTERNET FIRST.
 
     if (!(await internetConnectionChecker.hasConnection)) {
-      return ApiResult.noInternetConenction();
+      return const ApiResult.noInternetConenction();
     } else {
       ///put an validation na di need null is params
       try {
@@ -111,11 +111,11 @@ class SessionRepoImpl extends SessionsRepositories {
           await user.sendEmailVerification();
           await user.updateDisplayName(params.fullName);
 
-          var token = await user.getIdToken();
           final databaseReference =
               FirebaseDatabase.instance.ref('users/${user.uid}');
 
           await databaseReference.set({
+            'fullName': params.fullName,
             'phoneNumber': params.phoneNumber,
             'emailAddress': params.emailAddress,
           });

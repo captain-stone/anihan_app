@@ -1,3 +1,5 @@
+// ignore_for_file: use_key_in_widget_constructors
+
 import 'package:anihan_app/feature/presenter/gui/widgets/location_item.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +21,7 @@ class TrendingLocationsSection extends StatelessWidget {
                 ),
           ),
         ),
-        Container(
+        SizedBox(
           height: 160.0, // Adjusted height to fit placeholder content
           child: ListView.builder(
             scrollDirection: Axis.horizontal,

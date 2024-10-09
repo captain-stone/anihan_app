@@ -1,14 +1,12 @@
 import 'dart:async';
 
 import 'package:anihan_app/common/api_result.dart';
-import 'package:anihan_app/feature/data/models/api/firebase_model.dart';
-import 'package:anihan_app/feature/data/models/dto/seller_registrations_dto.dart';
-import 'package:anihan_app/feature/domain/entities/registration_farmers_entity.dart';
-import 'package:anihan_app/feature/presenter/gui/pages/seller_registration_bloc/seller_registration_bloc.dart';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:injectable/injectable.dart';
+import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 
 part 'seller_info_add_ons_event.dart';

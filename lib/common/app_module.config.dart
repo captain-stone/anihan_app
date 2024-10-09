@@ -30,6 +30,8 @@ import 'package:anihan_app/feature/domain/usecases/sign_up_usecase.dart'
     as _i341;
 import 'package:anihan_app/feature/domain/usecases/user_information_usecase.dart'
     as _i619;
+import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/chats_page_bloc.dart'
+    as _i346;
 import 'package:anihan_app/feature/presenter/gui/pages/login_bloc/login_page_bloc.dart'
     as _i550;
 import 'package:anihan_app/feature/presenter/gui/pages/register_bloc/register_page_bloc.dart'
@@ -43,6 +45,8 @@ import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/use
 import 'package:dio/dio.dart' as _i361;
 import 'package:firebase_core/firebase_core.dart' as _i982;
 import 'package:firebase_database/firebase_database.dart' as _i345;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'
+    as _i163;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:http/http.dart' as _i519;
 import 'package:injectable/injectable.dart' as _i526;
@@ -69,6 +73,11 @@ extension GetItInjectableX on _i174.GetIt {
       () => appModule.db,
       preResolve: true,
     );
+    await gh.factoryAsync<_i163.FlutterLocalNotificationsPlugin>(
+      () => appModule.notification,
+      preResolve: true,
+    );
+    gh.factory<_i346.ChatsPageBloc>(() => _i346.ChatsPageBloc());
     gh.lazySingleton<_i345.DatabaseReference>(() => appModule.ref);
     gh.lazySingleton<_i519.Client>(() => appModule.httpClient);
     gh.lazySingleton<_i361.Dio>(() => appModule.dio);

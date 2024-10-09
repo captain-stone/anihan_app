@@ -9,10 +9,12 @@ plugins {
 
 android {
     namespace = "com.example.anihan_app"
-    compileSdk = flutter.compileSdkVersion
+    // compileSdk = flutter.compileSdkVersion
+    compileSdk = 34
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -30,6 +32,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -52,6 +55,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
     implementation "androidx.multidex:multidex:2.0.1"
     implementation 'com.facebook.android:facebook-login:latest.release'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.2.2'
 
 }
 

@@ -2,6 +2,7 @@ import 'package:anihan_app/common/api_result.dart';
 import 'package:anihan_app/feature/data/models/dto/seller_registrations_dto.dart';
 import 'package:anihan_app/feature/data/models/dto/user_information_dto.dart';
 import 'package:anihan_app/feature/domain/parameters/farmers_registration_params.dart';
+import 'package:anihan_app/feature/services/date_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:logger/logger.dart';
@@ -74,8 +75,10 @@ class UserInformationServiceApi {
     }
   }
 
+//REGISTRATIONS OF SELLERS OR STORES
   Future<SellerRegistrationsDto> sellersInformation(
       FarmersRegistrationParams params) async {
+    DateServices date = DateServices();
     //generate storeID: store+uid
 
     User user = await gettingUserId();
@@ -89,6 +92,7 @@ class UserInformationServiceApi {
       "storeAddress": params.storeAddress,
       "isApproved":
           Approval.pendingApproval.name, //approved, pending, not approved
+      'date_created': date.dateNow()
     };
 
     var storeData = {

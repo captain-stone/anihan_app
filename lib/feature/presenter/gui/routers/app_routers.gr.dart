@@ -16,9 +16,14 @@ abstract class _$AppRouters extends RootStackRouter {
   @override
   final Map<String, PageFactory> pagesMap = {
     ChatsRoute.name: (routeData) {
+      final args = routeData.argsAs<ChatsRouteArgs>(
+          orElse: () => const ChatsRouteArgs());
       return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const ChatsPage(),
+        child: ChatsPage(
+          uid: args.uid,
+          key: args.key,
+        ),
       );
     },
     HomeNavigationRoute.name: (routeData) {
@@ -60,9 +65,14 @@ abstract class _$AppRouters extends RootStackRouter {
       );
     },
     NotificationRoute.name: (routeData) {
+      final args = routeData.argsAs<NotificationRouteArgs>(
+          orElse: () => const NotificationRouteArgs());
       return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const NotificationPage(),
+        child: NotificationPage(
+          uid: args.uid,
+          key: args.key,
+        ),
       );
     },
     RegistrationFormRoute.name: (routeData) {
@@ -94,16 +104,39 @@ abstract class _$AppRouters extends RootStackRouter {
 
 /// generated route for
 /// [ChatsPage]
-class ChatsRoute extends PageRouteInfo<void> {
-  const ChatsRoute({List<PageRouteInfo>? children})
-      : super(
+class ChatsRoute extends PageRouteInfo<ChatsRouteArgs> {
+  ChatsRoute({
+    String? uid,
+    Key? key,
+    List<PageRouteInfo>? children,
+  }) : super(
           ChatsRoute.name,
+          args: ChatsRouteArgs(
+            uid: uid,
+            key: key,
+          ),
           initialChildren: children,
         );
 
   static const String name = 'ChatsRoute';
 
-  static const PageInfo<void> page = PageInfo<void>(name);
+  static const PageInfo<ChatsRouteArgs> page = PageInfo<ChatsRouteArgs>(name);
+}
+
+class ChatsRouteArgs {
+  const ChatsRouteArgs({
+    this.uid,
+    this.key,
+  });
+
+  final String? uid;
+
+  final Key? key;
+
+  @override
+  String toString() {
+    return 'ChatsRouteArgs{uid: $uid, key: $key}';
+  }
 }
 
 /// generated route for
@@ -226,16 +259,40 @@ class MyInformationRouteArgs {
 
 /// generated route for
 /// [NotificationPage]
-class NotificationRoute extends PageRouteInfo<void> {
-  const NotificationRoute({List<PageRouteInfo>? children})
-      : super(
+class NotificationRoute extends PageRouteInfo<NotificationRouteArgs> {
+  NotificationRoute({
+    String? uid,
+    Key? key,
+    List<PageRouteInfo>? children,
+  }) : super(
           NotificationRoute.name,
+          args: NotificationRouteArgs(
+            uid: uid,
+            key: key,
+          ),
           initialChildren: children,
         );
 
   static const String name = 'NotificationRoute';
 
-  static const PageInfo<void> page = PageInfo<void>(name);
+  static const PageInfo<NotificationRouteArgs> page =
+      PageInfo<NotificationRouteArgs>(name);
+}
+
+class NotificationRouteArgs {
+  const NotificationRouteArgs({
+    this.uid,
+    this.key,
+  });
+
+  final String? uid;
+
+  final Key? key;
+
+  @override
+  String toString() {
+    return 'NotificationRouteArgs{uid: $uid, key: $key}';
+  }
 }
 
 /// generated route for

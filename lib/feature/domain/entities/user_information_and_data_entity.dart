@@ -1,4 +1,3 @@
-import 'package:anihan_app/common/api_result.dart';
 import 'package:anihan_app/feature/domain/entities/app_entity.dart';
 
 class UserInformationEntity extends AppEntity {
@@ -19,7 +18,6 @@ class UserInformationEntity extends AppEntity {
   });
   // final String
   @override
-  // TODO: implement props
   List<Object?> get props => [
         displayName,
         remarks,

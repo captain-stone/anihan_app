@@ -1,13 +1,13 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
-import '../pages/chats_page.dart';
+import '../pages/chats_bloc/chats_page.dart';
 import '../pages/home_navigation_page.dart';
 import '../pages/home_page.dart';
 import '../pages/login_bloc/login_page.dart';
 import '../pages/myinformation_farmer.dart';
 import '../pages/user_information_bloc/user_information_page.dart';
-import '../pages/notification_page.dart';
+import '../pages/notification_bloc/notification_page.dart';
 import '../pages/register_bloc/register_page.dart';
 import '../pages/seller_registration_bloc/seller_registration_page.dart';
 import '../pages/wish_list_page.dart';

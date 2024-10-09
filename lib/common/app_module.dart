@@ -1,13 +1,15 @@
+import 'package:anihan_app/common/notification_module.dart';
 import 'package:anihan_app/feature/data/database/app_database.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import 'package:http/http.dart' as http;
+// ignore: no_leading_underscores_for_library_prefixes
 import 'package:get_it/get_it.dart' as _i1;
 
 import 'package:dio/dio.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:logger/logger.dart';
 
 import 'app_module.config.dart';
 
@@ -38,6 +40,13 @@ abstract class AppModule {
 
   @preResolve
   Future<AppDatabase> get db => AppDatabase.create();
+
+  @preResolve
+  Future<FlutterLocalNotificationsPlugin> get notification async {
+    final plugin = FlutterLocalNotificationsPlugin();
+    await NotificationModule.initializeNotifications(plugin);
+    return plugin;
+  }
 }
 
 final getIt = _i1.GetIt.instance;

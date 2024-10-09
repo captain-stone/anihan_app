@@ -1,6 +1,5 @@
-import 'package:anihan_app/feature/domain/entities/app_entity.dart';
 import 'package:anihan_app/feature/domain/entities/registration_farmers_entity.dart';
-import 'package:anihan_app/feature/presenter/gui/pages/seller_registration_bloc/seller_registration_bloc.dart';
+
 import 'package:json_annotation/json_annotation.dart';
 
 import 'app_dto.dart';
