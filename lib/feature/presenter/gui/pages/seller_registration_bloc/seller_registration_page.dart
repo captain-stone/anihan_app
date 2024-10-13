@@ -1,9 +1,11 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers
+
 import 'package:anihan_app/common/app_module.dart';
 import 'package:anihan_app/feature/domain/parameters/farmers_registration_params.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/seller_registration_bloc/seller_registration_bloc.dart';
 import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/addons/custom_alert_dialog.dart';
-import 'package:auto_route/annotations.dart';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,8 +21,7 @@ class SellerRegistrationPage extends StatefulWidget {
       {required this.uid,
       required this.fullName,
       required this.phoneNumber,
-      Key? key})
-      : super(key: key);
+      super.key});
 
   @override
   State<SellerRegistrationPage> createState() => _SellerRegistrationPageState();
@@ -45,7 +46,6 @@ class _SellerRegistrationPageState extends State<SellerRegistrationPage> {
     return BlocConsumer<SellerRegistrationBloc, SellerRegistrationState>(
       bloc: _bloc,
       listener: (context, state) {
-        // TODO: implement listener
         logger.d(state);
 
         if (state is SellerRegistrationSuccessState) {

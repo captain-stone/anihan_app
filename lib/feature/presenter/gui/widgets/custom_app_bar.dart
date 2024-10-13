@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget {
-  Function(String value) onChangeSearchCrops;
+  final Function(String value) onChangeSearchCrops;
 
-  CustomAppBar({required this.onChangeSearchCrops});
+  const CustomAppBar({super.key, required this.onChangeSearchCrops});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class CustomAppBar extends StatelessWidget {
               margin: const EdgeInsets.symmetric(vertical: 8.0),
               child: TextField(
                 decoration: InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(vertical: 12.0),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
                   hintText: 'Search a Crop!',
                   prefixIcon: const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 12.0),
@@ -59,7 +59,7 @@ class CustomAppBar extends StatelessWidget {
           Stack(
             children: [
               IconButton(
-                icon: Icon(Icons.people),
+                icon: const Icon(Icons.people),
                 onPressed: () {
                   // Placeholder for future community function
                 },
@@ -83,7 +83,7 @@ class CustomAppBar extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           IconButton(
-            icon: Icon(Icons.shopping_cart),
+            icon: const Icon(Icons.shopping_cart),
             onPressed: () {
               // Placeholder for future cart function
             },

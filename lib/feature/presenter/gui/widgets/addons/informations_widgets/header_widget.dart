@@ -10,14 +10,13 @@ class HeaderWidget extends StatelessWidget {
 
   final List<Widget> accessRoles;
 
-  Function() onPressSell;
+  final Function() onPressSell;
 
-  HeaderWidget(this.name,
+  const HeaderWidget(this.name,
       {required this.isApproved,
       required this.accessRoles,
       required this.onPressSell,
-      Key? key})
-      : super(key: key);
+      super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +83,7 @@ class HeaderWidget extends StatelessWidget {
             size: 22,
           ),
           onPressed: () {
-            AutoRouter.of(context).replace(MyInformationFarmerRoute());
+            AutoRouter.of(context).replace(const MyInformationFarmerRoute());
           },
         ),
       ],

@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:logger/logger.dart';
 
 import '../../common/app_module.dart';
 
@@ -20,8 +19,6 @@ class NotificationHelper {
     Uint8List? bigPicture,
   }) async {
     if (!isNotifShown) {
-      Logger logger = Logger();
-
       BigTextStyleInformation bigTextStyleInformation = BigTextStyleInformation(
         body ?? '',
         htmlFormatBigText: true,

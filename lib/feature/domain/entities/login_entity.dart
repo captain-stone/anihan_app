@@ -27,6 +27,5 @@ class LoginEntity extends AppEntity {
       this.password});
 
   @override
-  // TODO: implement props
   List<Object?> get props => [token, displayName, uid, refreshToken, dateLogin];
 }

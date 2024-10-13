@@ -2,7 +2,7 @@ import 'package:anihan_app/common/app_module.dart';
 import 'package:anihan_app/feature/domain/parameters/login_params.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/login_bloc/login_page_bloc.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/addons/custom_alert_dialog.dart';
-import 'package:auto_route/annotations.dart';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _initialLogin() {
-    _loginBloc.add(GetLoginEvent());
+    _loginBloc.add(const GetLoginEvent());
   }
 
   void _togglePasswordVisibility() {
@@ -72,7 +72,6 @@ class _LoginPageState extends State<LoginPage> {
     return BlocConsumer<LoginPageBloc, LoginPageState>(
       bloc: _loginBloc,
       listener: (context, state) {
-        // TODO: implement listener
         logger.d(state);
 
         if (state is LoginSuccessState) {
@@ -228,8 +227,8 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             const SizedBox(height: 10),
                             const Row(
-                              key: const Key('orDivider'),
-                              children: const [
+                              key: Key('orDivider'),
+                              children: [
                                 Expanded(child: Divider(color: Colors.black)),
                                 Padding(
                                   padding:
@@ -265,7 +264,7 @@ class _LoginPageState extends State<LoginPage> {
                                 // Add sign-up functionality
 
                                 AutoRouter.of(context)
-                                    .push(RegistrationFormRoute());
+                                    .push(const RegistrationFormRoute());
                               },
                               child: const Text.rich(
                                 TextSpan(

@@ -22,7 +22,7 @@ class RegistrationFarmersRepoImpl extends RegistrationFarmersRepository {
     //adding data information
 
     if (!(await internetConnectionChecker.hasConnection)) {
-      return ApiResult.noInternetConenction();
+      return const ApiResult.noInternetConenction();
     } else {
       try {
         UserInformationServiceApi userInformationServiceApi =
@@ -38,9 +38,8 @@ class RegistrationFarmersRepoImpl extends RegistrationFarmersRepository {
           return const ApiResult.error("Error saving data");
         }
       } on Exception catch (e) {
-        // TODO
         logger.e(e);
-        return ApiResult.error("Error saving data");
+        return const ApiResult.error("Error saving data");
       }
     }
   }

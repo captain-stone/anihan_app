@@ -2,7 +2,7 @@ import 'package:anihan_app/common/api_result.dart';
 import 'package:anihan_app/feature/domain/entities/registration_farmers_entity.dart';
 import 'package:anihan_app/feature/domain/parameters/farmers_registration_params.dart';
 import 'package:anihan_app/feature/domain/usecases/registration_farmers_usecase.dart';
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
 
@@ -17,7 +17,6 @@ class SellerRegistrationBloc
   SellerRegistrationBloc(this._registrationFarmersUsecase)
       : super(SellerRegistrationInitial()) {
     on<SellerUidEvent>((event, emit) async {
-      // TODO: implement event handler
       emit(SellerRegistrationLoadingState());
 
       var result = await _registrationFarmersUsecase(event.params);

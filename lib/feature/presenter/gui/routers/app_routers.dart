@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
+import '../pages/add_product_page/addproductform.dart';
 import '../pages/chats_bloc/chats_page.dart';
 import '../pages/home_navigation_page.dart';
 import '../pages/home_page.dart';
@@ -16,7 +17,6 @@ part 'app_routers.gr.dart';
 @AutoRouterConfig()
 class AppRouters extends _$AppRouters {
   @override
-  // TODO: implement routes
   List<AutoRoute> get routes => [
         AutoRoute(page: LoginRoute.page, initial: true),
         // AutoRoute(page: HomeRoute.page),
@@ -31,5 +31,6 @@ class AppRouters extends _$AppRouters {
         ]),
         AutoRoute(page: SellerRegistrationRoute.page),
         AutoRoute(page: MyInformationFarmerRoute.page),
+        AutoRoute(page: AddProductFormRoute.page),
       ];
 }

@@ -1,3 +1,6 @@
+// ignore_for_file: library_private_types_in_public_api
+
+import 'package:anihan_app/feature/presenter/gui/widgets/debugger/logger_debugger.dart';
 import 'package:flutter/material.dart';
 
 import 'animation_theme.dart';
@@ -5,14 +8,14 @@ import 'animation_theme.dart';
 class LocationItem extends StatefulWidget {
   final String location;
 
-  LocationItem({required this.location});
+  const LocationItem({super.key, required this.location});
 
   @override
   _LocationItemState createState() => _LocationItemState();
 }
 
 class _LocationItemState extends State<LocationItem>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, LoggerEvent {
   bool _isPressed = false;
   late final AnimationController _controller;
 
@@ -50,7 +53,7 @@ class _LocationItemState extends State<LocationItem>
           _isPressed = false;
         });
         // Placeholder for future functionality when location is clicked
-        print('Location ${widget.location} clicked');
+        debug('Location ${widget.location} clicked');
       },
       onTapCancel: () {
         setState(() {
@@ -72,7 +75,7 @@ class _LocationItemState extends State<LocationItem>
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
                   blurRadius: 10.0,
-                  offset: Offset(0, 4), // Shadow effect
+                  offset: const Offset(0, 4), // Shadow effect
                 ),
               ],
             ),
@@ -80,7 +83,7 @@ class _LocationItemState extends State<LocationItem>
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.vertical(
+                  borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(
                         16.0), // Top rounded corners for image/icon
                   ),

@@ -6,7 +6,7 @@ abstract class SellerRegistrationEvent extends Equatable {
 
 class SellerUidEvent extends SellerRegistrationEvent {
   final FarmersRegistrationParams params;
-  SellerUidEvent(this.params);
+  const SellerUidEvent(this.params);
   @override
   List<Object> get props => [params];
 }

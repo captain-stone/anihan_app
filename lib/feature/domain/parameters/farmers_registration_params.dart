@@ -12,6 +12,5 @@ class FarmersRegistrationParams extends Params {
       required this.storeAddress,
       required this.password});
   @override
-  // TODO: implement props
   List<Object?> get props => [storeName, onlineTime, storeAddress, password];
 }

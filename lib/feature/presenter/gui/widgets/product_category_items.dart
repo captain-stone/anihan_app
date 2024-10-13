@@ -1,3 +1,6 @@
+// ignore_for_file: library_private_types_in_public_api
+
+import 'package:anihan_app/feature/presenter/gui/widgets/debugger/logger_debugger.dart';
 import 'package:flutter/material.dart';
 
 import 'animation_theme.dart';
@@ -6,14 +9,14 @@ import 'product_category.dart';
 class ProductCategoryItem extends StatefulWidget {
   final ProductCategory category;
 
-  ProductCategoryItem({required this.category});
+  const ProductCategoryItem({super.key, required this.category});
 
   @override
   _ProductCategoryItemState createState() => _ProductCategoryItemState();
 }
 
 class _ProductCategoryItemState extends State<ProductCategoryItem>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, LoggerEvent {
   bool _isPressed = false;
   late final AnimationController _controller;
 
@@ -51,7 +54,7 @@ class _ProductCategoryItemState extends State<ProductCategoryItem>
           _isPressed = false;
         });
         // Placeholder for future functionality when category is clicked
-        print('Category ${widget.category.name} clicked');
+        debug('Category ${widget.category.name} clicked');
       },
       onTapCancel: () {
         setState(() {
@@ -73,7 +76,7 @@ class _ProductCategoryItemState extends State<ProductCategoryItem>
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
                   blurRadius: 10.0,
-                  offset: Offset(0, 4), // Shadow effect
+                  offset: const Offset(0, 4), // Shadow effect
                 ),
               ],
             ),
@@ -81,7 +84,7 @@ class _ProductCategoryItemState extends State<ProductCategoryItem>
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.vertical(
+                  borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(16.0), // Top rounded corners for image
                   ),
                   child: Image.asset(

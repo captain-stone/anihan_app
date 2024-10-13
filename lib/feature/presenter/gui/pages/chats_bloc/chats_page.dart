@@ -1,11 +1,13 @@
+// ignore_for_file: unused_element, unused_field, prefer_final_fields
+
 import 'package:anihan_app/common/app_module.dart';
 import 'package:anihan_app/feature/data/models/api/firebase_model.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/chats_page_bloc.dart';
+import 'package:anihan_app/feature/presenter/gui/widgets/debugger/logger_debugger.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart' ;
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:logger/logger.dart';
 
 @RoutePage()
 class ChatsPage extends StatefulWidget {
@@ -15,23 +17,23 @@ class ChatsPage extends StatefulWidget {
   State<ChatsPage> createState() => _ChatsPageState();
 }
 
-class _ChatsPageState extends State<ChatsPage> {
+class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
   final _bloc = getIt<ChatsPageBloc>();
   int _selectedIndex = 2;
   static const List<ChatItem> chatItems = [];
   List<FirebaseDataModel> users = [];
-  // ignore: prefer_final_fields, unused_field
+
   List<String> _friendSuggestions = [];
-  // ignore: unused_field
+
   String _searchQuery = '';
-  final logger = Logger();
+
   bool searchEmpty = true;
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
-    print("Selected index: $index");
+    debug("Selected index: $index");
   }
 
   void onChange(String value) {
@@ -125,10 +127,10 @@ class _ChatsPageState extends State<ChatsPage> {
                       //MUST ADDING FRIENDS
                       ShowFriendListToChat(widget.uid!, notFriends)
                       : searchData.isNotEmpty
-                          ? Center(
+                          ? const Center(
                               child: Text("Search"),
                             )
-                          : Center(
+                          : const Center(
                               child: CircularProgressIndicator(),
                             );
             },
@@ -151,8 +153,6 @@ class CustomAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final logger = Logger();
-
     return AppBar(
       automaticallyImplyLeading: false,
       title: Row(
@@ -237,8 +237,6 @@ class FriendsSuggestions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<ChatItem> friends;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Column(
@@ -279,7 +277,7 @@ class FriendsSuggestions extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.people),
+                            const Icon(Icons.people),
                             const SizedBox(width: 16.0),
                             Text(users[index]!.value['fullName']),
                           ],
@@ -348,7 +346,7 @@ class ShowFriendListToChat extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Icon(Icons.people),
+                          const Icon(Icons.people),
                           const SizedBox(width: 16.0),
                           Text(users[index]!.value['fullName']),
                         ],
@@ -515,7 +513,7 @@ class ChatList extends StatelessWidget {
 
       return ListView.builder(
         shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         itemCount: name.length,
         itemBuilder: (context, index) {
           return ListTile(
@@ -541,7 +539,7 @@ class ChatItem extends StatelessWidget {
   final bool isUserMessage;
 
   const ChatItem({
-    Key? key,
+    super.key,
     required this.imageUrl,
     required this.isOnline,
     required this.name,
@@ -549,7 +547,7 @@ class ChatItem extends StatelessWidget {
     required this.dateTime,
     required this.isUnread,
     required this.isUserMessage,
-  }) : super(key: key);
+  });
 
   String formatTime(DateTime dateTime) {
     final now = DateTime.now();
@@ -613,10 +611,10 @@ class ProfilePicture extends StatelessWidget {
   final bool isOnline;
 
   const ProfilePicture({
-    Key? key,
+    super.key,
     required this.imageUrl,
     required this.isOnline,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -650,12 +648,12 @@ class ChatDetails extends StatelessWidget {
   final bool isUserMessage;
 
   const ChatDetails({
-    Key? key,
+    super.key,
     required this.name,
     required this.recentMessage,
     required this.isUnread,
     required this.isUserMessage,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -692,10 +690,10 @@ class TimeIndicator extends StatelessWidget {
   final bool isUnread;
 
   const TimeIndicator({
-    Key? key,
+    super.key,
     required this.time,
     required this.isUnread,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

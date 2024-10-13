@@ -1,6 +1,8 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers
+
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:injectable/injectable.dart';
@@ -19,8 +21,6 @@ class ChatsPageBloc extends Bloc<ChatsPageEvent, ChatsPageState> {
 
   ChatsPageBloc() : super(ChatsPageInitial()) {
     on<ChatsPageEvent>((event, emit) async {
-      // TODO: implement event handler
-
       DatabaseReference _refs = db.ref("users/");
 
       try {
@@ -83,8 +83,6 @@ class ChatsPageBloc extends Bloc<ChatsPageEvent, ChatsPageState> {
     });
 
     on<SearchFriendEvent>((event, emit) async {
-      // TODO: implement event handler
-
       DatabaseReference _refs = db.ref("users/");
       _refs.child(event.query);
 

@@ -16,7 +16,7 @@ class SellerInfoAddOnsLoadingState extends SellerInfoAddOnsState {
 
 class SellerInfoAddOnsSuccessState extends SellerInfoAddOnsState {
   final Map<String, dynamic> dataModel;
-  SellerInfoAddOnsSuccessState(this.dataModel);
+  const SellerInfoAddOnsSuccessState(this.dataModel);
   @override
   List<Object> get props => [dataModel];
 }
@@ -24,7 +24,7 @@ class SellerInfoAddOnsSuccessState extends SellerInfoAddOnsState {
 class SellerInfoAddOnsErrorState extends SellerInfoAddOnsState {
   final String message;
 
-  SellerInfoAddOnsErrorState(this.message);
+  const SellerInfoAddOnsErrorState(this.message);
   @override
   List<Object> get props => [message];
 }

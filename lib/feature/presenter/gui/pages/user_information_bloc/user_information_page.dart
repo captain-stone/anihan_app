@@ -1,7 +1,10 @@
+// ignore_for_file: library_private_types_in_public_api, unused_element, no_leading_underscores_for_local_identifiers
+
 import 'package:anihan_app/common/api_result.dart';
 import 'package:anihan_app/common/app_module.dart';
 import 'package:anihan_app/feature/domain/parameters/user_information_params.dart';
-import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/bloc/seller_info_add_ons_bloc.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/add_ons/your_products.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/seller_add_ons/seller_info_add_ons_bloc.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/user_information_bloc_bloc.dart';
 import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
 import 'package:auto_route/auto_route.dart';
@@ -14,11 +17,12 @@ import '../../widgets/addons/informations_widgets/activities_widget.dart';
 import '../../widgets/addons/informations_widgets/header_widget.dart';
 import '../../widgets/addons/informations_widgets/orders_widget.dart';
 import '../../widgets/addons/informations_widgets/sections_titles.dart';
+import 'products_add_ons/product_add_ons_bloc.dart';
 
 @RoutePage()
 class MyInformationPage extends StatefulWidget {
   final String? uid;
-  const MyInformationPage(this.uid, {Key? key}) : super(key: key);
+  const MyInformationPage(this.uid, {super.key});
 
   @override
   _MyInformationPageState createState() => _MyInformationPageState();
@@ -107,9 +111,9 @@ class _MyInformationPageState extends State<MyInformationPage> {
           side: const BorderSide(color: Colors.white),
         ),
       ),
-      child: Column(
+      child: const Column(
         mainAxisSize: MainAxisSize.min,
-        children: const [
+        children: [
           Icon(Icons.sell, color: Colors.white),
           SizedBox(height: 8.0), // Space between icon and text
           Text('Sell Your Own'),
@@ -122,14 +126,22 @@ class _MyInformationPageState extends State<MyInformationPage> {
   Widget build(BuildContext context) {
     DatabaseReference _ref = db.ref("farmers/${widget.uid}/");
     DatabaseReference _userUpdate = db.ref("users/${widget.uid}/");
+    DatabaseReference _productsRef = db.ref("products/product-id${widget.uid}");
 
-    return BlocProvider(
-      create: (context) =>
-          SellerInfoAddOnsBloc(_ref, _userUpdate)..add(SellerStreanEvent()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) =>
+              SellerInfoAddOnsBloc(_ref, _userUpdate)..add(SellerStreanEvent()),
+        ),
+        BlocProvider(
+          create: (context) =>
+              ProductAddOnsBloc(_productsRef)..add(GetSelfProductEvents()),
+        ),
+      ],
       child: BlocConsumer<UserInformationBlocBloc, UserInformationBlocState>(
         bloc: _bloc,
         listener: (context, state) {
-          // TODO: implement listener
           logger.d(state);
 
           if (state is UserInformationSuccessState) {
@@ -220,7 +232,7 @@ class _MyInformationPageState extends State<MyInformationPage> {
                   builder: (context, state) {
                     String isApproved = Approval.notApproved.name;
 
-                    logger.d(state);
+                    // logger.d(state);
                     if (state is SellerInfoAddOnsSuccessState) {
                       isApproved = state.dataModel['isApproved'];
                       if (state.dataModel['farmers'] != null) {
@@ -252,7 +264,49 @@ class _MyInformationPageState extends State<MyInformationPage> {
                 ),
                 const MyOrdersWidget(),
                 const ActivitiesWidget(),
-                const SectionTitle(title: 'You May Like'),
+                // Visibility(
+                //   visible: isFarmers == Approval.approved.name,
+                //   child: SectionTitle(
+                //     title: 'Your Products',
+                //     addProducts: () {
+                //       AutoRouter.of(context).push(const AddProductFormRoute());
+                //     },
+                //   ),
+                // ),
+                // Visibility(
+                //     visible: isFarmers == Approval.approved.name,
+                //     child: YourProduct(widget.uid!)),
+
+                SectionTitle(
+                  title: 'Your Products',
+                  addProducts: () {
+                    AutoRouter.of(context).push(const AddProductFormRoute());
+                  },
+                ),
+                BlocBuilder<ProductAddOnsBloc, ProductAddOnsState>(
+                  builder: (context, state) {
+                    // logger.d(state);
+                    if (state is ProductSuccessState) {
+                      // logger.d(state.productEntity);
+
+                      // var data = state.productEntity.productVariant;
+                      // logger.d(data);
+                      return YourProduct(
+                        widget.uid!,
+                        context,
+                        state,
+                      );
+                    }
+                    return YourProduct(
+                      widget.uid!,
+                      context,
+                      state,
+                    );
+                  },
+                ),
+                const SectionTitle(
+                  title: 'You May Like',
+                ),
                 const YouMayLikeWidget(),
               ],
             ),
@@ -272,7 +326,7 @@ class Product {
 }
 
 class YouMayLikeWidget extends StatefulWidget {
-  const YouMayLikeWidget({Key? key}) : super(key: key);
+  const YouMayLikeWidget({super.key});
 
   @override
   _YouMayLikeWidgetState createState() => _YouMayLikeWidgetState();

@@ -15,6 +15,8 @@ class ProductsSection extends StatelessWidget {
     ),
   );
 
+  ProductsSection({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -29,11 +31,11 @@ class ProductsSection extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primary,
                 ),
           ),
-          SizedBox(height: 16.0),
+          const SizedBox(height: 16.0),
           GridView.builder(
             shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               mainAxisSpacing: 16.0,
               crossAxisSpacing: 16.0,

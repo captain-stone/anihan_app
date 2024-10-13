@@ -17,7 +17,7 @@ class SellerRegistrationLoadingState extends SellerRegistrationState {
 class SellerRegistrationSuccessState extends SellerRegistrationState {
   final RegistrationFarmersEntity registrationFarmersEntity;
 
-  SellerRegistrationSuccessState(this.registrationFarmersEntity);
+  const SellerRegistrationSuccessState(this.registrationFarmersEntity);
   @override
   List<Object> get props => [registrationFarmersEntity];
 }
@@ -25,21 +25,21 @@ class SellerRegistrationSuccessState extends SellerRegistrationState {
 class SellerPasswordErrorState extends SellerRegistrationState {
   final String message;
 
-  SellerPasswordErrorState(this.message);
+  const SellerPasswordErrorState(this.message);
   @override
   List<Object> get props => [message];
 }
 
 class SellerErrorState extends SellerRegistrationState {
   final String message;
-  SellerErrorState(this.message);
+  const SellerErrorState(this.message);
   @override
   List<Object> get props => [message];
 }
 
 class SellerInternetErrorState extends SellerRegistrationState {
   final String message;
-  SellerInternetErrorState(this.message);
+  const SellerInternetErrorState(this.message);
 
   @override
   List<Object> get props => [message];

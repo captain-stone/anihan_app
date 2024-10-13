@@ -7,12 +7,12 @@ class CustomAlertDialog extends StatelessWidget {
   final bool actionCloseVisibility;
   final bool actionOkayVisibility;
   final String actionLabel;
-  Function()? onPressedCloseBtn;
-  Function()? onPressOkay;
+  final Function()? onPressedCloseBtn;
+  final Function()? onPressOkay;
   final Widget child;
 
-  CustomAlertDialog({
-    Key? key,
+  const CustomAlertDialog({
+    super.key,
     required this.colorMessage,
     required this.title,
     this.height = 58,
@@ -22,7 +22,7 @@ class CustomAlertDialog extends StatelessWidget {
     this.onPressOkay,
     this.onPressedCloseBtn,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +68,7 @@ class CustomAlertDialog extends StatelessWidget {
                   child: ElevatedButton(
                       style: ButtonStyle(
                           shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                              WidgetStateProperty.all<RoundedRectangleBorder>(
                                   RoundedRectangleBorder(
                                       borderRadius:
                                           BorderRadius.circular(12.0)))),

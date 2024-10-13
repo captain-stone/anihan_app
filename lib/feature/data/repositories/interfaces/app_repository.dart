@@ -1,6 +1,8 @@
 // import 'package:equatable/equatable.dart';
 // import 'package:login_flutter_firebase/common/api_result.dart';
 
+// ignore_for_file: deprecated_member_use, avoid_print
+
 import 'dart:developer';
 import 'dart:io';
 

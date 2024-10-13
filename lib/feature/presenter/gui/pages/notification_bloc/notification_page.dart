@@ -1,7 +1,7 @@
 import 'package:anihan_app/feature/presenter/gui/pages/notification_bloc/notification_page_bloc.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/addons/notifications/panel_container_widget.dart';
 import 'package:auto_route/annotations.dart';
-import 'package:firebase_database/firebase_database.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';

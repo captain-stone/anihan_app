@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field, library_private_types_in_public_api, use_super_parameters
+
 import 'package:auto_route/annotations.dart';
 import 'package:flutter/material.dart';
 
@@ -31,15 +33,6 @@ class WishListPage extends StatefulWidget {
 }
 
 class _WishListPageState extends State<WishListPage> {
-  int _selectedIndex = 2; // Default selected index is "Home"
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    print("Selected index: $index");
-  }
-
   @override
   Widget build(BuildContext context) {
     List<User> users = [
@@ -64,7 +57,8 @@ class _WishListPageState extends State<WishListPage> {
     ];
     return Scaffold(
       appBar: AppBar(
-          automaticallyImplyLeading: false, title: Text('Following/Wishlists')),
+          automaticallyImplyLeading: false,
+          title: const Text('Following/Wishlists')),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -117,13 +111,13 @@ class _WishListPageState extends State<WishListPage> {
 class UpperBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
 
-  const UpperBar({Key? key, required this.title}) : super(key: key);
+  const UpperBar({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       leading: IconButton(
-        icon: Icon(Icons.arrow_back),
+        icon: const Icon(Icons.arrow_back),
         onPressed: () {
           Navigator.pop(context);
         },
@@ -137,7 +131,7 @@ class UpperBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: true,
       actions: [
         IconButton(
-          icon: Icon(Icons.chat_bubble_outline),
+          icon: const Icon(Icons.chat_bubble_outline),
           onPressed: () {
             // Action for the chat icon, for example, navigating to a chat page
           },

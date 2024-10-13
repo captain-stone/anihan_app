@@ -6,7 +6,7 @@ abstract class UserInformationBlocEvent extends Equatable {
 
 class GetUidEvent extends UserInformationBlocEvent {
   final UserUidParams params;
-  GetUidEvent(this.params);
+  const GetUidEvent(this.params);
 
   @override
   List<Object> get props => [params];

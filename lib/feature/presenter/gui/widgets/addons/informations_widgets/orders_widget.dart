@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class MyOrdersWidget extends StatelessWidget {
-  const MyOrdersWidget({Key? key}) : super(key: key);
+  const MyOrdersWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -1,7 +1,7 @@
 import 'package:anihan_app/feature/domain/entities/sign_up_entity.dart';
 import 'package:anihan_app/feature/domain/parameters/sign_up_params.dart';
 import 'package:anihan_app/feature/domain/usecases/sign_up_usecase.dart';
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
 

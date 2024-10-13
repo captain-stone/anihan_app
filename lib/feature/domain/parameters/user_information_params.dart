@@ -4,6 +4,5 @@ class UserUidParams extends Params {
   final String uid;
   UserUidParams(this.uid);
   @override
-  // TODO: implement props
   List<Object?> get props => [uid];
 }

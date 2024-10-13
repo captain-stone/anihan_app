@@ -1,5 +1,5 @@
 import 'package:anihan_app/common/api_result.dart';
-import 'package:anihan_app/feature/data/repositories/impl/session_repo_impl.dart';
+
 import 'package:anihan_app/feature/data/repositories/interfaces/sessions_repositories.dart';
 import 'package:anihan_app/feature/domain/usecases/usecases.dart';
 import 'package:injectable/injectable.dart';

@@ -24,7 +24,7 @@ class UserInformationRepoImpl extends UserInformationRepository {
         UserInformationServiceApi();
 
     if (!(await internetConnectionChecker.hasConnection)) {
-      return ApiResult.noInternetConenction();
+      return const ApiResult.noInternetConenction();
     } else {
       var result = await userInformationServiceApi.userInformation(params.uid);
 
@@ -36,7 +36,5 @@ class UserInformationRepoImpl extends UserInformationRepository {
 
       return ApiResult.success(entity);
     }
-    // // TODO: implement getUserData
-    // throw UnimplementedError();
   }
 }

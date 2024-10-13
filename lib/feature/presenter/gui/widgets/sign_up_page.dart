@@ -42,7 +42,7 @@ class SignUpScreen extends StatelessWidget {
                 Align(
                   alignment: Alignment.topRight,
                   child: IconButton(
-                    icon: Icon(Icons.help_outline),
+                    icon: const Icon(Icons.help_outline),
                     onPressed: () {
                       // Action for help button
                     },
@@ -56,8 +56,8 @@ class SignUpScreen extends StatelessWidget {
                 ),
 
                 // Phone number field
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16.0),
                   child: TextField(
                     decoration: InputDecoration(
                       prefixIcon: Icon(Icons.phone),
@@ -75,18 +75,18 @@ class SignUpScreen extends StatelessWidget {
                     height: 48,
                     child: ElevatedButton(
                       onPressed: () {},
-                      child: Text('Next'),
+                      child: const Text('Next'),
                     ),
                   ),
                 ),
 
                 // Or divider with lines on both sides
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8.0),
                   child: Row(
                     children: [
                       Expanded(child: Divider(color: Colors.black)),
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text("Or"),
                       ),

@@ -13,6 +13,8 @@ class NewStockSection extends StatelessWidget {
     ProductCategory('Saplings', 'assets/sapling.jpg'),
   ];
 
+  NewStockSection({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -28,7 +30,7 @@ class NewStockSection extends StatelessWidget {
                 ),
           ),
         ),
-        Container(
+        SizedBox(
           height: 200.0, // Adjusted height to fit categories content
           child: ListView.builder(
             scrollDirection: Axis.horizontal,

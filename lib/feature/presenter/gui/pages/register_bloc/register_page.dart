@@ -1,9 +1,11 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers
+
 import 'package:anihan_app/common/app_module.dart';
 import 'package:anihan_app/feature/domain/parameters/sign_up_params.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/register_bloc/register_page_bloc.dart';
 import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/addons/custom_alert_dialog.dart';
-import 'package:auto_route/annotations.dart';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -69,8 +71,6 @@ class _RegistrationFormStatePage extends State<RegistrationFormPage> {
     return BlocConsumer<RegisterPageBloc, RegisterPageState>(
       bloc: _regBloc,
       listener: (context, state) {
-        // TODO: implement listener
-
         if (state is RegisterFirebaseErrorState) {
           //create a error Message here.
           showDialog(
@@ -95,7 +95,7 @@ class _RegistrationFormStatePage extends State<RegistrationFormPage> {
                     child: Text(
                         "Thank you, ${state.data.fullName}! You can now explore all the features of the app. Please verify your account to complete the registration process and log in."),
                     onPressedCloseBtn: () {
-                      AutoRouter.of(context).push(LoginRoute());
+                      AutoRouter.of(context).push(const LoginRoute());
                     },
                   ));
         }
@@ -155,14 +155,14 @@ class _RegistrationFormStatePage extends State<RegistrationFormPage> {
                           controller: phoneNumberController,
                           decoration: const InputDecoration(
                             labelText: 'Phone Number',
-                            prefixIcon: const Icon(Icons.phone),
+                            prefixIcon: Icon(Icons.phone),
                           ),
                           keyboardType: TextInputType.phone,
                         ),
                         const SizedBox(height: 20),
                         TextField(
                           controller: emailAddressController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Email Address',
                             prefixIcon: Icon(Icons.mail),
                           ),
@@ -172,9 +172,9 @@ class _RegistrationFormStatePage extends State<RegistrationFormPage> {
 
                         TextField(
                           controller: fullNameController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Full Name',
-                            prefixIcon: const Icon(Icons.person),
+                            prefixIcon: Icon(Icons.person),
                           ),
                         ),
                         const SizedBox(height: 20),

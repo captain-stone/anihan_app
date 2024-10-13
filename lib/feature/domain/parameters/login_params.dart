@@ -6,6 +6,5 @@ class LoginParams extends Params {
 
   LoginParams(this.username, this.password);
   @override
-  // TODO: implement props
   List<Object> get props => [username, password];
 }

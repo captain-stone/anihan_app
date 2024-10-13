@@ -73,7 +73,7 @@ class TitleContentWidgetPanelContainer extends StatelessWidget {
                 Text(title,
                     style: const TextStyle(
                         fontSize: 16, fontWeight: FontWeight.bold)),
-                Text(data["date_created"], style: TextStyle(fontSize: 10))
+                Text(data["date_created"], style: const TextStyle(fontSize: 10))
               ],
             ),
             Text(

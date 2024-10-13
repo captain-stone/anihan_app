@@ -5,8 +5,6 @@ import 'package:anihan_app/feature/domain/parameters/user_information_params.dar
 import 'package:anihan_app/feature/domain/usecases/usecases.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../presenter/gui/pages/wish_list_page.dart';
-
 @injectable
 class UserInformationUsecase
     extends Usecases<Future<ApiResult<UserInformationEntity>>, UserUidParams> {

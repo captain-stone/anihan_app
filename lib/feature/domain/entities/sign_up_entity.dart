@@ -10,6 +10,5 @@ class SignUpEntity extends AppEntity {
       {this.phoneNumber, this.emailAddress, this.fullName, this.password});
 
   @override
-  // TODO: implement props
   List<Object?> get props => [phoneNumber, emailAddress, fullName, password];
 }

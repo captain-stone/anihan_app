@@ -1,9 +1,11 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 @RoutePage()
 class MyInformationFarmerPage extends StatefulWidget {
-  const MyInformationFarmerPage({Key? key}) : super(key: key);
+  const MyInformationFarmerPage({super.key});
 
   @override
   _MyInformationFarmerPageState createState() =>
@@ -38,7 +40,6 @@ class _MyInformationFarmerPageState extends State<MyInformationFarmerPage> {
     setState(() {
       _selectedIndex = index;
     });
-    print("Selected index: $index");
   }
 
   @override
@@ -94,7 +95,7 @@ class _MyInformationFarmerPageState extends State<MyInformationFarmerPage> {
 class SectionTitle extends StatelessWidget {
   final String title;
 
-  const SectionTitle({required this.title, Key? key}) : super(key: key);
+  const SectionTitle({required this.title, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +114,7 @@ class SectionTitle extends StatelessWidget {
 }
 
 class HeaderWidget extends StatelessWidget {
-  const HeaderWidget({Key? key}) : super(key: key);
+  const HeaderWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -175,13 +176,13 @@ class HeaderWidget extends StatelessWidget {
               icon: const Icon(Icons.shopping_cart, color: Colors.white),
               onPressed: () {},
             ),
-            Positioned(
+            const Positioned(
               right: 4,
               top: 4,
               child: CircleAvatar(
                 radius: 10.0,
                 backgroundColor: Colors.red,
-                child: const Text(
+                child: Text(
                   '2',
                   style: TextStyle(color: Colors.white, fontSize: 12.0),
                 ),
@@ -281,9 +282,9 @@ class HeaderWidget extends StatelessWidget {
         ),
         elevation: 0, // Flat look like the reference
       ),
-      child: Row(
+      child: const Row(
         mainAxisSize: MainAxisSize.min,
-        children: const [
+        children: [
           Icon(Icons.storefront,
               color: Colors.black), // Replacing with a storefront icon
           SizedBox(width: 8),
@@ -300,7 +301,7 @@ class HeaderWidget extends StatelessWidget {
 }
 
 class MyOrdersWidget extends StatelessWidget {
-  const MyOrdersWidget({Key? key}) : super(key: key);
+  const MyOrdersWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -423,7 +424,7 @@ class MyOrdersWidget extends StatelessWidget {
 }
 
 class ActivitiesWidget extends StatelessWidget {
-  const ActivitiesWidget({Key? key}) : super(key: key);
+  const ActivitiesWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -520,7 +521,7 @@ class Product {
 }
 
 class YouMayLikeWidget extends StatefulWidget {
-  const YouMayLikeWidget({Key? key}) : super(key: key);
+  const YouMayLikeWidget({super.key});
 
   @override
   _YouMayLikeWidgetState createState() => _YouMayLikeWidgetState();

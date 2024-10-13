@@ -2,7 +2,7 @@
 
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:logger/logger.dart';
@@ -25,7 +25,7 @@ class NotificationPageBloc
         _subscription = _refs.onValue.listen((event) {
           if (event.snapshot.value == null) {
             if (!emit.isDone) {
-              emit(NotificationPageErrorState("No data saved"));
+              emit(const NotificationPageErrorState("No data saved"));
             }
             _subscription?.isPaused;
           } else {
@@ -56,7 +56,7 @@ class NotificationPageBloc
               _subscription?.isPaused;
             } else {
               if (!emit.isDone) {
-                emit(NotificationPageErrorState("No data saved"));
+                emit(const NotificationPageErrorState("No data saved"));
               }
               _subscription?.isPaused;
             }
@@ -72,8 +72,6 @@ class NotificationPageBloc
         logger.d(e);
         emit(NotificationPageErrorState("Error Occured: $e"));
       }
-
-      // TODO: implement event handler
     });
   }
 }

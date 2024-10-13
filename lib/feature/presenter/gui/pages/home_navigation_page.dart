@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 import 'dart:io';
 
@@ -9,7 +11,7 @@ import 'package:flutter/services.dart';
 @RoutePage()
 class HomeNavigationPage extends StatefulWidget {
   final String? uid;
-  const HomeNavigationPage(this.uid, {Key? key}) : super(key: key);
+  const HomeNavigationPage(this.uid, {super.key});
 
   @override
   State<HomeNavigationPage> createState() => _HomeNavigationPageState();

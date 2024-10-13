@@ -1,12 +1,16 @@
+// ignore_for_file: prefer_final_fields
+
 import 'dart:async';
 
 import 'package:anihan_app/common/api_result.dart';
+import 'package:anihan_app/feature/domain/entities/product_entity.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:injectable/injectable.dart';
-import 'package:intl/intl.dart';
+
 import 'package:logger/logger.dart';
 
 part 'seller_info_add_ons_event.dart';
@@ -16,7 +20,7 @@ part 'seller_info_add_ons_state.dart';
 class SellerInfoAddOnsBloc
     extends Bloc<SellerInfoAddOnsEvent, SellerInfoAddOnsState> {
   final DatabaseReference _refs;
-  DatabaseReference _sellerUpdateRef;
+  final DatabaseReference _sellerUpdateRef;
 
   final Logger logger = Logger();
   late StreamSubscription? _subscription;
@@ -27,11 +31,11 @@ class SellerInfoAddOnsBloc
         _subscription = _refs.onValue.listen((event) {
           if (event.snapshot.value == null) {
             if (!emit.isDone) {
-              emit(SellerInfoAddOnsErrorState("No data saved"));
+              emit(const SellerInfoAddOnsErrorState("No data saved"));
             }
             _subscription?.isPaused;
           } else {
-            logger.d(event.snapshot.value);
+            // logger.d(event.snapshot.value);
             var dataObject = (event.snapshot.value as Map?);
 
             var data = dataObject
@@ -39,7 +43,7 @@ class SellerInfoAddOnsBloc
 
             //data is storename, storeaddress, and isApproved
             if (data != null) {
-              logger.d(data["isApproved"]);
+              // logger.d(data["isApproved"]);
 
               if (!emit.isDone) {
                 if (data["isApproved"] == Approval.approved.name) {
@@ -61,7 +65,7 @@ class SellerInfoAddOnsBloc
                 _subscription?.isPaused;
               } else {
                 if (!emit.isDone) {
-                  emit(SellerInfoAddOnsErrorState("No data saved"));
+                  emit(const SellerInfoAddOnsErrorState("No data saved"));
                 }
                 _subscription?.isPaused;
               }
@@ -75,7 +79,7 @@ class SellerInfoAddOnsBloc
         });
         await _subscription!.asFuture();
       } catch (e) {
-        logger.d(e);
+        logger.e(e);
         emit(SellerInfoAddOnsErrorState("Error Occured: $e"));
       }
     });

@@ -15,6 +15,12 @@ abstract class _$AppRouters extends RootStackRouter {
 
   @override
   final Map<String, PageFactory> pagesMap = {
+    AddProductFormRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const AddProductFormPage(),
+      );
+    },
     ChatsRoute.name: (routeData) {
       final args = routeData.argsAs<ChatsRouteArgs>(
           orElse: () => const ChatsRouteArgs());
@@ -39,7 +45,7 @@ abstract class _$AppRouters extends RootStackRouter {
     HomeRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: HomePage(),
+        child: const HomePage(),
       );
     },
     LoginRoute.name: (routeData) {
@@ -100,6 +106,20 @@ abstract class _$AppRouters extends RootStackRouter {
       );
     },
   };
+}
+
+/// generated route for
+/// [AddProductFormPage]
+class AddProductFormRoute extends PageRouteInfo<void> {
+  const AddProductFormRoute({List<PageRouteInfo>? children})
+      : super(
+          AddProductFormRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'AddProductFormRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
 }
 
 /// generated route for

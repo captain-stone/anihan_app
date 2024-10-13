@@ -1,5 +1,5 @@
-import 'dart:ui';
-import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:auto_route/annotations.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +12,8 @@ import '../widgets/trending_locations_section.dart';
 
 @RoutePage()
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -27,7 +29,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(60.0),
+        preferredSize: const Size.fromHeight(60.0),
         child: CustomAppBar(onChangeSearchCrops: _searchCrops),
       ),
       body: SingleChildScrollView(
@@ -35,11 +37,11 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TrendingLocationsSection(),
-            SizedBox(height: 8.0),
-            LocationsLabel(),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 8.0),
+            const LocationsLabel(),
+            const SizedBox(height: 16.0),
             NewStockSection(),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             ProductsSection(),
           ],
         ),

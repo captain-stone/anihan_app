@@ -17,7 +17,7 @@ class RegisterPageLoadingState extends RegisterPageState {
 class RegisteredSuccessState extends RegisterPageState {
   final SignUpEntity data;
 
-  RegisteredSuccessState(this.data);
+  const RegisteredSuccessState(this.data);
   @override
   List<Object> get props => [data];
 }

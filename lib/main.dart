@@ -1,7 +1,7 @@
 import 'package:anihan_app/common/app_module.dart';
 import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/animation_theme.dart';
-import 'package:firebase_core/firebase_core.dart';
+
 import 'package:flutter/material.dart';
 
 void main() async {
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
-          extensions: <ThemeExtension<dynamic>>[
+          extensions: const <ThemeExtension<dynamic>>[
             AnimationTheme(
                 hoverScale: 1.1,
                 pressScale: 0.9,

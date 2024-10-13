@@ -1,3 +1,6 @@
+// ignore_for_file: library_private_types_in_public_api
+
+import 'package:anihan_app/feature/presenter/gui/widgets/debugger/logger_debugger.dart';
 import 'package:flutter/material.dart';
 
 import 'animation_theme.dart';
@@ -6,14 +9,14 @@ import 'products.dart';
 class ProductItem extends StatefulWidget {
   final Product product;
 
-  ProductItem({required this.product});
+  const ProductItem({super.key, required this.product});
 
   @override
   _ProductItemState createState() => _ProductItemState();
 }
 
 class _ProductItemState extends State<ProductItem>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, LoggerEvent {
   bool _isPressed = false;
   late final AnimationController _controller;
 
@@ -51,7 +54,7 @@ class _ProductItemState extends State<ProductItem>
           _isPressed = false;
         });
         // Placeholder for future functionality when product is clicked
-        print('Product ${widget.product.name} clicked');
+        debug('Product ${widget.product.name} clicked');
       },
       onTapCancel: () {
         setState(() {
@@ -69,7 +72,7 @@ class _ProductItemState extends State<ProductItem>
               BoxShadow(
                 color: Colors.black.withOpacity(0.1),
                 blurRadius: 10.0,
-                offset: Offset(0, 4),
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -77,7 +80,7 @@ class _ProductItemState extends State<ProductItem>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.vertical(
+                borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(16.0),
                 ),
                 child: Image.asset(
@@ -111,13 +114,13 @@ class _ProductItemState extends State<ProductItem>
                     ),
                     Row(
                       children: [
-                        Icon(Icons.star, color: Colors.amber, size: 16.0),
-                        SizedBox(width: 4.0),
+                        const Icon(Icons.star, color: Colors.amber, size: 16.0),
+                        const SizedBox(width: 4.0),
                         Text(
                           '${widget.product.rating}',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
-                        SizedBox(width: 8.0),
+                        const SizedBox(width: 8.0),
                         Text(
                           '${widget.product.itemsSold} sold',
                           style: Theme.of(context).textTheme.bodyMedium,

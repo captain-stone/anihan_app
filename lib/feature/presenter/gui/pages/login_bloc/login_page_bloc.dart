@@ -2,9 +2,9 @@ import 'package:anihan_app/common/api_result.dart';
 import 'package:anihan_app/feature/domain/entities/login_entity.dart';
 import 'package:anihan_app/feature/domain/parameters/login_params.dart';
 import 'package:anihan_app/feature/domain/usecases/login_usecase.dart';
-import 'package:bloc/bloc.dart';
+
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 part 'login_page_event.dart';

@@ -17,7 +17,7 @@ class UserInformationLoadingState extends UserInformationBlocState {
 class UserInformationSuccessState extends UserInformationBlocState {
   final UserInformationEntity userInformationEntity;
 
-  UserInformationSuccessState(this.userInformationEntity);
+  const UserInformationSuccessState(this.userInformationEntity);
   @override
   List<Object> get props => [userInformationEntity];
 }
@@ -25,14 +25,14 @@ class UserInformationSuccessState extends UserInformationBlocState {
 class UserInformationErrorState extends UserInformationBlocState {
   final String message;
 
-  UserInformationErrorState(this.message);
+  const UserInformationErrorState(this.message);
   @override
   List<Object> get props => [message];
 }
 
 class UserInformationInternetErrorState extends UserInformationBlocState {
   final String message;
-  UserInformationInternetErrorState(this.message);
+  const UserInformationInternetErrorState(this.message);
   @override
   List<Object> get props => [message];
 }

@@ -6,7 +6,7 @@ abstract class RegisterPageEvent extends Equatable {
 
 class GetRegistrationEvent extends RegisterPageEvent {
   final SignUpParams params;
-  GetRegistrationEvent(this.params);
+  const GetRegistrationEvent(this.params);
   @override
   List<Object> get props => [params];
 }

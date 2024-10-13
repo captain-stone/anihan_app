@@ -1,3 +1,5 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers
+
 import 'package:anihan_app/common/api_result.dart';
 import 'package:anihan_app/feature/data/models/dto/seller_registrations_dto.dart';
 import 'package:anihan_app/feature/data/models/dto/user_information_dto.dart';
