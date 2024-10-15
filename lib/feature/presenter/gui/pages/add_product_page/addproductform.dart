@@ -1,5 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api, prefer_final_fields, use_build_context_synchronously
 
+import 'dart:ffi';
+
 import 'package:anihan_app/common/app_module.dart';
 import 'package:anihan_app/feature/domain/parameters/product_params.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/add_product_page/add_product_page_bloc.dart';
@@ -28,8 +30,9 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
   List<Uint8List> _imageDataList = [];
   List<Widget> _variationCards = [];
   List<Map<String, dynamic>> _variantData = [];
-  List<GlobalKey<VariationCardState>> _variationKeys =
-      []; // List of GlobalKeys for variation cards
+  String fileExtension = "";
+  List<GlobalKey<VariationCardState>> _variationKeys = [];
+  List<Uint8List> _variantImageData = [];
   final _productNameController = TextEditingController();
   final _labelController = TextEditingController();
   final _priceController = TextEditingController();
@@ -44,12 +47,13 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
     );
 
     if (selected != null) {
-      final String fileExtension = selected.name.split('.').last.toLowerCase();
+      fileExtension = selected.name.split('.').last.toLowerCase();
       if (['png', 'jpg', 'jpeg'].contains(fileExtension)) {
         final Uint8List data = await selected.readAsBytes();
         setState(() {
           _imageDataList.add(data);
         });
+        logger.d(fileExtension);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -62,7 +66,7 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
   void _addVariationCard() {
     final key = GlobalKey<VariationCardState>();
 
-    _variationKeys.add(key); // Store the key for the variation card
+    _variationKeys.add(key);
 
     setState(() {
       _variationCards.add(
@@ -92,7 +96,7 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
     for (var key in _variationKeys) {
       final state = key.currentState;
       if (state != null) {
-        allData.add(state.data); // Access the data through the state getter
+        allData.add(state.data);
       }
     }
 
@@ -120,7 +124,7 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
       final state = key.currentState;
 
       if (state == null) {
-        logger.d('State is null for key: $key');
+        logger.d('State is null for key: ${key.currentState}');
         return false;
       }
 
@@ -134,11 +138,13 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
       _productNameController.text,
       _labelController.text,
       double.tryParse(_priceController.text)!,
+      _imageDataList,
       _descriptionController.text,
       productVariant: data,
     );
 
-    logger.d("DETAILS:\n$params");
+    // logger.d(
+    //     "DETAILS:\n${data[1]['productVariantImage'].length}\n${data[0]['productVariantImage'].runtimeType}");
 
     _addProductBloc.add(AddProductEvent(params));
 
@@ -398,12 +404,13 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
       child: ElevatedButton(
         onPressed: () {
           final data = _retrieveVariationData();
+
           if (_validateAllFields(data)) {
             // Proceed with submission if all validations pass
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Product submitted successfully!')),
             );
-            Navigator.of(context).pop();
+            // Navigator.of(context).pop();
           }
         },
         style: ElevatedButton.styleFrom(

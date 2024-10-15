@@ -284,29 +284,29 @@ class _MyInformationPageState extends State<MyInformationPage> {
                   },
                 ),
                 BlocBuilder<ProductAddOnsBloc, ProductAddOnsState>(
-                  builder: (context, state) {
-                    // logger.d(state);
-                    if (state is ProductSuccessState) {
-                      // logger.d(state.productEntity);
-
-                      // var data = state.productEntity.productVariant;
-                      // logger.d(data);
-                      return YourProduct(
-                        widget.uid!,
-                        context,
-                        state,
-                      );
-                    }
+                    builder: (context, state) {
+                  // logger.d(state);
+                  if (state is ProductSuccessState) {
+                    // logger.d(state.productEntity);
+                    var data = state.productEntity;
+                    // var data = state.productEntity.productVariant;
+                    logger.d(data);
                     return YourProduct(
                       widget.uid!,
                       context,
-                      state,
+                      data,
                     );
-                  },
+                  } else {
+                    return Container();
+                  }
+                }),
+                const SizedBox(
+                  height: 12,
                 ),
                 const SectionTitle(
                   title: 'You May Like',
                 ),
+
                 const YouMayLikeWidget(),
               ],
             ),
@@ -347,7 +347,8 @@ class _YouMayLikeWidgetState extends State<YouMayLikeWidget> {
     return List.generate(
       10,
       (index) => Product(
-        imageUrl: 'https://via.placeholder.com/150',
+        imageUrl:
+            'https://images.pexels.com/photos/2014422/pexels-photo-2014422.jpeg',
         name: 'Product ${index + 1}',
         price: (index + 1) * 10.0,
       ),

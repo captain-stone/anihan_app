@@ -1,16 +1,17 @@
-// ignore_for_file: no_leading_underscores_for_local_identifiers
+// ignore_for_file: no_leading_underscores_for_local_identifiers, unused_local_variable
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 
-import '../products_add_ons/product_add_ons_bloc.dart';
+import '../../../../../domain/entities/product_entity.dart';
 
 import '../user_information_page.dart';
 
 class YourProduct extends StatefulWidget {
   final String uid;
   final BuildContext sellerContext;
-  final ProductAddOnsState state;
+  final List<ProductEntity> state;
   const YourProduct(this.uid, this.sellerContext, this.state, {super.key});
 
   @override
@@ -21,7 +22,8 @@ class _YourProductState extends State<YourProduct> {
   late Future<List<Product>> _recommendedProductsFuture;
   // final _userBloc = getIt<UserInformationBlocBloc>();
   final FirebaseDatabase db = FirebaseDatabase.instance;
-  late ProductAddOnsState state;
+  late List<ProductEntity> state;
+  final logger = Logger();
 
   @override
   void initState() {
@@ -32,15 +34,24 @@ class _YourProductState extends State<YourProduct> {
 
   Future<List<Product>> _fetchRecommendedProducts() async {
     await Future.delayed(const Duration(seconds: 2));
+    logger.d(state);
 
-    return List.generate(
-      5,
-      (index) => Product(
-        imageUrl: 'https://via.placeholder.com/150',
-        name: 'Product ${index + 1}',
-        price: (index + 1) * 10.0,
-      ),
-    );
+    return state
+        .map((e) => Product(
+            imageUrl:
+                "https://images.pexels.com/photos/2014422/pexels-photo-2014422.jpeg",
+            name: e.productName,
+            price: e.productPrice))
+        .toList();
+
+    // return List.generate(
+    //   5,
+    //   (index) => Product(
+    //     imageUrl: 'https://via.placeholder.com/150',
+    //     name: 'Product ${index + 1}',
+    //     price: (index + 1) * 10.0,
+    //   ),
+    // );
   }
 
   @override
@@ -48,7 +59,31 @@ class _YourProductState extends State<YourProduct> {
     DatabaseReference _userUpdate = db.ref("products/product-id${widget.uid}/");
     // context.read();
     // var data = widget.sellerContext.widget.key;
-    return Container();
+    if (state.isNotEmpty) {
+      return FutureBuilder<List<Product>>(
+        future: _recommendedProductsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return const Center(
+              child: Text('Failed to load products. Please try again.'),
+            );
+          } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+            return _buildProductGrid(snapshot.data!);
+          } else {
+            return const Center(
+              child: Text('No recommended products available.'),
+            );
+          }
+        },
+      );
+    } else {
+      return const SizedBox(
+        child:
+            Center(child: Text("You don't have any products, please add one")),
+      );
+    }
   }
 
   Widget _buildProductGrid(List<Product> products) {

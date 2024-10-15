@@ -25,6 +25,7 @@ class VariationCardState extends State<VariationCard> {
   Map<String, dynamic> get variantData => {};
 
   Map<String, dynamic> get data => {
+        "productVariantImage": _variationImage,
         "productName": controllerName.text,
         "productPrice": controllerPrice.text,
       };

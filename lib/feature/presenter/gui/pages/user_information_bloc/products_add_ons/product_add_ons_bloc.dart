@@ -31,7 +31,7 @@ class ProductAddOnsBloc extends Bloc<ProductAddOnsEvent, ProductAddOnsState> {
                 _subscriptionProducts?.isPaused;
               }
             } else {
-              logger.d(event.snapshot.value);
+              // logger.d(event.snapshot.value);
               var dataObject = (event.snapshot.value as Map<dynamic, dynamic>?);
 
               // var data = dataObject
@@ -44,6 +44,11 @@ class ProductAddOnsBloc extends Bloc<ProductAddOnsEvent, ProductAddOnsState> {
 
                 // Iterate over the entries to populate the list
                 dataObject.forEach((key, value) {
+                  List<String> productImages =
+                      (value['imageUrls'] as List<dynamic>?)
+                              ?.map((imageUrl) => imageUrl as String)
+                              .toList() ??
+                          [];
                   String productName = value['name'];
                   String productLabel = value['label'];
                   double productPrice = double.parse(value['price'].toString());
@@ -61,6 +66,7 @@ class ProductAddOnsBloc extends Bloc<ProductAddOnsEvent, ProductAddOnsState> {
 
                   // Create a ProductEntity and add it to the list
                   productList.add(ProductEntity(
+                    productImages,
                     productName,
                     productLabel,
                     productPrice,
