@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:anihan_app/feature/domain/entities/product_entity.dart';
 import 'package:anihan_app/feature/domain/parameters/params.dart';
 
 class ProductParams extends Params {
@@ -8,7 +9,7 @@ class ProductParams extends Params {
   final double productPrice;
   final String itemDescriptions;
   final List<Uint8List> imageDataList;
-  final List<Map<String, dynamic>?>? productVariant;
+  final List<ProductVariantEntity?>? productVariant;
   // final List<Uint8List?>? product
 
   ProductParams(

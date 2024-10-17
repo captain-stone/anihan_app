@@ -1,35 +1,31 @@
-// ignore_for_file: no_leading_underscores_for_local_identifiers, unused_local_variable
+// ignore_for_file: library_private_types_in_public_api
 
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
 import '../../../../../domain/entities/product_entity.dart';
-
 import '../user_information_page.dart';
 
-class YourProduct extends StatefulWidget {
-  final String uid;
-  final BuildContext sellerContext;
+class YouMayLikeWidget extends StatefulWidget {
   final List<ProductEntity> state;
-  const YourProduct(this.uid, this.sellerContext, this.state, {super.key});
+  const YouMayLikeWidget({super.key, required this.state});
 
   @override
-  State<YourProduct> createState() => _YourProductState();
+  _YouMayLikeWidgetState createState() => _YouMayLikeWidgetState();
 }
 
-class _YourProductState extends State<YourProduct> {
+class _YouMayLikeWidgetState extends State<YouMayLikeWidget> {
   late Future<List<Product>> _recommendedProductsFuture;
-  // final _userBloc = getIt<UserInformationBlocBloc>();
-  final FirebaseDatabase db = FirebaseDatabase.instance;
-  late List<ProductEntity> state;
+  late final List<ProductEntity> state;
   final logger = Logger();
 
   @override
   void initState() {
     super.initState();
-    state = widget.state;
-    _recommendedProductsFuture = _fetchRecommendedProducts();
+    setState(() {
+      state = widget.state;
+      _recommendedProductsFuture = _fetchRecommendedProducts();
+    });
   }
 
   Future<List<Product>> _fetchRecommendedProducts() async {
@@ -42,48 +38,28 @@ class _YourProductState extends State<YourProduct> {
             name: e.productName,
             price: e.productPrice))
         .toList();
-
-    // return List.generate(
-    //   5,
-    //   (index) => Product(
-    //     imageUrl: 'https://via.placeholder.com/150',
-    //     name: 'Product ${index + 1}',
-    //     price: (index + 1) * 10.0,
-    //   ),
-    // );
   }
 
   @override
   Widget build(BuildContext context) {
-    DatabaseReference _userUpdate = db.ref("products/product-id${widget.uid}/");
-    // context.read();
-    // var data = widget.sellerContext.widget.key;
-    if (state.isNotEmpty) {
-      return FutureBuilder<List<Product>>(
-        future: _recommendedProductsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            logger.e(snapshot.error);
-            return const Center(
-              child: Text('Failed to load products. Please try again.'),
-            );
-          } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-            return _buildProductGrid(snapshot.data!);
-          } else {
-            return const Center(
-              child: Text('No recommended products available.'),
-            );
-          }
-        },
-      );
-    } else {
-      return const SizedBox(
-        child:
-            Center(child: Text("You don't have any products, please add one")),
-      );
-    }
+    return FutureBuilder<List<Product>>(
+      future: _recommendedProductsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return const Center(
+            child: Text('Failed to load products. Please try again.'),
+          );
+        } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          return _buildProductGrid(snapshot.data!);
+        } else {
+          return const Center(
+            child: Text('No recommended products available.'),
+          );
+        }
+      },
+    );
   }
 
   Widget _buildProductGrid(List<Product> products) {
@@ -143,7 +119,7 @@ class _YourProductState extends State<YourProduct> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Text(
-              '₱${product.price.toStringAsFixed(2)}',
+              '\$${product.price.toStringAsFixed(2)}',
               style: const TextStyle(
                 fontSize: 14,
                 color: Colors.green,

@@ -1,21 +1,32 @@
 import 'package:anihan_app/feature/presenter/gui/widgets/product_items.dart';
 import 'package:flutter/material.dart';
 
+import '../../../domain/entities/product_entity.dart';
 import 'products.dart';
 
 class ProductsSection extends StatelessWidget {
-  final List<Product> products = List.generate(
-    10,
-    (index) => Product(
-      'Product $index',
-      'assets/logo.png', // Placeholder image path
-      '\$${(10 + index * 2).toStringAsFixed(2)}',
-      4.5, // Placeholder rating
-      index * 10 + 5, // Placeholder items sold
-    ),
-  );
+  final List<ProductEntity> state;
+  const ProductsSection({super.key, required this.state});
 
-  ProductsSection({super.key});
+  // final List<Product> products = List.generate(
+  //   10,
+  //   (index) => Product(
+  //     'Product $index',
+  //     'assets/logo.png', // Placeholder image path
+  //     '\$${(10 + index * 2).toStringAsFixed(2)}',
+  //     4.5, // Placeholder rating
+  //     index * 10 + 5, // Placeholder items sold
+  //   ),
+  // );
+
+  List<Product> _fetchRecommendedProducts() {
+    return state
+        .map((e) => Product(
+            imagePath: e.productImage.first,
+            name: e.productName,
+            price: e.productPrice))
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,9 +52,9 @@ class ProductsSection extends StatelessWidget {
               crossAxisSpacing: 16.0,
               childAspectRatio: 0.7, // Adjust for item height
             ),
-            itemCount: products.length,
+            itemCount: _fetchRecommendedProducts().length,
             itemBuilder: (context, index) {
-              return ProductItem(product: products[index]);
+              return ProductItem(product: _fetchRecommendedProducts()[index]);
             },
           ),
         ],

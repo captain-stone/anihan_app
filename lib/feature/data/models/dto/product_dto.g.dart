@@ -6,27 +6,40 @@ part of 'product_dto.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ProductDto _$ProductDtoFromJson(Map<String, dynamic> json) => ProductDto(
-      productName: json['productName'] as String,
-      productprice: (json['productprice'] as num).toInt(),
-      productImamgeData: json['productImamgeData'] as String,
-    );
-
-Map<String, dynamic> _$ProductDtoToJson(ProductDto instance) =>
-    <String, dynamic>{
-      'productName': instance.productName,
-      'productprice': instance.productprice,
-      'productImamgeData': instance.productImamgeData,
-    };
-
 ProductVariantDto _$ProductVariantDtoFromJson(Map<String, dynamic> json) =>
     ProductVariantDto(
-      productVariantId: (json['productVariantId'] as Map<String, dynamic>).map(
-        (k, e) => MapEntry(k, ProductDto.fromJson(e as Map<String, dynamic>)),
-      ),
+      variantName: json['variantName'] as String?,
+      variantPrice: json['variantPrice'] as String?,
+      variantImages: json['variantImages'] as String?,
     );
 
 Map<String, dynamic> _$ProductVariantDtoToJson(ProductVariantDto instance) =>
     <String, dynamic>{
-      'productVariantId': instance.productVariantId,
+      'variantName': instance.variantName,
+      'variantPrice': instance.variantPrice,
+      'variantImages': instance.variantImages,
+    };
+
+ProductDataDto _$ProductDataDtoFromJson(Map<String, dynamic> json) =>
+    ProductDataDto(
+      imageList: (json['imageUrls'] as List<dynamic>)
+          .map((e) => e as String?)
+          .toList(),
+      productName: json['name'] as String,
+      productLabel: json['label'] as String,
+      productItemDescriptions: json['itemDescriptions'] as String,
+      productPrice: (json['price'] as num).toDouble(),
+      storeId: json['storeId'] as String?,
+      userId: json['userId'] as String?,
+    );
+
+Map<String, dynamic> _$ProductDataDtoToJson(ProductDataDto instance) =>
+    <String, dynamic>{
+      'imageUrls': instance.imageList,
+      'name': instance.productName,
+      'label': instance.productLabel,
+      'itemDescriptions': instance.productItemDescriptions,
+      'price': instance.productPrice,
+      'storeId': instance.storeId,
+      'userId': instance.userId,
     };

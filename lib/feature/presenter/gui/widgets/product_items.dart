@@ -83,7 +83,7 @@ class _ProductItemState extends State<ProductItem>
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(16.0),
                 ),
-                child: Image.asset(
+                child: Image.network(
                   widget.product.imagePath,
                   fit: BoxFit.cover,
                   height: 140.0,
@@ -106,7 +106,7 @@ class _ProductItemState extends State<ProductItem>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      widget.product.price,
+                      "${widget.product.price}",
                       style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                             color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.bold,
@@ -117,12 +117,12 @@ class _ProductItemState extends State<ProductItem>
                         const Icon(Icons.star, color: Colors.amber, size: 16.0),
                         const SizedBox(width: 4.0),
                         Text(
-                          '${widget.product.rating}',
+                          '${widget.product.rating ?? 5}',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         const SizedBox(width: 8.0),
                         Text(
-                          '${widget.product.itemsSold} sold',
+                          '${widget.product.itemsSold ?? 0} sold',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ],

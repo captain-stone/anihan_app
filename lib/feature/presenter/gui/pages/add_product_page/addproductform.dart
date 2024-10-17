@@ -1,8 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api, prefer_final_fields, use_build_context_synchronously
 
-import 'dart:ffi';
-
 import 'package:anihan_app/common/app_module.dart';
+import 'package:anihan_app/feature/domain/entities/product_entity.dart';
 import 'package:anihan_app/feature/domain/parameters/product_params.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/add_product_page/add_product_page_bloc.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/debugger/logger_debugger.dart';
@@ -29,10 +28,8 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
   final _formKey = GlobalKey<FormState>(); // GlobalKey to manage form state
   List<Uint8List> _imageDataList = [];
   List<Widget> _variationCards = [];
-  List<Map<String, dynamic>> _variantData = [];
   String fileExtension = "";
   List<GlobalKey<VariationCardState>> _variationKeys = [];
-  List<Uint8List> _variantImageData = [];
   final _productNameController = TextEditingController();
   final _labelController = TextEditingController();
   final _priceController = TextEditingController();
@@ -90,8 +87,8 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
     });
   }
 
-  List<Map<String, dynamic>> _retrieveVariationData() {
-    List<Map<String, dynamic>> allData = [];
+  List<ProductVariantEntity> _retrieveVariationData() {
+    List<ProductVariantEntity> allData = [];
 
     for (var key in _variationKeys) {
       final state = key.currentState;
@@ -103,7 +100,7 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
     return allData;
   }
 
-  bool _validateAllFields(List<Map<String, dynamic>> data) {
+  bool _validateAllFields(List<ProductVariantEntity> data) {
     // Validate the main form (text fields)
     if (!_formKey.currentState!.validate()) {
       return false;
@@ -142,6 +139,8 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
       _descriptionController.text,
       productVariant: data,
     );
+
+    logger.d(params);
 
     // logger.d(
     //     "DETAILS:\n${data[1]['productVariantImage'].length}\n${data[0]['productVariantImage'].runtimeType}");

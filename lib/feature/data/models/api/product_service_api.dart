@@ -1,8 +1,8 @@
 // ignore_for_file: unused_catch_clause, no_leading_underscores_for_local_identifiers, unused_local_variable
 
-import 'dart:ffi';
 import 'dart:typed_data';
 
+import 'package:anihan_app/feature/data/models/dto/product_dto.dart';
 import 'package:anihan_app/feature/domain/entities/product_entity.dart';
 import 'package:anihan_app/feature/domain/parameters/product_params.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,6 +17,9 @@ mixin ProductServiceApi {
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user = auth.currentUser;
     Map<String, dynamic> productData = {};
+    late final ProductDataDto productDataDto;
+    late final ProductVariantDto productVariantDto;
+    List<Map<String, dynamic>> productVariantDtoList = [];
     final logger = Logger();
 
     try {
@@ -27,6 +30,7 @@ mixin ProductServiceApi {
         //     db.ref("products/product-id${user.uid}");
 
         List<String?> imageUrl = [];
+
         List<Map<String, dynamic>?>? variantData = [];
 
         int count = 0;
@@ -39,6 +43,34 @@ mixin ProductServiceApi {
             count++;
           }
         }
+
+        var variantEntityList = params.productVariant;
+        if (variantEntityList != null) {
+          int countNum = 0;
+
+          for (var data in variantEntityList) {
+            String? variantImage = await _uploadImageToStorage(
+                data!.imageData!,
+                'jpg',
+                "products/product-id${user.uid}/variant-images/",
+                data.varianName!,
+                countNum);
+
+            productVariantDtoList.add(ProductVariantDto(
+              variantImages: variantImage,
+              variantName: data.varianName,
+              variantPrice: data.variantPrice,
+            ).toJson());
+
+            countNum++;
+          }
+          // productVariantDtoList = variantEntityList.map((e) async{
+          //   String? variantImage = await
+
+          //   return ProductVariantDto();
+          // }).toList();
+        }
+
         // if (params.productVariant != null) {
         //   variantData =
         //       await Future.wait(params.productVariant!.map((variant) async {
@@ -77,17 +109,20 @@ mixin ProductServiceApi {
         //     return null; // Handle null variants safely
         //   }).toList());
         // }
+        final userId = user.uid;
 
-        productData = {
-          "imageUrls": imageUrl,
-          "name": params.productName,
-          user.uid: true,
-          "storeId-${user.uid}-id": true,
-          "label": params.productLabel,
-          "price": params.productPrice,
-          "itemDescriptions": params.itemDescriptions,
-          "variant-${user.uid}-id": params.productVariant,
-        };
+        productDataDto = ProductDataDto(
+            imageList: imageUrl,
+            productName: params.productName,
+            productLabel: params.productLabel,
+            productItemDescriptions: params.itemDescriptions,
+            // productVariantDtoList: productVariantDtoList,
+            productPrice: params.productPrice);
+
+        productData = ProductDataDto.customToJson(
+            productDataDto, productVariantDtoList, userId);
+
+        logger.d(productData);
 
         await newProductRef.set(productData);
         // _refsVariations.set(variants);
@@ -133,13 +168,12 @@ mixin ProductServiceApi {
                   //             .toList()
                   //         : [];
 
-                  List<Map<String, dynamic>> productVariants =
+                  List<ProductVariantEntity> productVariants =
                       (productInfo['variant-${user.uid}-id'] as List<dynamic>?)
-                              ?.map((variant) => {
-                                    // 'productVairantImages': variant['images'],
-                                    'productName': variant['productName'],
-                                    'productPrice': variant['productPrice']
-                                  })
+                              ?.map((variant) => ProductVariantEntity(
+                                  images: variant['variantImages'],
+                                  varianName: variant['variantName'],
+                                  variantPrice: variant['variantPrice']))
                               .toList() ??
                           []; // Fallback to an empty list
                   return ProductEntity(
@@ -180,10 +214,15 @@ mixin ProductServiceApi {
       String _fileName = '$fileName$count.$extension';
       Reference storageRef =
           FirebaseStorage.instance.ref(refs).child('/$_fileName');
-      UploadTask uploadTask = storageRef.putData(data);
+      // UploadTask uploadTask = storageRef.putData(data);
 
-      TaskSnapshot snapshot = await uploadTask;
-      String downloadUrl = await snapshot.ref.getDownloadURL();
+      TaskSnapshot taskSnapshot = await FirebaseStorage.instance
+          .ref(refs)
+          .child('/$fileName')
+          .putData(data);
+
+      // TaskSnapshot snapshot = await uploadTask;
+      String downloadUrl = await taskSnapshot.ref.getDownloadURL();
       return downloadUrl;
     } catch (e) {
       logger.e('Failed to upload image: $e');

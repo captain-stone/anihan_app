@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:anihan_app/feature/domain/entities/app_entity.dart';
 
 class ProductEntity extends AppEntity {
@@ -5,7 +7,7 @@ class ProductEntity extends AppEntity {
   final String productName;
   final String productLabel;
   final double productPrice;
-  final List<Map<String, dynamic>?>? productVariant;
+  final List<ProductVariantEntity?>? productVariant;
   final String itemDescriptions;
 
   ProductEntity(
@@ -25,4 +27,17 @@ class ProductEntity extends AppEntity {
         productPrice,
         itemDescriptions,
       ];
+}
+
+class ProductVariantEntity extends AppEntity {
+  final Uint8List? imageData;
+  final String? images;
+  final String? varianName;
+  final String? variantPrice;
+
+  ProductVariantEntity(
+      {this.imageData, this.images, this.varianName, this.variantPrice});
+
+  @override
+  List<Object?> get props => [imageData, images, varianName, variantPrice];
 }

@@ -3,8 +3,6 @@
 import 'dart:async';
 
 import 'package:anihan_app/common/api_result.dart';
-import 'package:anihan_app/feature/domain/entities/product_entity.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';

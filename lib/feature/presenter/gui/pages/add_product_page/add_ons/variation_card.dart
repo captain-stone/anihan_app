@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:anihan_app/feature/domain/entities/product_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -24,11 +25,13 @@ class VariationCardState extends State<VariationCard> {
   TextEditingController get controllerPrice => _variationPriceController;
   Map<String, dynamic> get variantData => {};
 
-  Map<String, dynamic> get data => {
-        "productVariantImage": _variationImage,
-        "productName": controllerName.text,
-        "productPrice": controllerPrice.text,
-      };
+  ProductVariantEntity get data => ProductVariantEntity(
+      imageData: _variationImage,
+      varianName: controllerName.text,
+      variantPrice: controllerPrice.text);
+  // "productVariantImage": _variationImage,
+  // "productName": controllerName.text,
+  // "productPrice": controllerPrice.text,
 
   Future<void> _pickVariationImage() async {
     final XFile? selected = await _picker.pickImage(
@@ -46,6 +49,7 @@ class VariationCardState extends State<VariationCard> {
           _variationImage = data;
         });
       } else {
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content: Text('Only .png, .jpg, and .jpeg formats are allowed.')),

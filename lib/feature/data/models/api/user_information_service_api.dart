@@ -28,15 +28,20 @@ class UserInformationServiceApi {
   Future<UserInformationDto> userInformation(String uid) async {
     final logger = Logger();
     User user = await gettingUserId();
-    String approvalRemarks = "";
+
+    logger.d(uid);
 
     try {
+      late final String approvalRemarks;
+
       // Reference to the specific user's data in Firebase Realtime Database
       DatabaseReference _refs = db.ref("users/$uid");
+      logger.d("PASSS");
 
       // Await the data snapshot
       DataSnapshot dataSnapshot =
           await _refs.once().then((event) => event.snapshot);
+      logger.d(dataSnapshot.exists);
 
       // Check if data exists in the database
       if (dataSnapshot.exists) {
@@ -49,13 +54,17 @@ class UserInformationServiceApi {
         String emailAddress = data['emailAddress'] ?? user.email ?? 'No email';
         int phoneNumber = data['phoneNumber'] ?? 'No phone number';
         String? photoUrl = user.photoURL;
+
         // String? photoUrl = data['photoUrl'];
 
         // Log the retrieved data
-        logger.i("User Information: $data");
+        // logger.i("User Information: $data");
 
-        if (data.containsKey('farmers')) {
+        if (!data.containsKey('farmers')) {
           data['farmers'] = Approval.pendingApproval.name;
+          approvalRemarks = data['farmers'];
+        } else {
+          approvalRemarks = data['farmers'];
         }
 
         // Return the UserInformationDto populated with the data

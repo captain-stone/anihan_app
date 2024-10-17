@@ -46,8 +46,8 @@ import 'package:anihan_app/feature/presenter/gui/pages/register_bloc/register_pa
     as _i282;
 import 'package:anihan_app/feature/presenter/gui/pages/seller_registration_bloc/seller_registration_bloc.dart'
     as _i905;
-import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/seller_add_ons/seller_info_add_ons_bloc.dart'
-    as _i113;
+import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/add_ons/seller_add_ons/seller_info_add_ons_bloc.dart'
+    as _i418;
 import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/user_information_bloc_bloc.dart'
     as _i860;
 import 'package:dio/dio.dart' as _i361;
@@ -89,7 +89,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i345.DatabaseReference>(() => appModule.ref);
     gh.lazySingleton<_i519.Client>(() => appModule.httpClient);
     gh.lazySingleton<_i361.Dio>(() => appModule.dio);
-    gh.factory<_i113.SellerInfoAddOnsBloc>(() => _i113.SellerInfoAddOnsBloc(
+    gh.factory<_i418.SellerInfoAddOnsBloc>(() => _i418.SellerInfoAddOnsBloc(
           gh<_i345.DatabaseReference>(),
           gh<_i345.DatabaseReference>(),
         ));

@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:logger/logger.dart';
 
-import '../../../../../domain/entities/product_entity.dart';
+import '../../../../../../domain/entities/product_entity.dart';
 
 part 'product_add_ons_event.dart';
 part 'product_add_ons_state.dart';
@@ -55,12 +55,12 @@ class ProductAddOnsBloc extends Bloc<ProductAddOnsEvent, ProductAddOnsState> {
                   String itemDescriptions = value['itemDescriptions'];
 
                   // Assuming uid is accessible in this scope
-                  List<Map<String, dynamic>?> productVariants =
+                  List<ProductVariantEntity?> productVariants =
                       (value['variant-${user!.uid}-id'] as List<dynamic>?)
-                              ?.map((variant) => {
-                                    'productName': variant['productName'],
-                                    'productPrice': variant['productPrice']
-                                  })
+                              ?.map((variant) => ProductVariantEntity(
+                                  images: variant['variantImages'],
+                                  varianName: variant['variantName'],
+                                  variantPrice: variant['variantPrice']))
                               .toList() ??
                           []; // Fallback to an empty list if null
 

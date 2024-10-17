@@ -26,15 +26,21 @@ class UserInformationRepoImpl extends UserInformationRepository {
     if (!(await internetConnectionChecker.hasConnection)) {
       return const ApiResult.noInternetConenction();
     } else {
-      var result = await userInformationServiceApi.userInformation(params.uid);
+      try {
+        var result =
+            await userInformationServiceApi.userInformation(params.uid);
 
-      // var useData = result["users"];
-      // var informationData = result["databaseData"];
-      var entity = result.toEntity();
+        // var useData = result["users"];
+        // var informationData = result["databaseData"];
+        var entity = result.toEntity();
 
-      logger.d(entity);
+        logger.d(entity);
 
-      return ApiResult.success(entity);
+        return ApiResult.success(entity);
+      } on Exception catch (e) {
+        logger.e(e);
+        return const ApiResult.error("No User found");
+      }
     }
   }
 }
