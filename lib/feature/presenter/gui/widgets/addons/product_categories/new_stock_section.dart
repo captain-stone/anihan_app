@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 
 import 'product_category.dart';
 import 'product_category_items.dart';
 
 class NewStockSection extends StatelessWidget {
+  final logger = Logger();
   final List<ProductCategory> categories = [
     ProductCategory('Seeds', 'assets/seeds.jpg'),
     ProductCategory('Fruits', 'assets/fruits.jpg'),

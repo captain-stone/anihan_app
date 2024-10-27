@@ -4,8 +4,10 @@ import 'package:anihan_app/common/app_module.dart';
 import 'package:anihan_app/feature/domain/entities/product_entity.dart';
 import 'package:anihan_app/feature/domain/parameters/product_params.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/add_product_page/add_product_page_bloc.dart';
+import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/debugger/logger_debugger.dart';
-import 'package:auto_route/annotations.dart';
+
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -16,7 +18,8 @@ import 'add_ons/variation_card.dart';
 
 @RoutePage()
 class AddProductFormPage extends StatefulWidget {
-  const AddProductFormPage({super.key});
+  final String? uid;
+  const AddProductFormPage({super.key, required this.uid});
 
   @override
   _AddProductFormState createState() => _AddProductFormState();
@@ -34,6 +37,16 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
   final _labelController = TextEditingController();
   final _priceController = TextEditingController();
   final _descriptionController = TextEditingController();
+  bool isLoading = false;
+  String? selectedValue;
+  final List<String> label = [
+    "Seeds",
+    "Fruits",
+    "Vegetables",
+    "Fertilizers",
+    "Farming Tools",
+    "Saplings"
+  ];
 
   Future<void> _pickImage() async {
     final XFile? selected = await _picker.pickImage(
@@ -133,7 +146,7 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
 
     ProductParams params = ProductParams(
       _productNameController.text,
-      _labelController.text,
+      selectedValue ?? "None",
       double.tryParse(_priceController.text)!,
       _imageDataList,
       _descriptionController.text,
@@ -294,20 +307,36 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
         Row(
           children: [
             Expanded(
-              child: TextFormField(
-                controller: _labelController,
-                decoration: InputDecoration(
-                  labelText: 'Label:',
-                  labelStyle: Theme.of(context).textTheme.bodyMedium,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a label.';
-                  }
-                  return null;
-                },
-              ),
-            ),
+                child: DropdownButtonFormField(
+                    hint: const Text("Label"),
+                    value: selectedValue,
+                    items: label.map((String item) {
+                      return DropdownMenuItem<String>(
+                        value: item,
+                        child: Text(item),
+                      );
+                    }).toList(),
+                    onChanged: (String? value) {
+                      setState(() {
+                        selectedValue = value;
+                      });
+                    })),
+
+            // Expanded(
+            //   child: TextFormField(
+            //     controller: _labelController,
+            //     decoration: InputDecoration(
+            //       labelText: 'Label:',
+            //       labelStyle: Theme.of(context).textTheme.bodyMedium,
+            //     ),
+            //     validator: (value) {
+            //       if (value == null || value.isEmpty) {
+            //         return 'Please enter a label.';
+            //       }
+            //       return null;
+            //     },
+            //   ),
+            // ),
             const SizedBox(width: 10),
             Expanded(
               child: TextFormField(
@@ -409,7 +438,6 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Product submitted successfully!')),
             );
-            // Navigator.of(context).pop();
           }
         },
         style: ElevatedButton.styleFrom(
@@ -437,6 +465,37 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
       listener: (context, state) {
         // TODO: implement listener
         logger.d(state);
+
+        if (state is AddProductPageLoadingState) {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return const Dialog(
+                  backgroundColor: Colors.transparent,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.orange,
+                    ),
+                  ),
+                );
+              });
+          setState(() {
+            isLoading = true;
+          });
+        }
+
+        if (state is AddProductPageSuccessState) {
+          if (isLoading) {
+            Navigator.of(context).pop();
+            setState(() {
+              isLoading = false;
+            });
+          }
+          logger.d(state.entity);
+          Navigator.of(context).pop();
+          // AutoRouter.of(context)
+          //     .popAndPush(HomeNavigationRoute(uid: widget.uid));
+        }
       },
       builder: (context, state) {
         return Scaffold(

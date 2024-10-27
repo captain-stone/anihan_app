@@ -3,6 +3,7 @@
 import 'package:anihan_app/common/api_result.dart';
 import 'package:anihan_app/common/app_module.dart';
 import 'package:anihan_app/feature/domain/parameters/user_information_params.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/add_ons/product_favorite_bloc/product_favorite_cubit.dart';
 
 import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/add_ons/your_products.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/add_ons/seller_add_ons/seller_info_add_ons_bloc.dart';
@@ -35,6 +36,7 @@ class _MyInformationPageState extends State<MyInformationPage> {
   final FirebaseDatabase db = FirebaseDatabase.instance;
 
   final _bloc = getIt<UserInformationBlocBloc>();
+  final _addProductBloc = getIt<ProductAddOnsBloc>();
   final logger = Logger();
   final ScrollController _scrollController = ScrollController();
 
@@ -138,6 +140,7 @@ class _MyInformationPageState extends State<MyInformationPage> {
     return MultiBlocProvider(
       providers: [
         // BlocProvider(create: (context) => <UserInformationBlocBloc>()..add(GetUidEvent(UserUidParams(widget.uid!)))),
+
         BlocProvider(
           create: (context) =>
               SellerInfoAddOnsBloc(_ref, _userUpdate)..add(SellerStreanEvent()),
@@ -146,10 +149,13 @@ class _MyInformationPageState extends State<MyInformationPage> {
           create: (context) =>
               ProductAddOnsBloc(_productsRef)..add(GetSelfProductEvents()),
         ),
+//no
         BlocProvider(
           create: (context) => AllProductsAddOnsBloc(_allProductsRef)
             ..add(GetAllProductEvents()),
         ),
+
+        BlocProvider(create: (context) => ProductFavoriteCubit())
       ],
       child: BlocConsumer<UserInformationBlocBloc, UserInformationBlocState>(
         bloc: _bloc,
@@ -226,6 +232,7 @@ class _MyInformationPageState extends State<MyInformationPage> {
                     // logger.d(state);
                     if (state is SellerInfoAddOnsSuccessState) {
                       isApproved = state.dataModel['isApproved'];
+                      isFarmers = state.dataModel['isApproved'];
                       if (state.dataModel['farmers'] != null) {
                         isFarmers = state.dataModel['farmers'];
                       }
@@ -255,25 +262,13 @@ class _MyInformationPageState extends State<MyInformationPage> {
                 ),
                 const MyOrdersWidget(),
                 const ActivitiesWidget(),
-                // Visibility(
-                //   visible: isFarmers == Approval.approved.name,
-                //   child: SectionTitle(
-                //     title: 'Your Products',
-                //     addProducts: () {
-                //       AutoRouter.of(context).push(const AddProductFormRoute());
-                //     },
-                //   ),
-                // ),
-                // Visibility(
-                //     visible: isFarmers == Approval.approved.name,
-                //     child: YourProduct(widget.uid!)),
-
                 Visibility(
                   visible: isFarmers == Approval.approved.name,
                   child: SectionTitle(
                     title: 'Your Products',
                     addProducts: () {
-                      AutoRouter.of(context).push(const AddProductFormRoute());
+                      AutoRouter.of(context)
+                          .push(AddProductFormRoute(uid: widget.uid));
                     },
                   ),
                 ),
@@ -283,9 +278,8 @@ class _MyInformationPageState extends State<MyInformationPage> {
                       builder: (context, state) {
                     // logger.d(state);
                     if (state is ProductSuccessState) {
-                      // logger.d(state.productEntity);
                       var data = state.productEntity;
-
+                      logger.f(data);
                       return YourProduct(
                         widget.uid!,
                         context,
@@ -308,7 +302,6 @@ class _MyInformationPageState extends State<MyInformationPage> {
                 const SectionTitle(
                   title: 'You May Like',
                 ),
-
                 BlocBuilder<AllProductsAddOnsBloc, AllProductsAddOnsState>(
                     builder: (context, state) {
                   // logger.f(state);

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:injectable/injectable.dart';
 
 import 'package:logger/logger.dart';
 
@@ -12,6 +13,7 @@ import '../../../../../../domain/entities/product_entity.dart';
 part 'all_products_add_ons_event.dart';
 part 'all_products_add_ons_state.dart';
 
+@injectable
 class AllProductsAddOnsBloc
     extends Bloc<AllProductsAddOnsEvent, AllProductsAddOnsState> {
   final DatabaseReference _refs;
@@ -27,37 +29,29 @@ class AllProductsAddOnsBloc
 
         User? user = auth.currentUser;
         List<ProductEntity> productList = [];
-        // logger.d("FUNCT");
+
         try {
+          await Future.delayed(const Duration(milliseconds: 500));
           _subscriptionProducts = _refs.onValue.listen((event) {
             if (event.snapshot.value == null) {
               if (!emit.isDone) {
                 emit(const AllProductErrorState("No data saved"));
-                _subscriptionProducts?.isPaused;
+                // _subscriptionProducts?.isPaused;
               }
             } else {
-              // logger.d(event.snapshot.value);
               var dataObject = (event.snapshot.value as Map<dynamic, dynamic>?);
-              // logger.d("DASfdsfgdsghdfbadsjkhfbljabghjadsbfphdsbfghipdsgfdsg");
-              // var data = dataObject
-              //     ?.map((key, value) => MapEntry(key.toString(), value));
 
-              //data is storename, storeaddress, and isApproved
               if (dataObject != null) {
-                // Create a list to hold the products
                 List<ProductEntity> productList = [];
 
                 dataObject.forEach((productId, productDetails) {
-                  // logger.d(productId);
-                  // Iterate through product details (if it has nested keys)
                   productDetails.forEach((key, productInfo) {
-                    // Ensure all required fields exist
+                    String productIdKey = key;
                     if (productInfo['imageUrls'] != null &&
                         productInfo['name'] != null &&
                         productInfo['label'] != null &&
                         productInfo['price'] != null &&
                         productInfo['itemDescriptions'] != null) {
-                      // Extract product details
                       List<String> productImages =
                           List<String>.from(productInfo['imageUrls']);
                       String productName = productInfo['name'];
@@ -65,7 +59,6 @@ class AllProductsAddOnsBloc
                       double productPrice = productInfo['price'].toDouble();
                       String itemDescriptions = productInfo['itemDescriptions'];
 
-                      // Extract product variants if available
                       List<ProductVariantEntity?>? productVariants;
                       if (productInfo['variant-$productId-id'] != null) {
                         productVariants =
@@ -77,7 +70,6 @@ class AllProductsAddOnsBloc
                                 .toList();
                       }
 
-                      // Create ProductEntity and add it to the list
                       productList.add(ProductEntity(
                         productImages,
                         productName,
@@ -85,21 +77,21 @@ class AllProductsAddOnsBloc
                         productPrice,
                         itemDescriptions,
                         productVariant: productVariants,
+                        productKey: productIdKey,
                       ));
                     }
                   });
                 });
 
-                // Emit the new state with the list of ProductEntitydsfd
                 emit(AllProductSuccessState(productList));
-                _subscriptionProducts?.isPaused;
+                // _subscriptionProducts?.isPaused;
               } else {
                 if (!emit.isDone) {
                   emit(const AllProductErrorState(
                     "No data saved",
                   ));
                 }
-                _subscriptionProducts?.isPaused;
+                // _subscriptionProducts?.isPaused;
               }
             }
           }, onDone: () {

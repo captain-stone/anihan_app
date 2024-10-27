@@ -9,6 +9,8 @@ abstract class AddProductPageState extends Equatable {
 
 class AddProductPageInitial extends AddProductPageState {}
 
+class AddProductPageLoadingState extends AddProductPageState {}
+
 class AddProductPageSuccessState extends AddProductPageState {
   final List<ProductEntity> entity;
   const AddProductPageSuccessState(this.entity);

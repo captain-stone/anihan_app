@@ -5,8 +5,9 @@ import '../../../domain/entities/product_entity.dart';
 import 'products.dart';
 
 class ProductsSection extends StatelessWidget {
+  final String? label;
   final List<ProductEntity> state;
-  const ProductsSection({super.key, required this.state});
+  const ProductsSection({super.key, this.label, required this.state});
 
   // final List<Product> products = List.generate(
   //   10,
@@ -35,13 +36,15 @@ class ProductsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Recommended Products',
-            style: Theme.of(context).textTheme.displayLarge!.copyWith(
-                  fontSize: 20.0,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-          ),
+          label != null
+              ? Text(
+                  label!,
+                  style: Theme.of(context).textTheme.displayLarge!.copyWith(
+                        fontSize: 20.0,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                )
+              : Container(),
           const SizedBox(height: 16.0),
           GridView.builder(
             shrinkWrap: true,

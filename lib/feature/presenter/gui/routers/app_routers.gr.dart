@@ -16,9 +16,13 @@ abstract class _$AppRouters extends RootStackRouter {
   @override
   final Map<String, PageFactory> pagesMap = {
     AddProductFormRoute.name: (routeData) {
+      final args = routeData.argsAs<AddProductFormRouteArgs>();
       return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const AddProductFormPage(),
+        child: AddProductFormPage(
+          key: args.key,
+          uid: args.uid,
+        ),
       );
     },
     ChatsRoute.name: (routeData) {
@@ -99,6 +103,17 @@ abstract class _$AppRouters extends RootStackRouter {
         ),
       );
     },
+    ShowProductByCategoryRoute.name: (routeData) {
+      final args = routeData.argsAs<ShowProductByCategoryRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: ShowProductByCategoryPage(
+          key: args.key,
+          label: args.label,
+          productData: args.productData,
+        ),
+      );
+    },
     WishListRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -110,16 +125,40 @@ abstract class _$AppRouters extends RootStackRouter {
 
 /// generated route for
 /// [AddProductFormPage]
-class AddProductFormRoute extends PageRouteInfo<void> {
-  const AddProductFormRoute({List<PageRouteInfo>? children})
-      : super(
+class AddProductFormRoute extends PageRouteInfo<AddProductFormRouteArgs> {
+  AddProductFormRoute({
+    Key? key,
+    required String? uid,
+    List<PageRouteInfo>? children,
+  }) : super(
           AddProductFormRoute.name,
+          args: AddProductFormRouteArgs(
+            key: key,
+            uid: uid,
+          ),
           initialChildren: children,
         );
 
   static const String name = 'AddProductFormRoute';
 
-  static const PageInfo<void> page = PageInfo<void>(name);
+  static const PageInfo<AddProductFormRouteArgs> page =
+      PageInfo<AddProductFormRouteArgs>(name);
+}
+
+class AddProductFormRouteArgs {
+  const AddProductFormRouteArgs({
+    this.key,
+    required this.uid,
+  });
+
+  final Key? key;
+
+  final String? uid;
+
+  @override
+  String toString() {
+    return 'AddProductFormRouteArgs{key: $key, uid: $uid}';
+  }
 }
 
 /// generated route for
@@ -375,6 +414,50 @@ class SellerRegistrationRouteArgs {
   @override
   String toString() {
     return 'SellerRegistrationRouteArgs{uid: $uid, fullName: $fullName, phoneNumber: $phoneNumber, key: $key}';
+  }
+}
+
+/// generated route for
+/// [ShowProductByCategoryPage]
+class ShowProductByCategoryRoute
+    extends PageRouteInfo<ShowProductByCategoryRouteArgs> {
+  ShowProductByCategoryRoute({
+    Key? key,
+    required String label,
+    required List<ProductEntity> productData,
+    List<PageRouteInfo>? children,
+  }) : super(
+          ShowProductByCategoryRoute.name,
+          args: ShowProductByCategoryRouteArgs(
+            key: key,
+            label: label,
+            productData: productData,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'ShowProductByCategoryRoute';
+
+  static const PageInfo<ShowProductByCategoryRouteArgs> page =
+      PageInfo<ShowProductByCategoryRouteArgs>(name);
+}
+
+class ShowProductByCategoryRouteArgs {
+  const ShowProductByCategoryRouteArgs({
+    this.key,
+    required this.label,
+    required this.productData,
+  });
+
+  final Key? key;
+
+  final String label;
+
+  final List<ProductEntity> productData;
+
+  @override
+  String toString() {
+    return 'ShowProductByCategoryRouteArgs{key: $key, label: $label, productData: $productData}';
   }
 }
 

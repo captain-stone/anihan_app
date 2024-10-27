@@ -28,6 +28,18 @@ class _YouMayLikeWidgetState extends State<YouMayLikeWidget> {
     });
   }
 
+  @override
+  void didUpdateWidget(YouMayLikeWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.state != widget.state) {
+      setState(() {
+        state = widget.state;
+        _recommendedProductsFuture =
+            _fetchRecommendedProducts(); // Refresh the future
+      });
+    }
+  }
+
   Future<List<Product>> _fetchRecommendedProducts() async {
     await Future.delayed(const Duration(seconds: 2));
     // logger.d(state);

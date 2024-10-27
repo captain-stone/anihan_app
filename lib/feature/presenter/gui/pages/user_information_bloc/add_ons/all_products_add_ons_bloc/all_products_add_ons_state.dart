@@ -7,20 +7,29 @@ abstract class AllProductsAddOnsState extends Equatable {
   List<Object> get props => [];
 }
 
-class AllProductsAddOnsInitial extends AllProductsAddOnsState {}
+class AllProductsAddOnsInitial extends AllProductsAddOnsState {
+  @override
+  List<Object> get props => [];
+}
 
-class AllProductsAddOnsLoadingState extends AllProductsAddOnsState {}
+class AllProductsAddOnsLoadingState extends AllProductsAddOnsState {
+  @override
+  List<Object> get props => [];
+}
 
 class AllProductSuccessState extends AllProductsAddOnsState {
   final List<ProductEntity> productEntity;
 
   const AllProductSuccessState(this.productEntity);
+  @override
+  List<Object> get props => [productEntity];
 }
 
 class AllProductErrorState extends AllProductsAddOnsState {
   final String message;
 
   const AllProductErrorState(this.message);
+
   @override
   List<Object> get props => [message];
 }

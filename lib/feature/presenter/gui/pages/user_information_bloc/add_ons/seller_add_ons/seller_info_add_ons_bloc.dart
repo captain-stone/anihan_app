@@ -31,7 +31,7 @@ class SellerInfoAddOnsBloc
             if (!emit.isDone) {
               emit(const SellerInfoAddOnsErrorState("No data saved"));
             }
-            _subscription?.isPaused;
+            // _subscription?.isPaused;
           } else {
             // logger.d(event.snapshot.value);
             var dataObject = (event.snapshot.value as Map?);
@@ -60,12 +60,12 @@ class SellerInfoAddOnsBloc
                   }
                 }
                 emit(SellerInfoAddOnsSuccessState(data));
-                _subscription?.isPaused;
+                // _subscription?.isPaused;
               } else {
                 if (!emit.isDone) {
                   emit(const SellerInfoAddOnsErrorState("No data saved"));
                 }
-                _subscription?.isPaused;
+                // _subscription?.isPaused;
               }
             }
           }

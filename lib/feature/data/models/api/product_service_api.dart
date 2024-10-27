@@ -36,8 +36,12 @@ mixin ProductServiceApi {
         int count = 0;
         if (params.imageDataList.isNotEmpty) {
           for (var image in params.imageDataList) {
-            String? imageData = await _uploadImageToStorage(image, "jpg",
-                "products/product-id${user.uid}", params.productName, count);
+            String? imageData = await _uploadImageToStorage(
+                image,
+                "jpg",
+                "products/images/product-id${user.uid}/${params.productName}",
+                params.productName,
+                count);
 
             imageUrl.add(imageData);
             count++;
@@ -64,51 +68,8 @@ mixin ProductServiceApi {
 
             countNum++;
           }
-          // productVariantDtoList = variantEntityList.map((e) async{
-          //   String? variantImage = await
-
-          //   return ProductVariantDto();
-          // }).toList();
         }
 
-        // if (params.productVariant != null) {
-        //   variantData =
-        //       await Future.wait(params.productVariant!.map((variant) async {
-        //     if (variant != null) {
-        //       // Process and upload the images if they exist in the variant
-        //       List<String?> imageUrls = [];
-        //       logger
-        //           .e(" COMING\n${variant['productVariantImage'].runtimeType}");
-
-        //       if (variant['productVariantImage'] != null &&
-        //           variant['productVariantImage'] is List) {
-        //         logger.e(
-        //             "${variant['productVariantImage'].length}\n${variant['productVariantImage'] is List}");
-        //         var images = variant['productVariantImage'];
-        //         logger.e(images);
-        //         int count = 0;
-
-        //         for (var image in images) {
-        //           String? uploadedImage = await _uploadImageToStorage(
-        //               image as Uint8List,
-        //               "jpg",
-        //               "products/product-id${user.uid}/variantImages/",
-        //               variant['productName'],
-        //               count);
-        //           imageUrls.add(uploadedImage);
-        //           count++;
-        //         }
-        //       }
-
-        //       // Return the updated map with processed image URLs
-        //       return {
-        //         ...variant, // Spread the existing variant data
-        //         'images': imageUrls, // Replace images key with the new URLs
-        //       };
-        //     }
-        //     return null; // Handle null variants safely
-        //   }).toList());
-        // }
         final userId = user.uid;
 
         productDataDto = ProductDataDto(
@@ -140,6 +101,7 @@ mixin ProductServiceApi {
           // Access each product
           var productEntities = productDataList.entries
               .map((entry) {
+                String productIdKey = entry.key;
                 // Check if the entry value is a Map
                 if (entry.value is Map<dynamic, dynamic>) {
                   Map<dynamic, dynamic> productInfo =
@@ -183,6 +145,7 @@ mixin ProductServiceApi {
                     productPrice,
                     itemDescriptions,
                     productVariant: productVariants,
+                    productKey: productIdKey,
                   );
                 } else {
                   // Handle unexpected types; return null
@@ -211,14 +174,14 @@ mixin ProductServiceApi {
     final logger = Logger();
 
     try {
-      String _fileName = '$fileName$count.$extension';
-      Reference storageRef =
-          FirebaseStorage.instance.ref(refs).child('/$_fileName');
+      String _fileName = '${fileName.replaceAll(' ', '')}$count.$extension';
+      // Reference storageRef =
+      //     FirebaseStorage.instance.ref(refs).child('/$_fileName');
       // UploadTask uploadTask = storageRef.putData(data);
 
       TaskSnapshot taskSnapshot = await FirebaseStorage.instance
           .ref(refs)
-          .child('/$fileName')
+          .child('/$_fileName')
           .putData(data);
 
       // TaskSnapshot snapshot = await uploadTask;

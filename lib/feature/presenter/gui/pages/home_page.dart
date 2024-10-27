@@ -8,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/location_label.dart';
-import '../widgets/new_stock_section.dart';
+import '../widgets/addons/product_categories/new_stock_section.dart';
 import '../widgets/product_sections.dart';
 import '../widgets/trending_locations_section.dart';
 import 'user_information_bloc/add_ons/all_products_add_ons_bloc/all_products_add_ons_bloc.dart';
@@ -55,11 +55,10 @@ class _HomePageState extends State<HomePage> {
               BlocBuilder<AllProductsAddOnsBloc, AllProductsAddOnsState>(
                 builder: (context, state) {
                   if (state is AllProductSuccessState) {
-                    // logger.d(state.productEntity);
                     var data = state.productEntity;
-                    // var data = state.productEntity.productVariant;
-                    // logger.d(data);
+
                     return ProductsSection(
+                      label: "Recommended Products",
                       state: data,
                     );
                   } else {
@@ -75,39 +74,6 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-        // bottomNavigationBar: BottomNavigationBar(
-        //   items: const [
-        //     BottomNavigationBarItem(
-        //       icon: Icon(Icons.favorite),
-        //       label: 'Wishlist',
-        //     ),
-        //     BottomNavigationBarItem(
-        //       icon: Icon(Icons.message),
-        //       label: 'Messages',
-        //     ),
-        //     BottomNavigationBarItem(
-        //       icon: Icon(Icons.home),
-        //       label: 'Home',
-        //     ),
-        //     BottomNavigationBarItem(
-        //       icon: Icon(Icons.notifications),
-        //       label: 'Notifications',
-        //     ),
-        //     BottomNavigationBarItem(
-        //       icon: Icon(Icons.person),
-        //       label: 'Account',
-        //     ),
-        //   ],
-        //   currentIndex: _selectedIndex,
-        //   selectedItemColor: Colors.green.shade700,
-        //   unselectedItemColor: Colors.black54,
-        //   backgroundColor: Colors.white,
-        //   showSelectedLabels: true,
-        //   showUnselectedLabels: false,
-        //   type: BottomNavigationBarType.fixed,
-        //   elevation: 8.0,
-        //   onTap: _onItemTapped,
-        // ),
       ),
     );
   }

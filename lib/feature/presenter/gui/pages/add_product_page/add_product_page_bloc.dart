@@ -16,6 +16,7 @@ class AddProductPageBloc
   AddProductPageBloc(this._productUsecase) : super(AddProductPageInitial()) {
     on<AddProductEvent>((event, emit) async {
       var result = await _productUsecase(event.params);
+      emit(AddProductPageLoadingState());
 
       var status = result.status;
 
