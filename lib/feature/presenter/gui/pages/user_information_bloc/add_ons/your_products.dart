@@ -116,7 +116,7 @@ class _YourProductState extends State<YourProduct> {
           childAspectRatio: 0.75,
         ),
         itemBuilder: (context, index) {
-          return ProductCard(product: products[index]);
+          return ProductCard(uid: widget.uid, product: products[index]);
         },
       ),
     );

@@ -1,6 +1,9 @@
 // ignore_for_file: library_private_types_in_public_api
 
 import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/add_ons/product_favorite_bloc/product_favorite_cubit.dart';
+import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
+import 'package:anihan_app/feature/presenter/gui/widgets/customize/product_view_page.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
@@ -9,8 +12,9 @@ import '../../../../../domain/entities/product_entity.dart';
 
 class ProductCard extends StatefulWidget {
   final ProductEntity product;
+  final String uid;
 
-  const ProductCard({super.key, required this.product});
+  const ProductCard({super.key, required this.uid, required this.product});
 
   @override
   _ProductCardState createState() => _ProductCardState();
@@ -57,8 +61,6 @@ class _ProductCardState extends State<ProductCard> {
   Widget build(BuildContext context) {
     return BlocListener<ProductFavoriteCubit, ProductFavoriteState>(
       listener: (context, state) {
-        // TODO: implement listener
-
         if (state is ProductFavoriteSuccessState) {
           var data = state.successMessage;
           logger.d(data);
@@ -72,6 +74,11 @@ class _ProductCardState extends State<ProductCard> {
         onTap: () {
           logger.d(widget.product.productKey);
           logger.d(isFavorite);
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+            return ProductSectionPage();
+          }));
+          // AutoRouter.of(context).push(CustomProductViewingRoute(
+          //     uid: widget.uid, product: widget.product));
         },
         child: Card(
           elevation: 4,
@@ -173,23 +180,23 @@ class _ProductCardState extends State<ProductCard> {
 }
 
 // Update the product grid method
-Widget _buildProductGrid(List<ProductEntity> products) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-    child: GridView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: products.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10.0,
-        mainAxisSpacing: 10.0,
-        childAspectRatio: 0.75,
-      ),
-      itemBuilder: (context, index) {
-        return ProductCard(
-            product: products[index]); // Use the new ProductCard widget
-      },
-    ),
-  );
-}
+// Widget _buildProductGrid(List<ProductEntity> products) {
+//   return Padding(
+//     padding: const EdgeInsets.symmetric(horizontal: 16.0),
+//     child: GridView.builder(
+//       physics: const NeverScrollableScrollPhysics(),
+//       shrinkWrap: true,
+//       itemCount: products.length,
+//       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+//         crossAxisCount: 2,
+//         crossAxisSpacing: 10.0,
+//         mainAxisSpacing: 10.0,
+//         childAspectRatio: 0.75,
+//       ),
+//       itemBuilder: (context, index) {
+//         return ProductCard(
+//             product: products[index]); // Use the new ProductCard widget
+//       },
+//     ),
+//   );
+// }

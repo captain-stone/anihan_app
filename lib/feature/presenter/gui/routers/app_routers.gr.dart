@@ -36,6 +36,19 @@ abstract class _$AppRouters extends RootStackRouter {
         ),
       );
     },
+    CustomProductViewingRoute.name: (routeData) {
+      final args = routeData.argsAs<CustomProductViewingRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: CustomProductViewingPage(
+          args.uid,
+          key: args.key,
+          product: args.product,
+          height: args.height,
+          width: args.width,
+        ),
+      );
+    },
     HomeNavigationRoute.name: (routeData) {
       final args = routeData.argsAs<HomeNavigationRouteArgs>();
       return AutoRoutePage<dynamic>(
@@ -195,6 +208,60 @@ class ChatsRouteArgs {
   @override
   String toString() {
     return 'ChatsRouteArgs{uid: $uid, key: $key}';
+  }
+}
+
+/// generated route for
+/// [CustomProductViewingPage]
+class CustomProductViewingRoute
+    extends PageRouteInfo<CustomProductViewingRouteArgs> {
+  CustomProductViewingRoute({
+    required String uid,
+    Key? key,
+    required ProductEntity product,
+    double height = 100,
+    double width = 100,
+    List<PageRouteInfo>? children,
+  }) : super(
+          CustomProductViewingRoute.name,
+          args: CustomProductViewingRouteArgs(
+            uid: uid,
+            key: key,
+            product: product,
+            height: height,
+            width: width,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'CustomProductViewingRoute';
+
+  static const PageInfo<CustomProductViewingRouteArgs> page =
+      PageInfo<CustomProductViewingRouteArgs>(name);
+}
+
+class CustomProductViewingRouteArgs {
+  const CustomProductViewingRouteArgs({
+    required this.uid,
+    this.key,
+    required this.product,
+    this.height = 100,
+    this.width = 100,
+  });
+
+  final String uid;
+
+  final Key? key;
+
+  final ProductEntity product;
+
+  final double height;
+
+  final double width;
+
+  @override
+  String toString() {
+    return 'CustomProductViewingRouteArgs{uid: $uid, key: $key, product: $product, height: $height, width: $width}';
   }
 }
 

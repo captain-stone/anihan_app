@@ -311,6 +311,7 @@ class _MyInformationPageState extends State<MyInformationPage> {
                     // var data = state.productEntity.productVariant;
                     // logger.d(data);
                     return YouMayLikeWidget(
+                      widget.uid!,
                       state: data,
                     );
                   } else {
