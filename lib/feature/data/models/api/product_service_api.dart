@@ -42,7 +42,6 @@ mixin ProductServiceApi {
                 "products/images/product-id${user.uid}/${params.productName}",
                 params.productName,
                 count);
-
             imageUrl.add(imageData);
             count++;
           }
@@ -80,10 +79,12 @@ mixin ProductServiceApi {
             // productVariantDtoList: productVariantDtoList,
             productPrice: params.productPrice);
 
+        //* THIS METHOD IS ADDING STOREID;
         productData = ProductDataDto.customToJson(
             productDataDto, productVariantDtoList, userId);
 
         logger.d(productData);
+        logger.d(productDataDto.toJson());
 
         await newProductRef.set(productData);
         // _refsVariations.set(variants);
@@ -94,11 +95,8 @@ mixin ProductServiceApi {
         //     await _refsVariations.once().then((event) => event.snapshot);
 
         Map<dynamic, dynamic>? productDataList = dataSnapshot.value as Map?;
-        // Map<dynamic, dynamic>? productDataListVariants =
-        //     dataSnapshotVariants.value as Map?;
 
         if (productDataList != null) {
-          // Access each product
           var productEntities = productDataList.entries
               .map((entry) {
                 String productIdKey = entry.key;
@@ -121,7 +119,7 @@ mixin ProductServiceApi {
                   String itemDescriptions =
                       productInfo['itemDescriptions'] as String? ??
                           'No Description';
-
+                  String storeId = "storeId-$userId-id";
                   // Safely handle the variants
                   // List<Map<String, dynamic>> productVariants =
                   //     productInfo['variant-${user.uid}-id'] is List
@@ -146,6 +144,7 @@ mixin ProductServiceApi {
                     itemDescriptions,
                     productVariant: productVariants,
                     productKey: productIdKey,
+                    storeId: storeId,
                   );
                 } else {
                   // Handle unexpected types; return null

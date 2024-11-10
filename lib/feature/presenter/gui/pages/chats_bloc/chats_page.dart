@@ -1,10 +1,12 @@
-// ignore_for_file: unused_element, unused_field, prefer_final_fields
+// ignore_for_file: unused_element, unused_field, prefer_final_fields, no_leading_underscores_for_local_identifiers
 
 import 'package:anihan_app/common/app_module.dart';
+import 'package:anihan_app/common/enum_files.dart';
 import 'package:anihan_app/feature/data/models/api/firebase_model.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/chats_page_bloc.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/debugger/logger_debugger.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -18,16 +20,38 @@ class ChatsPage extends StatefulWidget {
 }
 
 class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
-  final _bloc = getIt<ChatsPageBloc>();
+  // final _bloc = getIt<ChatsPageBloc>();
   int _selectedIndex = 2;
+  bool isFriendsExpanded = true;
+  bool isFriendsSuggestionExpanded = true;
+  bool isLoading = false;
+
   static const List<ChatItem> chatItems = [];
   List<FirebaseDataModel> users = [];
+  List<FirebaseDataModel> requestedUsers = [];
+
+  List<Map<String, dynamic>> friendRequestsMapList = [];
+  List<Map<String, dynamic>> friendSuggestionsMapList = [];
 
   List<String> _friendSuggestions = [];
 
   String _searchQuery = '';
 
   bool searchEmpty = true;
+
+  List<FirebaseDataModel?> friends = [];
+  List<FirebaseDataModel?> notFriends = [];
+  List<FirebaseDataModel> searchData = [];
+
+  @override
+  void initState() {
+    super.initState();
+    context
+        .read<ChatsPageBloc>()
+        .add(GetUserListEvent(currentUserId: widget.uid!));
+
+    // _bloc.add(GetUserListEvent());
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -46,52 +70,225 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
     if (value != "") {
       setState(() {
         searchEmpty = false;
+        context.read<ChatsPageBloc>().add(SearchFriendEvent(_searchQuery));
       });
     } else {
       setState(() {
         searchEmpty = true;
+        friends = [];
+        notFriends = [];
+        context
+            .read<ChatsPageBloc>()
+            .add(GetUserListEvent(currentUserId: widget.uid!));
       });
     }
   }
 
+  void onSearchFunction() {
+    // _bloc.add(SearchFriendEvent(_searchQuery));
+    context.read<ChatsPageBloc>().add(SearchFriendEvent(_searchQuery));
+  }
+
+  void addFriendFunction(String userId) {
+    context.read<ChatsPageBloc>().add(AddingFriendEvent(userId, widget.uid!));
+    // logger.d(userId);
+  }
+
+  Widget showFriendsAndNotFriends(Size size) {
+    double _width = size.width;
+    double _height = size.height;
+    return Column(
+      children: [
+        const SizedBox(
+          height: 12,
+        ),
+        Container(
+          width: _width,
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              //title
+              const Text(
+                "Friends",
+                style: TextStyle(fontSize: 18),
+              ),
+              IconButton(
+                  onPressed: () {
+                    setState(() {
+                      isFriendsExpanded = !isFriendsExpanded;
+                    });
+                  },
+                  icon: Icon(
+                    !isFriendsExpanded
+                        ? Icons.arrow_forward_ios_outlined
+                        : Icons.keyboard_arrow_down,
+                    size: 18,
+                  ))
+            ],
+          ),
+        ),
+        if (isFriendsExpanded)
+          SizedBox(
+            // color: Colors.red,
+            width: _width,
+            child: friends.isNotEmpty
+                ? ShowFriendListToChat(widget.uid!, notFriends)
+                : Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Container(
+                      width: _width,
+                      height: _height * 0.2,
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: const Color(0xFFF1E7F5),
+                        boxShadow: [
+                          BoxShadow(
+                            color:
+                                Colors.black.withOpacity(0.1), // Shadow color
+                            offset: const Offset(0, 4),
+                            blurRadius: 8, // Spread of the shadow
+                            spreadRadius: 1, // How much the shadow spreads
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Text(
+                          "You are not following anyone yet. Start exploring to follow interesting profiles!",
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ),
+          ),
+        Container(
+          width: _width,
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              //title
+              const Text(
+                "Friends Suggestions",
+                style: TextStyle(fontSize: 18),
+              ),
+              IconButton(
+                  onPressed: () {
+                    setState(() {
+                      isFriendsSuggestionExpanded =
+                          !isFriendsSuggestionExpanded;
+                    });
+                  },
+                  icon: Icon(
+                    !isFriendsSuggestionExpanded
+                        ? Icons.arrow_forward_ios_outlined
+                        : Icons.keyboard_arrow_down,
+                    size: 18,
+                  ))
+            ],
+          ),
+        ),
+        if (isFriendsSuggestionExpanded)
+          SizedBox(
+            // color: Colors.red,
+            width: _width,
+            // height: _height,
+            child: notFriends.isNotEmpty
+                ? FriendsSuggestions(
+                    widget.uid!,
+                    notFriends,
+                    addFriendFunction: addFriendFunction,
+                  )
+                : Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Container(
+                      width: _width,
+                      height: _height * 0.2,
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: const Color(0xFFF1E7F5),
+                        boxShadow: [
+                          BoxShadow(
+                            color:
+                                Colors.black.withOpacity(0.1), // Shadow color
+                            offset: const Offset(0, 4),
+                            blurRadius: 8, // Spread of the shadow
+                            spreadRadius: 1, // How much the shadow spreads
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Text(
+                          "It looks like there is no friend suggestions. Invite some friends to get started.",
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ),
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ChatsPageBloc()..add(GetUserListEvent()),
-      child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(60.0),
-            child: CustomAppBar(
-              _bloc,
-              valueString: _searchQuery,
-              isSearching: searchEmpty,
-              onChanged: (value) => onChange(value),
-            ),
+    final double _width = MediaQuery.of(context).size.width;
+    final double _height = MediaQuery.of(context).size.height;
+    return Scaffold(
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(60.0),
+          child: CustomAppBar(
+            ChatsPageBloc(),
+            valueString: _searchQuery,
+            isSearching: searchEmpty,
+            onChanged: (value) => onChange(value),
+            onSearchFunction: onSearchFunction,
           ),
-          body: BlocBuilder<ChatsPageBloc, ChatsPageState>(
+        ),
+        body: SingleChildScrollView(
+          child: BlocBuilder<ChatsPageBloc, ChatsPageState>(
             builder: (context, state) {
-              List<FirebaseDataModel?> friends = [];
-              List<FirebaseDataModel?> notFriends = [];
-              List<FirebaseDataModel?> searchData = [];
               logger.d(state);
-              if (state is ChatsPageSuccessState) {
-                users = state.data;
+              var userFriendPending = {};
+              List<FirebaseDataModel?> userData = [];
 
-                friends = users
-                    .map((e) {
-                      if (e.key == widget.uid) {
-                        return null;
-                      } else {
-                        if (e.value.containsKey('friends')) {
-                          return FirebaseDataModel(key: e.key, value: e.value);
-                        } else {
-                          return null;
-                        }
-                      }
-                    })
-                    .where((element) => element != null)
+              if (state is ChatsPageLoadingState) {
+                return SizedBox(
+                  width: _width,
+                  height: _height,
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.orange,
+                    ),
+                  ),
+                );
+              }
+              if (state is ChatsPageSuccessState) {
+                friendRequestsMapList = state.data["friendRequests"]!;
+                friendSuggestionsMapList = state.data["friendSuggestions"]!;
+
+                users = friendSuggestionsMapList
+                    .map((entry) => FirebaseDataModel(
+                          key: entry[
+                              "userId"], // Assuming "userId" is stored in each entry
+                          value: Map<String, dynamic>.from(entry["userInfo"]),
+                        ))
+                    .toList();
+                requestedUsers = friendRequestsMapList
+                    .map((entry) => FirebaseDataModel(
+                        key: entry["requestId"], value: entry))
                     .toList();
 
+                friends = requestedUsers.map((e) {
+                  return FirebaseDataModel(
+                      key: e.key,
+                      value: e.value["userInfo"],
+                      status: e.value["status"]);
+                }).toList();
+
+                logger.d(friends);
                 notFriends = users
                     .map((e) {
                       if (e.key == widget.uid) {
@@ -108,34 +305,360 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
                     .where((element) => element != null)
                     .toList();
 
-                logger.d(friends);
-                logger.d(notFriends);
+                return Column(
+                  children: [
+                    const SizedBox(
+                      height: 12,
+                    ),
+                    Container(
+                      width: _width,
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          //title
+                          const Text(
+                            "Friends",
+                            style: TextStyle(fontSize: 18),
+                          ),
+                          IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  isFriendsExpanded = !isFriendsExpanded;
+                                });
+                              },
+                              icon: Icon(
+                                !isFriendsExpanded
+                                    ? Icons.arrow_forward_ios_outlined
+                                    : Icons.keyboard_arrow_down,
+                                size: 18,
+                              ))
+                        ],
+                      ),
+                    ),
+                    if (isFriendsExpanded)
+                      SizedBox(
+                        // color: Colors.red,
+                        width: _width,
+                        child: friends.isNotEmpty
+                            ? ShowFriendListToChat(
+                                widget.uid!,
+                                friends,
+                              )
+                            : Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24.0),
+                                child: Container(
+                                  width: _width,
+                                  height: _height * 0.2,
+                                  padding: const EdgeInsets.all(18),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    color: const Color(0xFFF1E7F5),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black
+                                            .withOpacity(0.1), // Shadow color
+                                        offset: const Offset(0, 4),
+                                        blurRadius: 8, // Spread of the shadow
+                                        spreadRadius:
+                                            1, // How much the shadow spreads
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      "You are not following anyone yet. Start exploring to follow interesting profiles!",
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                      ),
+                    Container(
+                      width: _width,
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          //title
+                          const Text(
+                            "Friends Suggestions",
+                            style: TextStyle(fontSize: 18),
+                          ),
+                          IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  isFriendsSuggestionExpanded =
+                                      !isFriendsSuggestionExpanded;
+                                });
+                              },
+                              icon: Icon(
+                                !isFriendsSuggestionExpanded
+                                    ? Icons.arrow_forward_ios_outlined
+                                    : Icons.keyboard_arrow_down,
+                                size: 18,
+                              ))
+                        ],
+                      ),
+                    ),
+                    if (isFriendsSuggestionExpanded)
+                      SizedBox(
+                        // color: Colors.red,
+                        width: _width,
+                        // height: _height,
+                        child: notFriends.isNotEmpty
+                            ? FriendsSuggestions(
+                                widget.uid!,
+                                notFriends,
+                                addFriendFunction: addFriendFunction,
+                              )
+                            : Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24.0),
+                                child: Container(
+                                  width: _width,
+                                  height: _height * 0.2,
+                                  padding: const EdgeInsets.all(18),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    color: const Color(0xFFF1E7F5),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black
+                                            .withOpacity(0.1), // Shadow color
+                                        offset: const Offset(0, 4),
+                                        blurRadius: 8, // Spread of the shadow
+                                        spreadRadius:
+                                            1, // How much the shadow spreads
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      "It looks like there is no friend suggestions. Invite some friends to get started.",
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                      ),
+                  ],
+                );
               }
 
               if (state is ChatsPageSearchSuccessState) {
-                logger.e(state);
                 searchData = state.data;
+                if (searchData.isEmpty) {
+                  return const Center(
+                    child: Text("No Available users"),
+                  );
+                } else {
+                  friends = [];
+                  notFriends = [];
+                  friends = searchData
+                      .map((e) {
+                        if (e.key == widget.uid) {
+                          return null;
+                        } else {
+                          if (e.value.containsKey('friends')) {
+                            return FirebaseDataModel(
+                                key: e.key, value: e.value);
+                          } else {
+                            return null;
+                          }
+                        }
+                      })
+                      .where((element) => element != null)
+                      .toList();
+
+                  notFriends = searchData
+                      .map((e) {
+                        if (e.key == widget.uid) {
+                          return null;
+                        }
+                        if (e.value.containsKey('friends')) {
+                          return null;
+                        } else {
+                          var firebaseData =
+                              FirebaseDataModel(key: e.key, value: e.value);
+                          return firebaseData;
+                        }
+                      })
+                      .where((element) => element != null)
+                      .toList();
+                }
+
+                return Column(
+                  children: [
+                    const SizedBox(
+                      height: 12,
+                    ),
+                    Container(
+                      width: _width,
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          //title
+                          const Text(
+                            "Friends",
+                            style: TextStyle(fontSize: 18),
+                          ),
+                          IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  isFriendsExpanded = !isFriendsExpanded;
+                                });
+                              },
+                              icon: Icon(
+                                !isFriendsExpanded
+                                    ? Icons.arrow_forward_ios_outlined
+                                    : Icons.keyboard_arrow_down,
+                                size: 18,
+                              ))
+                        ],
+                      ),
+                    ),
+                    if (isFriendsExpanded)
+                      SizedBox(
+                        // color: Colors.red,
+                        width: _width,
+                        child: friends.isNotEmpty
+                            ? ShowFriendListToChat(widget.uid!, notFriends)
+                            : Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24.0),
+                                child: Container(
+                                  width: _width,
+                                  height: _height * 0.2,
+                                  padding: const EdgeInsets.all(18),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    color: const Color(0xFFF1E7F5),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black
+                                            .withOpacity(0.1), // Shadow color
+                                        offset: const Offset(0, 4),
+                                        blurRadius: 8, // Spread of the shadow
+                                        spreadRadius:
+                                            1, // How much the shadow spreads
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      "You are not following anyone yet. Start exploring to follow interesting profiles!",
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                      ),
+                    Container(
+                      width: _width,
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          //title
+                          const Text(
+                            "Friends Suggestions",
+                            style: TextStyle(fontSize: 18),
+                          ),
+                          IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  isFriendsSuggestionExpanded =
+                                      !isFriendsSuggestionExpanded;
+                                });
+                              },
+                              icon: Icon(
+                                !isFriendsSuggestionExpanded
+                                    ? Icons.arrow_forward_ios_outlined
+                                    : Icons.keyboard_arrow_down,
+                                size: 18,
+                              ))
+                        ],
+                      ),
+                    ),
+                    if (isFriendsSuggestionExpanded)
+                      SizedBox(
+                        // color: Colors.red,
+                        width: _width,
+                        // height: _height,
+                        child: notFriends.isNotEmpty
+                            ? FriendsSuggestions(
+                                widget.uid!,
+                                notFriends,
+                                addFriendFunction: addFriendFunction,
+                              )
+                            : Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24.0),
+                                child: Container(
+                                  width: _width,
+                                  height: _height * 0.2,
+                                  padding: const EdgeInsets.all(18),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    color: const Color(0xFFF1E7F5),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black
+                                            .withOpacity(0.1), // Shadow color
+                                        offset: const Offset(0, 4),
+                                        blurRadius: 8, // Spread of the shadow
+                                        spreadRadius:
+                                            1, // How much the shadow spreads
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      "It looks like there is no friend suggestions. Invite some friends to get started.",
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                      ),
+                  ],
+                );
               }
-              return friends.isEmpty && notFriends.isNotEmpty
-                  ?
-                  //SHOWIGN SUGGESTIONS
-                  FriendsSuggestions(_bloc, widget.uid!, friends)
-                  :
-                  //YOU CAN ADD FRIENDS HERE PAREN
-                  friends.isNotEmpty && notFriends.isNotEmpty
-                      ?
-                      //MUST ADDING FRIENDS
-                      ShowFriendListToChat(widget.uid!, notFriends)
-                      : searchData.isNotEmpty
-                          ? const Center(
-                              child: Text("Search"),
-                            )
-                          : const Center(
-                              child: CircularProgressIndicator(),
-                            );
+
+              if (state is FriendRequestSuccessState) {
+                logger.d(notFriends);
+
+                return showFriendsAndNotFriends(Size(_width, _height));
+              }
+
+              if (state is FriendRequestErrorState) {
+                return showFriendsAndNotFriends(Size(_width, _height));
+              }
+
+              return Container();
+              // return friends.isEmpty && notFriends.isNotEmpty
+              //     ?
+              //     //SHOWIGN SUGGESTIONS
+              //     FriendsSuggestions(_bloc, widget.uid!, friends)
+              //     :
+              //     //YOU CAN ADD FRIENDS HERE PAREN
+              //     friends.isNotEmpty && notFriends.isNotEmpty
+              //         ?
+              //         //MUST ADDING FRIENDS
+              //         ShowFriendListToChat(widget.uid!, notFriends)
+              //         : searchData.isNotEmpty
+              //             ? const Center(
+              //                 child: Text("Search"),
+              //               )
+              //             : const Center(
+              //                 child: CircularProgressIndicator(),
+              //               );
             },
-          )),
-    );
+          ),
+        ));
   }
 }
 
@@ -145,10 +668,13 @@ class CustomAppBar extends StatelessWidget {
   final ChatsPageBloc bloc;
   final bool isSearching;
 
+  final void Function() onSearchFunction;
+
   const CustomAppBar(this.bloc,
       {required this.valueString,
       required this.onChanged,
       required this.isSearching,
+      required this.onSearchFunction,
       super.key});
 
   @override
@@ -177,9 +703,7 @@ class CustomAppBar extends StatelessWidget {
                   ),
                   suffixIcon: !isSearching
                       ? TextButton(
-                          onPressed: () {
-                            bloc.add(SearchFriendEvent(valueString));
-                          },
+                          onPressed: onSearchFunction,
                           child: const Text('search'),
                         )
                       : null,
@@ -229,71 +753,62 @@ class CustomAppBar extends StatelessWidget {
 //showing suggestions...
 
 class FriendsSuggestions extends StatelessWidget {
-  final ChatsPageBloc bloc;
+  // final ChatsPageBloc bloc;
   final String uid;
   final List<FirebaseDataModel?> users;
+  final Function(String userId) addFriendFunction;
 
-  const FriendsSuggestions(this.bloc, this.uid, this.users, {super.key});
+  const FriendsSuggestions(this.uid, this.users,
+      {required this.addFriendFunction, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(
-            height: 12,
-          ),
-          const Text(
-            "Friends Suggestions",
-            style: TextStyle(fontSize: 18),
-          ),
-          const SizedBox(
-            height: 12,
-          ),
-          Expanded(
-            child: ListView.builder(
-                itemCount: users.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    padding: const EdgeInsets.all(12.0),
-                    margin: const EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 16.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 6.0,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.people),
-                            const SizedBox(width: 16.0),
-                            Text(users[index]!.value['fullName']),
-                          ],
-                        ),
-                        TextButton(
-                            onPressed: () {
-                              bloc.add(
-                                  AddingFriendEvent(uid, users[index]!.key));
-                            },
-                            child: const Text("ADD"))
-                      ],
-                    ),
-                  );
-                }),
-          ),
-        ],
+    // print(users);
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+        child: Column(
+          children: users.map((user) {
+            return Container(
+              // color: Colors.green,
+              padding: const EdgeInsets.all(8.0),
+              margin:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 6.0,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.people),
+                      const SizedBox(width: 16.0),
+                      Text(user!.value['fullName']),
+                    ],
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      var userId = user.key;
+
+                      addFriendFunction(userId);
+                    },
+                    child: const Text("add"),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }
@@ -302,60 +817,59 @@ class FriendsSuggestions extends StatelessWidget {
 class ShowFriendListToChat extends StatelessWidget {
   final String uid;
   final List<FirebaseDataModel?> users;
+
   const ShowFriendListToChat(this.uid, this.users, {super.key});
 
   @override
   Widget build(BuildContext context) {
+    // var usersInfo =
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(
-            height: 12,
-          ),
-          const Text(
-            "Friends",
-            style: TextStyle(fontSize: 18),
-          ),
-          const SizedBox(
-            height: 12,
-          ),
-          Expanded(
-            child: ListView.builder(
-                itemCount: users.length,
-                itemBuilder: (context, index) {
-                  return Visibility(
-                    visible: uid != users[index]!.key,
-                    child: Container(
-                      padding: const EdgeInsets.all(12.0),
-                      margin: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 16.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 6.0,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          const Icon(Icons.people),
-                          const SizedBox(width: 16.0),
-                          Text(users[index]!.value['fullName']),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-          ),
-        ],
+        children: users.map((friend) {
+          return Visibility(
+            visible: uid != friend!.key,
+            child: Container(
+              padding: const EdgeInsets.all(12.0),
+              margin:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 6.0,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.people),
+                      const SizedBox(width: 16.0),
+                      Text(friend.value['fullName']),
+                    ],
+                  ),
+                  Text(
+                    "${friend.status}",
+                    style: TextStyle(
+                        color: friend.status! == FriendStatus.accepted.name
+                            ? Colors.green
+                            : friend.status! == FriendStatus.rejected.name
+                                ? Colors.red
+                                : Colors.orange),
+                  )
+                ],
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }

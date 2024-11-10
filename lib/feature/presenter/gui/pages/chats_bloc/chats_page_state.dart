@@ -15,7 +15,8 @@ class ChatsPageLoadingState extends ChatsPageState {
 }
 
 class ChatsPageSuccessState extends ChatsPageState {
-  final List<FirebaseDataModel> data;
+  // final List<FirebaseDataModel> data;
+  final Map<String, List<Map<String, dynamic>>> data;
 
   const ChatsPageSuccessState(this.data);
 
@@ -37,4 +38,29 @@ class ChatsPageErrorState extends ChatsPageState {
   const ChatsPageErrorState(this.message);
   @override
   List<Object> get props => [message];
+}
+
+class FriendRequestSuccessState extends ChatsPageState {
+  final Map<String, dynamic> data;
+
+  const FriendRequestSuccessState(this.data);
+
+  @override
+  List<Object> get props => [data];
+}
+
+class FriendRequestErrorState extends ChatsPageState {
+  final String message;
+
+  const FriendRequestErrorState(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+class AllPendingRequestSuccessState extends ChatsPageState {
+  final List<Map<String, dynamic>> data;
+  const AllPendingRequestSuccessState(this.data);
+  @override
+  List<Object> get props => [data];
 }

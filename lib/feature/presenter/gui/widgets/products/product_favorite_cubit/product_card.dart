@@ -1,9 +1,11 @@
 // ignore_for_file: library_private_types_in_public_api
 
-import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/add_ons/product_favorite_bloc/product_favorite_cubit.dart';
-import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
-import 'package:anihan_app/feature/presenter/gui/widgets/customize/product_view_page.dart';
-import 'package:auto_route/auto_route.dart';
+import 'package:anihan_app/common/api_result.dart';
+import 'package:anihan_app/feature/presenter/gui/widgets/products/product_showcase_bloc/your_product_showcase.dart';
+import 'package:anihan_app/feature/presenter/gui/widgets/products/product_favorite_cubit/product_favorite_cubit.dart';
+
+import 'package:anihan_app/feature/presenter/gui/widgets/products/product_view_page.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
@@ -11,10 +13,15 @@ import 'package:logger/logger.dart';
 import '../../../../../domain/entities/product_entity.dart';
 
 class ProductCard extends StatefulWidget {
+  final ProductDist dist;
   final ProductEntity product;
   final String uid;
 
-  const ProductCard({super.key, required this.uid, required this.product});
+  const ProductCard(
+      {super.key,
+      required this.uid,
+      required this.product,
+      required this.dist});
 
   @override
   _ProductCardState createState() => _ProductCardState();
@@ -28,7 +35,7 @@ class _ProductCardState extends State<ProductCard> {
   @override
   void initState() {
     super.initState();
-    logger.d(widget.product);
+    // logger.d(widget.product);
     context
         .read<ProductFavoriteCubit>()
         .addToFavorite(widget.product.productKey);
@@ -63,7 +70,7 @@ class _ProductCardState extends State<ProductCard> {
       listener: (context, state) {
         if (state is ProductFavoriteSuccessState) {
           var data = state.successMessage;
-          logger.d(data);
+          // logger.d(data);
           // isFavorite = data["favorite"];
           if (data['favorite'] == widget.product.productKey) {
             isFavorite = true;
@@ -74,9 +81,19 @@ class _ProductCardState extends State<ProductCard> {
         onTap: () {
           logger.d(widget.product.productKey);
           logger.d(isFavorite);
-          Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-            return ProductSectionPage();
-          }));
+
+          if (widget.dist == ProductDist.personal) {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return YourProductShowcase(
+                products: widget.product,
+              );
+            }));
+          } else {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return ProductSectionPage();
+            }));
+          }
+
           // AutoRouter.of(context).push(CustomProductViewingRoute(
           //     uid: widget.uid, product: widget.product));
         },

@@ -113,7 +113,7 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
     return allData;
   }
 
-  bool _validateAllFields(List<ProductVariantEntity> data) {
+  _validateAllFields(List<ProductVariantEntity> data) {
     // Validate the main form (text fields)
     if (!_formKey.currentState!.validate()) {
       return false;
@@ -433,12 +433,8 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
         onPressed: () {
           final data = _retrieveVariationData();
 
-          if (_validateAllFields(data)) {
-            // Proceed with submission if all validations pass
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Product submitted successfully!')),
-            );
-          }
+          _validateAllFields(data);
+          // Proceed with submission if all validations pass
         },
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 15),
@@ -493,6 +489,9 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
           }
           logger.d(state.entity);
           Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Product submitted successfully!')),
+          );
           // AutoRouter.of(context)
           //     .popAndPush(HomeNavigationRoute(uid: widget.uid));
         }

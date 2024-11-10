@@ -1,12 +1,23 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, no_leading_underscores_for_local_identifiers
 
 import 'dart:async';
 import 'dart:io';
 
 import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../widgets/addons/product_categories/product_category_items/product_category_items_cubit.dart';
+import '../widgets/products/all_products_add_ons_bloc/all_products_add_ons_bloc.dart';
+import '../widgets/products/product_favorite_cubit/product_favorite_cubit.dart';
+import '../widgets/products/product_showcase_bloc/product_showcase_bloc.dart';
+import '../widgets/products/products_add_ons_bloc/product_add_ons_bloc.dart';
+import '../widgets/sellers/seller_add_ons/seller_info_add_ons_bloc.dart';
+import 'chats_bloc/chats_page_bloc.dart';
+import 'notification_bloc/notification_page_bloc.dart';
 
 @RoutePage()
 class HomeNavigationPage extends StatefulWidget {
@@ -22,6 +33,7 @@ class _HomeNavigationPageState extends State<HomeNavigationPage> {
   int _selectedIndex = 2;
   bool isBackButtonPressed = false;
   Timer? _backButtonTimer;
+  final FirebaseDatabase db = FirebaseDatabase.instance;
 
   @override
   void initState() {
@@ -74,61 +86,99 @@ class _HomeNavigationPageState extends State<HomeNavigationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
-      child: AutoTabsRouter(
-        // initialIndex: 12,
-        routes: [
-          const WishListRoute(),
-          ChatsRoute(uid: widget.uid),
-          const HomeRoute(),
-          NotificationRoute(uid: widget.uid),
-          MyInformationRoute(uid: widget.uid),
-        ],
-        builder: (context, child) {
-          tabsRouter = AutoTabsRouter.of(context);
-          return Scaffold(
-            body: child,
-            bottomNavigationBar: BottomNavigationBar(
-              items: const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.favorite),
-                  label: 'Wishlist',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.message),
-                  label: 'Messages',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  label: 'Home',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.notifications),
-                  label: 'Notifications',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person),
-                  label: 'Account',
-                ),
-              ],
-              currentIndex: tabsRouter.activeIndex,
-              selectedItemColor: Colors.green.shade700,
-              unselectedItemColor: Colors.black54,
-              backgroundColor: Colors.white,
-              showSelectedLabels: true,
-              showUnselectedLabels: false,
-              type: BottomNavigationBarType.fixed,
-              elevation: 8.0,
-              onTap: (index) {
-                setState(() {
-                  _selectedIndex = index;
-                });
-                tabsRouter.setActiveIndex(index);
-              },
-            ),
-          );
-        },
+    DatabaseReference _ref = db.ref("farmers/${widget.uid}/");
+    DatabaseReference _userUpdate = db.ref("users/${widget.uid}/");
+    DatabaseReference _productsRef = db.ref("products/product-id${widget.uid}");
+    DatabaseReference _allProductsRef = db.ref("products");
+
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) =>
+              SellerInfoAddOnsBloc(_ref, _userUpdate)..add(SellerStreanEvent()),
+        ),
+        BlocProvider(
+          create: (context) =>
+              ProductAddOnsBloc(_productsRef)..add(GetSelfProductEvents()),
+        ),
+//no
+        BlocProvider(
+          create: (context) => AllProductsAddOnsBloc(_allProductsRef)
+            ..add(GetAllProductEvents()),
+        ),
+
+        BlocProvider(create: (context) => ProductFavoriteCubit()),
+
+        BlocProvider(create: (context) => ProductShowcaseBloc()),
+        BlocProvider(
+          create: (context) => ChatsPageBloc(),
+        ),
+
+        BlocProvider(
+          create: (context) => NotificationPageBloc()
+            ..add(GetFarmersNotificationsEvent(uid: widget.uid)),
+        ),
+
+        BlocProvider(
+          create: (context) => ProductCategoryItemsCubit(_allProductsRef),
+        )
+      ],
+      child: WillPopScope(
+        onWillPop: _onWillPop,
+        child: AutoTabsRouter(
+          // initialIndex: 12,
+          routes: [
+            const WishListRoute(),
+            ChatsRoute(uid: widget.uid),
+            HomeRoute(uid: widget.uid),
+            NotificationRoute(uid: widget.uid),
+            MyInformationRoute(uid: widget.uid),
+          ],
+          builder: (context, child) {
+            tabsRouter = AutoTabsRouter.of(context);
+            return Scaffold(
+              body: child,
+              bottomNavigationBar: BottomNavigationBar(
+                items: const [
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.favorite),
+                    label: 'Wishlist',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.message),
+                    label: 'Messages',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.home),
+                    label: 'Home',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.notifications),
+                    label: 'Notifications',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.person),
+                    label: 'Account',
+                  ),
+                ],
+                currentIndex: tabsRouter.activeIndex,
+                selectedItemColor: Colors.green.shade700,
+                unselectedItemColor: Colors.black54,
+                backgroundColor: Colors.white,
+                showSelectedLabels: true,
+                showUnselectedLabels: false,
+                type: BottomNavigationBarType.fixed,
+                elevation: 8.0,
+                onTap: (index) {
+                  setState(() {
+                    _selectedIndex = index;
+                  });
+                  tabsRouter.setActiveIndex(index);
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
   }

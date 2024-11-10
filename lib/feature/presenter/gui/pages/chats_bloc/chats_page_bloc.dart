@@ -2,12 +2,16 @@
 
 import 'dart:async';
 
+import 'package:anihan_app/common/enum_files.dart';
+import 'package:anihan_app/feature/data/models/api/friend_request_api.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/login_bloc/login_page_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 
+import '../../../../../common/api_result.dart';
 import '../../../../data/models/api/firebase_model.dart';
 
 part 'chats_page_event.dart';
@@ -20,69 +24,170 @@ class ChatsPageBloc extends Bloc<ChatsPageEvent, ChatsPageState> {
   late StreamSubscription? _subscription;
 
   ChatsPageBloc() : super(ChatsPageInitial()) {
-    on<ChatsPageEvent>((event, emit) async {
-      DatabaseReference _refs = db.ref("users/");
+    on<GetUserListEvent>((event, emit) async {
+      emit(ChatsPageLoadingState());
+
+      var currentUserId = event.currentUserId;
+      var toUser = event.toUserId;
+
+      DatabaseReference friendRequestsRef =
+          db.ref("friend_requests"); //.child(currentUserId);
+      DatabaseReference usersRef = db.ref("users");
 
       try {
-        _subscription = _refs.onValue.listen((event) {
-          if (event.snapshot.value == null) {
-            if (!emit.isDone) {
-              emit(const ChatsPageErrorState("No data saved"));
-            }
-            _subscription?.isPaused;
-          } else {
-            // logger.d(event.snapshot.value);
+        _subscription = friendRequestsRef.onValue.listen((event) async {
+          List<Map<String, dynamic>> enrichedFriendRequests = [];
+          List<Map<String, dynamic>> friendSuggestions = [];
 
-            var data = (event.snapshot.value as Map<dynamic, dynamic>)
-                .entries
-                .map((entry) => FirebaseDataModel(
-                    key: entry.key,
-                    value: Map<String, dynamic>.from(entry.value)))
+          // 1. Fetch Friend Requests
+          if (event.snapshot.value != null) {
+            final Object? data = event.snapshot.value;
+
+            List<Map<String, dynamic>> friendRequestsData = [];
+            (event.snapshot.value as Map<dynamic, dynamic>)
+                .forEach((key, value) {
+              value.forEach((innerKey, innerValue) {
+                // Create a new map for each entry
+                final entry = {
+                  'requestId': key, // Add the request ID
+
+                  'fromUser': innerValue['fromUser'],
+                  'status': innerValue['status'],
+                  'timestamp': innerValue['timestamp'],
+                };
+
+                friendRequestsData.add(entry);
+              });
+            });
+
+            for (var request in friendRequestsData) {
+              logger.d(request);
+              String fromUser = request['fromUser'];
+              String requestedId = request['requestId'];
+              logger.d(fromUser);
+              // Fetch user information for 'fromUser'
+              DataSnapshot userSnapshot =
+                  await usersRef.child(requestedId).get();
+              if (userSnapshot.exists) {
+                Map<String, dynamic> userInfo =
+                    Map<String, dynamic>.from(userSnapshot.value as Map);
+
+                // Combine friend request data with user info
+                enrichedFriendRequests.add({
+                  'requestId': request['requestId'],
+                  'status': request['status'],
+                  'timestamp': request['timestamp'],
+                  'userInfo': userInfo, // Include user's info
+                });
+              }
+            }
+          } else if (!emit.isDone) {
+            emit(const ChatsPageErrorState("No friend requests found"));
+          }
+
+          DataSnapshot usersSnapshot = await usersRef.get();
+          if (usersSnapshot.exists) {
+            Map<dynamic, dynamic> allUsers = usersSnapshot.value as Map;
+// logger.d(enrichedFriendRequests.map())
+            logger.d(enrichedFriendRequests);
+
+            Set<String> friendRequestUserIds = enrichedFriendRequests
+                .map((request) => request['requestId']) // Get the userKey
+                .whereType<String>() // Filter out null values
+                .toSet();
+            friendSuggestions = allUsers.entries
+                .where((entry) =>
+                    !friendRequestUserIds.contains(entry.key) &&
+                    entry.key != currentUserId)
+                .map((entry) => {
+                      'userId': entry.key,
+                      'userInfo': Map<String, dynamic>.from(
+                          entry.value), // User details like name, etc.
+                    })
                 .toList();
+          }
 
-            if (!emit.isDone) {
-              emit(ChatsPageSuccessState(data));
-              _subscription?.isPaused;
-            }
-
-            //data is storename, storeaddress, and isApproved
+          if (!emit.isDone) {
+            emit(ChatsPageSuccessState({
+              'friendRequests': enrichedFriendRequests,
+              'friendSuggestions': friendSuggestions,
+            }));
           }
         }, onDone: () {
           _subscription!.asFuture();
         }, onError: (error) {
           logger.e(error);
-          emit(ChatsPageErrorState("Error Occured: $error"));
+          emit(ChatsPageErrorState("Error Occurred: $error"));
         });
+
         await _subscription!.asFuture();
       } catch (e) {
-        logger.d(e);
-        emit(ChatsPageErrorState("Error Occured: $e"));
+        logger.e("Failed to load friend requests and suggestions: $e");
+        emit(ChatsPageErrorState("Error loading data"));
       }
+
+      // DatabaseReference _refs = db.ref("users/");
+
+      // try {
+      //   _subscription = _refs.onValue.listen((event) {
+      //     if (event.snapshot.value == null) {
+      //       if (!emit.isDone) {
+      //         emit(const ChatsPageErrorState("No data saved"));
+      //       }
+      //       _subscription?.isPaused;
+      //     } else {
+      //       // logger.d(event.snapshot.value);
+
+      //       var data = (event.snapshot.value as Map<dynamic, dynamic>)
+      //           .entries
+      //           .map((entry) => FirebaseDataModel(
+      //               key: entry.key,
+      //               value: Map<String, dynamic>.from(entry.value)))
+      //           .toList();
+
+      //       if (!emit.isDone) {
+      //         emit(ChatsPageSuccessState(data));
+      //         _subscription?.isPaused;
+      //       }
+
+      //       //data is storename, storeaddress, and isApproved
+      //     }
+      //   }, onDone: () {
+      //     _subscription!.asFuture();
+      //   }, onError: (error) {
+      //     logger.e(error);
+      //     emit(ChatsPageErrorState("Error Occured: $error"));
+      //   });
+      //   await _subscription!.asFuture();
+      // } catch (e) {
+      //   logger.d(e);
+      //   emit(ChatsPageErrorState("Error Occured: $e"));
+      // }
     });
 
     on<AddingFriendEvent>((event, emit) async {
-      DatabaseReference _refs = db.ref("users/");
+      emit(ChatsPageLoadingState());
 
-      try {
-        var userData = {
-          "friends": {event.uid: true}
-        };
+      FriendRequestService friendRequestService = FriendRequestService();
 
-        var addedFriendUpdateData = {
-          "friends": {event.userUid: true}
-        };
+      var data = await friendRequestService.sendFriendRequest(
+          event.uid, event.userUid);
 
-        //userUpdate
-        _refs.child(event.userUid).update(userData);
-        _refs.child(event.uid).update(addedFriendUpdateData);
-        // emit(Cha)
-      } catch (e) {
-        // logger.d(e);
-        emit(ChatsPageErrorState("Error Occured: $e"));
+      var status = data.status;
+
+      if (status == Status.success) {
+        if (data.data != null) {
+          emit(FriendRequestSuccessState(data.data!));
+        } else {
+          emit(FriendRequestErrorState(data.message!));
+        }
+      } else {
+        emit(FriendRequestErrorState(data.message!));
       }
     });
 
     on<SearchFriendEvent>((event, emit) async {
+      emit(ChatsPageLoadingState());
       DatabaseReference _refs = db.ref("users/");
       _refs.child(event.query);
 
@@ -107,13 +212,13 @@ class ChatsPageBloc extends Bloc<ChatsPageEvent, ChatsPageState> {
 
                   matchedUsers.add(
                       FirebaseDataModel(key: key.toString(), value: valueData));
-                  logger.e("Found user: $fullName with ID: $key");
+                  // logger.e("Found user: $fullName with ID: $key");
                 }
               }
             });
 
             if (matchedUsers.isEmpty) {
-              logger.f("No user found matching: $query");
+              // logger.f("No user found matching: $query");
 
               emit(ChatsPageErrorState("No user found matching: $query"));
             } else {
@@ -139,6 +244,28 @@ class ChatsPageBloc extends Bloc<ChatsPageEvent, ChatsPageState> {
 
         emit(ChatsPageErrorState("Error Occured: $e"));
       }
+    });
+
+    on<GetPendingRequestEvent>((event, emit) async {
+      emit(ChatsPageLoadingState());
+
+      FriendRequestService friendRequestService = FriendRequestService();
+      var response =
+          friendRequestService.getFriendRequests(event.currentUserId);
+
+      response.listen((data) {
+        var res = data.data;
+
+        if (res != null) {
+          if (!emit.isDone) {
+            emit(AllPendingRequestSuccessState(res));
+          }
+        } else {
+          if (!emit.isDone) {
+            emit(ChatsPageErrorState(data.message!));
+          }
+        }
+      });
     });
   }
 }

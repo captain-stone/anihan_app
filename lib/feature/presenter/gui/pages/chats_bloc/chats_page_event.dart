@@ -5,8 +5,20 @@ abstract class ChatsPageEvent extends Equatable {
 }
 
 class GetUserListEvent extends ChatsPageEvent {
+  final String currentUserId;
+  final String? toUserId;
+
+  const GetUserListEvent({required this.currentUserId, this.toUserId});
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [currentUserId, toUserId];
+}
+
+class GetPendingRequestEvent extends ChatsPageEvent {
+  final String currentUserId;
+
+  const GetPendingRequestEvent({required this.currentUserId});
+  @override
+  List<Object?> get props => [currentUserId];
 }
 
 class AddingFriendEvent extends ChatsPageEvent {

@@ -10,6 +10,7 @@ class ProductEntity extends AppEntity {
   final List<ProductVariantEntity?>? productVariant;
   final String itemDescriptions;
   final String productKey;
+  final String storeId;
 
   ProductEntity(
     this.productImage,
@@ -19,6 +20,7 @@ class ProductEntity extends AppEntity {
     this.itemDescriptions, {
     this.productVariant,
     required this.productKey,
+    required this.storeId,
   });
 
   @override
@@ -29,6 +31,7 @@ class ProductEntity extends AppEntity {
         productPrice,
         itemDescriptions,
         productKey,
+        storeId,
       ];
 }
 

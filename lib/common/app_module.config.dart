@@ -46,14 +46,12 @@ import 'package:anihan_app/feature/presenter/gui/pages/register_bloc/register_pa
     as _i282;
 import 'package:anihan_app/feature/presenter/gui/pages/seller_registration_bloc/seller_registration_bloc.dart'
     as _i905;
-import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/add_ons/all_products_add_ons_bloc/all_products_add_ons_bloc.dart'
-    as _i42;
-import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/add_ons/products_add_ons_bloc/product_add_ons_bloc.dart'
-    as _i879;
-import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/add_ons/seller_add_ons/seller_info_add_ons_bloc.dart'
-    as _i418;
 import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/user_information_bloc_bloc.dart'
     as _i860;
+import 'package:anihan_app/feature/presenter/gui/widgets/products/products_add_ons_bloc/product_add_ons_bloc.dart'
+    as _i280;
+import 'package:anihan_app/feature/presenter/gui/widgets/sellers/seller_add_ons/seller_info_add_ons_bloc.dart'
+    as _i779;
 import 'package:dio/dio.dart' as _i361;
 import 'package:firebase_core/firebase_core.dart' as _i982;
 import 'package:firebase_database/firebase_database.dart' as _i345;
@@ -93,7 +91,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i345.DatabaseReference>(() => appModule.ref);
     gh.lazySingleton<_i519.Client>(() => appModule.httpClient);
     gh.lazySingleton<_i361.Dio>(() => appModule.dio);
-    gh.factory<_i418.SellerInfoAddOnsBloc>(() => _i418.SellerInfoAddOnsBloc(
+    gh.factory<_i779.SellerInfoAddOnsBloc>(() => _i779.SellerInfoAddOnsBloc(
           gh<_i345.DatabaseReference>(),
           gh<_i345.DatabaseReference>(),
         ));
@@ -106,10 +104,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i521.UserInformationRepository>(() =>
         _i458.UserInformationRepoImpl(
             gh<_i973.InternetConnectionChecker>(instanceName: 'global')));
-    gh.factory<_i42.AllProductsAddOnsBloc>(
-        () => _i42.AllProductsAddOnsBloc(gh<_i345.DatabaseReference>()));
-    gh.factory<_i879.ProductAddOnsBloc>(
-        () => _i879.ProductAddOnsBloc(gh<_i345.DatabaseReference>()));
+    gh.factory<_i280.ProductAddOnsBloc>(
+        () => _i280.ProductAddOnsBloc(gh<_i345.DatabaseReference>()));
     gh.factory<_i908.SessionsRepositories>(() => _i457.SessionRepoImpl(
           gh<_i1057.LoginDao>(),
           gh<_i973.InternetConnectionChecker>(instanceName: 'global'),

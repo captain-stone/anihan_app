@@ -35,26 +35,12 @@ class WishListPage extends StatefulWidget {
 class _WishListPageState extends State<WishListPage> {
   @override
   Widget build(BuildContext context) {
-    List<User> users = [
-      User('John Cena', true),
-      User('Jane Doe', false),
-      User('Mike Ross', true),
-    ];
+    List<User> users = [];
 
-    List<Community> communities = [
-      Community('Vedanta', 42),
-      Community('Flutter Devs', 23),
-      Community('Food Lovers', 12),
-    ];
-    List<WishlistItem> wishlistItems = [
-      WishlistItem(
-          'Rambutan', 'Tanauan City', 'https://example.com/rambutan.jpg'),
-      WishlistItem(
-          'Saging (Saba)', 'Tanauan City', 'https://example.com/banana.jpg'),
-      WishlistItem('Langka', 'Tanauan City', 'https://example.com/langka.jpg'),
-      WishlistItem('Durian', 'Davao City', 'https://example.com/durian.jpg'),
-      WishlistItem('Mango', 'Guimaras', 'https://example.com/mango.jpg'),
-    ];
+    List<Community> communities = [];
+    List<WishlistItem> wishlistItems = [];
+    final double _height = MediaQuery.of(context).size.height;
+    final double _width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
           automaticallyImplyLeading: false,
@@ -65,45 +51,15 @@ class _WishListPageState extends State<WishListPage> {
           child: Column(
             children: [
               FollowingSection(users: users, communities: communities),
-              const SizedBox(height: 20.0),
-              WishlistSection(wishlistItems: wishlistItems),
+              // const SizedBox(height: 20.0),
+              WishlistSection(
+                wishlistItems: wishlistItems,
+                size: Size(_width, _height),
+              ),
             ],
           ),
         ),
       ),
-      // bottomNavigationBar: BottomNavigationBar(
-      //   items: const [
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.favorite),
-      //       label: 'Wishlist',
-      //     ),
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.message),
-      //       label: 'Messages',
-      //     ),
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.home),
-      //       label: 'Home',
-      //     ),
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.notifications),
-      //       label: 'Notifications',
-      //     ),
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.person),
-      //       label: 'Account',
-      //     ),
-      //   ],
-      //   currentIndex: _selectedIndex,
-      //   selectedItemColor: Colors.green.shade700,
-      //   unselectedItemColor: Colors.black54,
-      //   backgroundColor: Colors.white,
-      //   showSelectedLabels: true,
-      //   showUnselectedLabels: false,
-      //   type: BottomNavigationBarType.fixed,
-      //   elevation: 8.0,
-      //   onTap: _onItemTapped,
-      // ),
     );
   }
 }
@@ -156,6 +112,8 @@ class FollowingSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double _height = MediaQuery.of(context).size.height;
+    final double _width = MediaQuery.of(context).size.width;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -164,38 +122,88 @@ class FollowingSection extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Text(
             'Following',
-            style: Theme.of(context).textTheme.displayLarge,
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
         ),
-        SizedBox(
-          height: 115.0, // Set the height for user list
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: users.length,
-            itemBuilder: (context, index) {
-              return _buildUserItem(context, users[index]);
-            },
-          ),
+        const SizedBox(
+          height: 12,
         ),
 
+        users.isNotEmpty
+            ? SizedBox(
+                height: 115.0, // Set the height for user list
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: users.length,
+                  itemBuilder: (context, index) {
+                    return _buildUserItem(context, users[index]);
+                  },
+                ),
+              )
+            : Align(
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: _width * 0.7,
+                  child: const Center(
+                    child: Text(
+                      "You are not following anyone yet. Start exploring to follow interesting profiles!",
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ),
+
+        const SizedBox(
+          height: 12,
+        ),
+
+        const Divider(),
+
         // Communities Section
+        const SizedBox(
+          height: 12,
+        ),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(
             'Communities',
-            style: Theme.of(context).textTheme.displayLarge,
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
         ),
-        SizedBox(
-          height: 115.0, // Set the height for community list
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: communities.length,
-            itemBuilder: (context, index) {
-              return _buildCommunityItem(context, communities[index]);
-            },
-          ),
+        const SizedBox(
+          height: 12,
         ),
+
+        communities.isNotEmpty
+            ? SizedBox(
+                height: 115.0, // Set the height for community list
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: communities.length,
+                  itemBuilder: (context, index) {
+                    return _buildCommunityItem(context, communities[index]);
+                  },
+                ),
+              )
+            : Align(
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: _width * 0.7,
+                  child: const Center(
+                    child: Text(
+                      "You do not have any communities yet. Start exploring to follow interesting community!",
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ),
+        const SizedBox(
+          height: 12,
+        ),
+        const SizedBox(
+          height: 12,
+        ),
+        const Divider(),
       ],
     );
   }
@@ -247,8 +255,10 @@ class FollowingSection extends StatelessWidget {
 
 class WishlistSection extends StatelessWidget {
   final List<WishlistItem> wishlistItems;
+  final Size size;
 
-  const WishlistSection({Key? key, required this.wishlistItems})
+  const WishlistSection(
+      {Key? key, required this.wishlistItems, required this.size})
       : super(key: key);
 
   @override
@@ -260,25 +270,38 @@ class WishlistSection extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Text(
             'Wishlist',
-            style: Theme.of(context).textTheme.displayLarge,
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
         ),
-        GridView.builder(
-          shrinkWrap:
-              true, // Necessary to make the GridView fit inside a Column
-          physics:
-              const NeverScrollableScrollPhysics(), // Prevent GridView from scrolling independently
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3, // Number of columns in the grid
-            crossAxisSpacing: 10.0, // Space between columns
-            mainAxisSpacing: 10.0, // Space between rows
-            childAspectRatio: 0.75, // Adjust ratio to match your design
-          ),
-          itemCount: wishlistItems.length,
-          itemBuilder: (context, index) {
-            return _buildWishlistItem(context, wishlistItems[index]);
-          },
-        ),
+        wishlistItems.isNotEmpty
+            ? GridView.builder(
+                shrinkWrap:
+                    true, // Necessary to make the GridView fit inside a Column
+                physics:
+                    const NeverScrollableScrollPhysics(), // Prevent GridView from scrolling independently
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3, // Number of columns in the grid
+                  crossAxisSpacing: 10.0, // Space between columns
+                  mainAxisSpacing: 10.0, // Space between rows
+                  childAspectRatio: 0.75, // Adjust ratio to match your design
+                ),
+                itemCount: wishlistItems.length,
+                itemBuilder: (context, index) {
+                  return _buildWishlistItem(context, wishlistItems[index]);
+                },
+              )
+            : Align(
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: size.width * 0.7,
+                  child: const Center(
+                    child: Text(
+                      "You do not have any wishlist, try adding one.",
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ),
       ],
     );
   }

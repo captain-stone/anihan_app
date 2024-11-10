@@ -16,6 +16,11 @@ enum Approval {
   pendingApproval,
 }
 
+enum ProductDist {
+  personal,
+  suggestions,
+}
+
 enum ErrorType {
   nullError,
   noInternet,

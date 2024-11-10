@@ -8,12 +8,12 @@ import 'package:injectable/injectable.dart';
 
 import 'package:logger/logger.dart';
 
-import '../../../../../../domain/entities/product_entity.dart';
+import '../../../../../domain/entities/product_entity.dart';
 
 part 'all_products_add_ons_event.dart';
 part 'all_products_add_ons_state.dart';
 
-@injectable
+// @injectable
 class AllProductsAddOnsBloc
     extends Bloc<AllProductsAddOnsEvent, AllProductsAddOnsState> {
   final DatabaseReference _refs;
@@ -58,6 +58,7 @@ class AllProductsAddOnsBloc
                       String productLabel = productInfo['label'];
                       double productPrice = productInfo['price'].toDouble();
                       String itemDescriptions = productInfo['itemDescriptions'];
+                      String storeId = "storeId-${user!.uid}-id";
 
                       List<ProductVariantEntity?>? productVariants;
                       if (productInfo['variant-$productId-id'] != null) {
@@ -78,6 +79,7 @@ class AllProductsAddOnsBloc
                         itemDescriptions,
                         productVariant: productVariants,
                         productKey: productIdKey,
+                        storeId: storeId,
                       ));
                     }
                   });

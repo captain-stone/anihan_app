@@ -1,12 +1,20 @@
+import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/chats_page_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
 
 class CustomAppBar extends StatelessWidget {
   final Function(String value) onChangeSearchCrops;
+  final void Function() onPressedIconUser;
 
-  const CustomAppBar({super.key, required this.onChangeSearchCrops});
+  const CustomAppBar(
+      {super.key,
+      required this.onChangeSearchCrops,
+      required this.onPressedIconUser});
 
   @override
   Widget build(BuildContext context) {
+    final logger = Logger();
     return AppBar(
       automaticallyImplyLeading: false,
       title: Row(
@@ -59,23 +67,34 @@ class CustomAppBar extends StatelessWidget {
           Stack(
             children: [
               IconButton(
-                icon: const Icon(Icons.people),
-                onPressed: () {
-                  // Placeholder for future community function
-                },
-              ),
-              const Positioned(
+                  icon: const Icon(Icons.people), onPressed: onPressedIconUser),
+              Positioned(
                 right: 4,
                 top: 4,
                 child: CircleAvatar(
                   radius: 8,
                   backgroundColor: Colors.red,
-                  child: Text(
-                    '3', // Notification count
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                    ),
+                  child: BlocBuilder<ChatsPageBloc, ChatsPageState>(
+                    builder: (context, state) {
+                      int numberOfRequest = 123;
+                      logger.d(state);
+                      if (state is AllPendingRequestSuccessState) {
+                        return Text(
+                          '$numberOfRequest', // Notification count
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                          ),
+                        );
+                      }
+                      return const Text(
+                        '0', // Notification count
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),

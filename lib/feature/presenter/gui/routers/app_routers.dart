@@ -14,7 +14,7 @@ import '../pages/register_bloc/register_page.dart';
 import '../pages/seller_registration_bloc/seller_registration_page.dart';
 import '../pages/wish_list_page.dart';
 import '../widgets/addons/product_categories/show_product_by_category.dart';
-import '../widgets/customize/custom_product_viewing.dart';
+import '../widgets/products/custom_product_viewing.dart';
 part 'app_routers.gr.dart';
 
 @AutoRouterConfig()

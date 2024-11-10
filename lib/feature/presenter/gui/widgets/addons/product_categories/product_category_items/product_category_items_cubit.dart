@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/add_ons/products_add_ons_bloc/product_add_ons_bloc.dart';
+import 'package:anihan_app/feature/presenter/gui/widgets/products/products_add_ons_bloc/product_add_ons_bloc.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -56,6 +56,7 @@ class ProductCategoryItemsCubit extends Cubit<ProductCategoryItemsState> {
                     String productLabel = productInfo['label'];
                     double productPrice = productInfo['price'].toDouble();
                     String itemDescriptions = productInfo['itemDescriptions'];
+                    String storeId = "storeId-${user!.uid}-id";
 
                     List<ProductVariantEntity?>? productVariants;
                     if (productInfo['variant-$productId-id'] != null) {
@@ -70,7 +71,9 @@ class ProductCategoryItemsCubit extends Cubit<ProductCategoryItemsState> {
 
                     productList.add(ProductEntity(productImages, productName,
                         productLabel, productPrice, itemDescriptions,
-                        productVariant: productVariants, productKey: key));
+                        productVariant: productVariants,
+                        productKey: key,
+                        storeId: storeId));
                   }
                 }
               });

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
+import 'product_custom_app_bar.dart';
+import '../sellers/seller_info_sections.dart';
+
 class ProductSectionPage extends StatefulWidget {
   @override
   _ProductSectionPageState createState() => _ProductSectionPageState();
@@ -253,13 +256,12 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60.0),
-        child: CustomAppBar(),
+      appBar: const PreferredSize(
+        preferredSize: Size.fromHeight(60.0),
+        child: ProductCustomAppBar(),
       ),
       body: Stack(
         children: [
-          // The scrollable content (Product Details and Recommendations)
           SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,14 +281,14 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
                 SizedBox(height: 16.0),
 
                 // Seller Info Section with Divider
-                SellerInfoSection(
+                const SellerInfoSection(
                   sellerName: 'John Doe',
                   sellerLocation: 'Tanauan City, Batangas',
                   sellerAvatarUrl: '',
                   rating: 4.8,
                   reviewCount: 1400,
                 ),
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
 
                 // Product Ratings Section with "View All" Button
                 ProductRatingsSection(
@@ -414,8 +416,9 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
             left: 0,
             right: 0,
             child: Container(
-              padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
-              decoration: BoxDecoration(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
+              decoration: const BoxDecoration(
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
@@ -425,73 +428,78 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
                   ),
                 ],
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Shop Icon Button
-                  IconButton(
-                    onPressed: () {
-                      // Handle Shop icon button action
-                    },
-                    icon: Icon(Icons.store),
-                    color: Colors.green.shade700,
-                    iconSize: 30.0,
-                  ),
-                  // Chat Seller Button
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      // Handle Chat Seller action
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green.shade700,
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 10.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Shop Icon Button
+                    IconButton(
+                      onPressed: () {
+                        // Handle Shop icon button action
+                      },
+                      icon: const Icon(Icons.store),
+                      color: Colors.green.shade700,
+                      iconSize: 30.0,
                     ),
-                    icon: Icon(Icons.chat_bubble_outline),
-                    label: Text("Chat Seller"),
-                  ),
+                    // Chat Seller Button
+                    ElevatedButton.icon(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green.shade700,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 10.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      icon: const Icon(Icons.chat_bubble_outline),
+                      label: const Text("Chat Seller"),
+                    ),
 
-                  // Add to Cart Button
-                  ElevatedButton(
-                    onPressed: () {
-                      _showBottomSheet(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange.shade700,
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 24.0, vertical: 10.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
+                    const SizedBox(
+                      width: 5,
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _showBottomSheet(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange.shade700,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24.0, vertical: 10.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      child: const Text(
+                        "Add to Cart",
+                        style: TextStyle(fontSize: 16.0),
                       ),
                     ),
-                    child: Text(
-                      "Add to Cart",
-                      style: TextStyle(fontSize: 16.0),
-                    ),
-                  ),
 
-                  // Buy Now Button
-                  ElevatedButton(
-                    onPressed: () {
-                      _showBottomSheet(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red.shade700,
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 28.0, vertical: 10.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
+                    const SizedBox(
+                      width: 5,
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _showBottomSheet(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red.shade700,
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 28.0, vertical: 10.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      child: Text(
+                        "Buy Now",
+                        style: TextStyle(fontSize: 16.0),
                       ),
                     ),
-                    child: Text(
-                      "Buy Now",
-                      style: TextStyle(fontSize: 16.0),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -499,136 +507,39 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
       ),
 
       // Bottom Navigation Bar
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Wishlist',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.message),
-            label: 'Messages',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Notifications',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Account',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.green.shade700,
-        unselectedItemColor: Colors.black54,
-        backgroundColor: Colors.white,
-        showSelectedLabels: true,
-        showUnselectedLabels: false,
-        type: BottomNavigationBarType.fixed,
-        elevation: 8.0,
-        onTap: _onItemTapped,
-      ),
-    );
-  }
-}
-
-class CustomAppBar extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      title: Row(
-        children: [
-          IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {},
-          ),
-          SizedBox(width: 10),
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 8.0),
-              child: TextField(
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
-                  hintText: 'Search a Crop!',
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12.0),
-                    child: Icon(Icons.search, size: 24.0),
-                  ),
-                  prefixIconConstraints: const BoxConstraints(
-                    minWidth: 40,
-                    minHeight: 40,
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                    borderSide: const BorderSide(
-                      color: Colors.black,
-                      width: 1.0,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                    borderSide: const BorderSide(
-                      color: Colors.green,
-                      width: 2.0,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                    borderSide: const BorderSide(
-                      color: Colors.black,
-                      width: 1.0,
-                    ),
-                  ),
-                ),
-                onChanged: (value) {
-                  // Placeholder for future search function
-                },
-              ),
-            ),
-          ),
-          SizedBox(width: 10),
-          Stack(
-            children: [
-              IconButton(
-                icon: Icon(Icons.people),
-                onPressed: () {
-                  // Placeholder for future community function
-                },
-              ),
-              const Positioned(
-                right: 4,
-                top: 4,
-                child: CircleAvatar(
-                  radius: 8,
-                  backgroundColor: Colors.red,
-                  child: Text(
-                    '3', // Notification count
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(width: 10),
-          IconButton(
-            icon: Icon(Icons.shopping_cart),
-            onPressed: () {
-              // Placeholder for future cart function
-            },
-          ),
-        ],
-      ),
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      elevation: 0,
+      // bottomNavigationBar: BottomNavigationBar(
+      //   items: const [
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.favorite),
+      //       label: 'Wishlist',
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.message),
+      //       label: 'Messages',
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.home),
+      //       label: 'Home',
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.notifications),
+      //       label: 'Notifications',
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.person),
+      //       label: 'Account',
+      //     ),
+      //   ],
+      //   currentIndex: _selectedIndex,
+      //   selectedItemColor: Colors.green.shade700,
+      //   unselectedItemColor: Colors.black54,
+      //   backgroundColor: Colors.white,
+      //   showSelectedLabels: true,
+      //   showUnselectedLabels: false,
+      //   type: BottomNavigationBarType.fixed,
+      //   elevation: 8.0,
+      //   onTap: _onItemTapped,
+      // ),
     );
   }
 }
@@ -799,105 +710,6 @@ class _ProductCarouselState extends State<ProductCarousel> {
               ),
             ],
           ),
-        ),
-      ],
-    );
-  }
-}
-
-class SellerInfoSection extends StatelessWidget {
-  final String sellerName;
-  final String sellerLocation;
-  final String sellerAvatarUrl;
-  final double rating;
-  final int reviewCount;
-
-  SellerInfoSection({
-    required this.sellerName,
-    required this.sellerLocation,
-    required this.sellerAvatarUrl,
-    required this.rating,
-    required this.reviewCount,
-  });
-
-  String _formatReviewCount(int count) {
-    if (count >= 1000) {
-      return '${(count / 1000).toStringAsFixed(1)}k';
-    }
-    return '$count';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Seller Info Section
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
-          color: Colors.white,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  // Seller Avatar
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundImage: NetworkImage(sellerAvatarUrl),
-                  ),
-                  SizedBox(width: 16.0),
-                  // Seller Information (Name & Location)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        sellerName,
-                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18.0,
-                            ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        sellerLocation,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium!
-                            .copyWith(color: Colors.grey.shade700),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              // "View Shop" Button
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 8.0, horizontal: 12.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  backgroundColor: Colors.green.shade700,
-                ),
-                onPressed: () {
-                  // Handle "View Shop" button tap
-                },
-                child: Text(
-                  'View Shop',
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelLarge!
-                      .copyWith(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-        ),
-        // Separator Line
-        Divider(
-          color: Colors.grey.shade300,
-          thickness: 1.0,
-          height: 1.0,
         ),
       ],
     );

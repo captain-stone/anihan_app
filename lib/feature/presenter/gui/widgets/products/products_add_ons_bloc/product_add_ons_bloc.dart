@@ -8,7 +8,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 
-import '../../../../../../domain/entities/product_entity.dart';
+import '../../../../../domain/entities/product_entity.dart';
 
 part 'product_add_ons_event.dart';
 part 'product_add_ons_state.dart';
@@ -60,6 +60,7 @@ class ProductAddOnsBloc extends Bloc<ProductAddOnsEvent, ProductAddOnsState>
                     double productPrice =
                         double.parse(value['price'].toString());
                     String itemDescriptions = value['itemDescriptions'];
+                    String storeId = "storeId-${user!.uid}-id";
 
                     // Assuming uid is accessible in this scope
                     List<ProductVariantEntity?> productVariants =
@@ -72,15 +73,11 @@ class ProductAddOnsBloc extends Bloc<ProductAddOnsEvent, ProductAddOnsState>
                             []; // Fallback to an empty list if null
 
                     // Create a ProductEntity and add it to the list
-                    productList.add(ProductEntity(
-                      productImages,
-                      productName,
-                      productLabel,
-                      productPrice,
-                      itemDescriptions,
-                      productVariant: productVariants,
-                      productKey: key,
-                    ));
+                    productList.add(ProductEntity(productImages, productName,
+                        productLabel, productPrice, itemDescriptions,
+                        productVariant: productVariants,
+                        productKey: key,
+                        storeId: storeId));
                   });
                   // logger.d(productList);
 

@@ -21,41 +21,37 @@ class _NotificationPageState extends State<NotificationPage> {
   String notification = "";
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => NotificationPageBloc()
-        ..add(GetFarmersNotificationsEvent(uid: widget.uid)),
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: const Text("Notification"),
-        ),
-        body: BlocBuilder<NotificationPageBloc, NotificationPageState>(
-          builder: (context, state) {
-            logger.d(state);
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text("Notification"),
+      ),
+      body: BlocBuilder<NotificationPageBloc, NotificationPageState>(
+        builder: (context, state) {
+          logger.d(state);
 
-            if (state is NotificationPageSuccessState) {
-              if (state.data.containsKey('isApproved')) {
-                notification = "approval";
-              }
-
-              if (!(data.contains(state.data))) {
-                data.insert(0, state.data);
-              }
+          if (state is NotificationPageSuccessState) {
+            if (state.data.containsKey('isApproved')) {
+              notification = "approval";
             }
 
-            if (data.isEmpty) {
-              return const Center(
-                  child: Text("You don't have any notifications"));
-            } else {
-              return ListView.builder(
-                  itemCount: data.length,
-                  itemBuilder: (contexet, index) {
-                    return PanelContainerWidget(
-                        notification: notification, data: data[index]);
-                  });
+            if (!(data.contains(state.data))) {
+              data.insert(0, state.data);
             }
-          },
-        ),
+          }
+
+          if (data.isEmpty) {
+            return const Center(
+                child: Text("You don't have any notifications"));
+          } else {
+            return ListView.builder(
+                itemCount: data.length,
+                itemBuilder: (contexet, index) {
+                  return PanelContainerWidget(
+                      notification: notification, data: data[index]);
+                });
+          }
+        },
       ),
     );
   }

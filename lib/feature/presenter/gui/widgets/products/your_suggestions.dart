@@ -1,11 +1,12 @@
 // ignore_for_file: library_private_types_in_public_api
 
-import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/add_ons/product_card.dart';
+import 'package:anihan_app/common/api_result.dart';
+import 'package:anihan_app/feature/presenter/gui/widgets/products/product_favorite_cubit/product_card.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
-import '../../../../../domain/entities/product_entity.dart';
-import '../user_information_page.dart';
+import '../../../../domain/entities/product_entity.dart';
+import '../../pages/user_information_bloc/user_information_page.dart';
 
 class YouMayLikeWidget extends StatefulWidget {
   final String uid;
@@ -102,7 +103,11 @@ class _YouMayLikeWidgetState extends State<YouMayLikeWidget> {
           childAspectRatio: 0.75,
         ),
         itemBuilder: (context, index) {
-          return ProductCard(uid: widget.uid, product: products[index]);
+          return ProductCard(
+            uid: widget.uid,
+            product: products[index],
+            dist: ProductDist.suggestions,
+          );
         },
       ),
     );

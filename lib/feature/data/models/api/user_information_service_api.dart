@@ -36,7 +36,6 @@ class UserInformationServiceApi {
 
       // Reference to the specific user's data in Firebase Realtime Database
       DatabaseReference _refs = db.ref("users/$uid");
-      logger.d("PASSS");
 
       // Await the data snapshot
       DataSnapshot dataSnapshot =
@@ -95,7 +94,7 @@ class UserInformationServiceApi {
     User user = await gettingUserId();
 
     // your db mus inside of farmers and userId,
-    String storeId = "storeId+${user.uid}";
+    String storeId = "storeId-${user.uid}-id";
 
     var sellersData = {
       "onlineTime": params.onlineTime,

@@ -60,9 +60,14 @@ abstract class _$AppRouters extends RootStackRouter {
       );
     },
     HomeRoute.name: (routeData) {
+      final args =
+          routeData.argsAs<HomeRouteArgs>(orElse: () => const HomeRouteArgs());
       return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const HomePage(),
+        child: HomePage(
+          uid: args.uid,
+          key: args.key,
+        ),
       );
     },
     LoginRoute.name: (routeData) {
@@ -305,16 +310,39 @@ class HomeNavigationRouteArgs {
 
 /// generated route for
 /// [HomePage]
-class HomeRoute extends PageRouteInfo<void> {
-  const HomeRoute({List<PageRouteInfo>? children})
-      : super(
+class HomeRoute extends PageRouteInfo<HomeRouteArgs> {
+  HomeRoute({
+    String? uid,
+    Key? key,
+    List<PageRouteInfo>? children,
+  }) : super(
           HomeRoute.name,
+          args: HomeRouteArgs(
+            uid: uid,
+            key: key,
+          ),
           initialChildren: children,
         );
 
   static const String name = 'HomeRoute';
 
-  static const PageInfo<void> page = PageInfo<void>(name);
+  static const PageInfo<HomeRouteArgs> page = PageInfo<HomeRouteArgs>(name);
+}
+
+class HomeRouteArgs {
+  const HomeRouteArgs({
+    this.uid,
+    this.key,
+  });
+
+  final String? uid;
+
+  final Key? key;
+
+  @override
+  String toString() {
+    return 'HomeRouteArgs{uid: $uid, key: $key}';
+  }
 }
 
 /// generated route for
