@@ -1,5 +1,7 @@
+// import 'dart:ui';
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/material.dart';
-import 'dart:ui';
 
 class AnimationTheme extends ThemeExtension<AnimationTheme> {
   final double hoverScale;

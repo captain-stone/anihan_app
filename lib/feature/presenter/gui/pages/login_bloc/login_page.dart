@@ -2,6 +2,8 @@ import 'package:anihan_app/common/app_module.dart';
 import 'package:anihan_app/feature/domain/parameters/login_params.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/login_bloc/login_page_bloc.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/addons/custom_alert_dialog.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../../../services/auth_services.dart';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
@@ -63,6 +65,91 @@ class _LoginPageState extends State<LoginPage> {
                 },
                 child: const Text(
                     "Email, phone or Username is Empty or Password is empty"));
+          });
+    }
+  }
+
+  void _forgotPassword() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          double _w = MediaQuery.of(context).size.width;
+          return CustomAlertDialog(
+              colorMessage: Colors.green,
+              title: "Reset Password",
+              height: 70,
+              widght: _w,
+              actionOkayVisibility: true,
+              onPressedCloseBtn: () {
+                Navigator.of(context).pop();
+              },
+              onPressOkay: () {
+                resetPassword();
+              },
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextFormField(
+                    controller: usernameController,
+                    decoration: const InputDecoration(label: Text("Username")),
+                  )
+                ],
+              ));
+        });
+  }
+
+  void resetPassword() async {
+    // AuthServices _auth = AuthServices();
+
+    if (usernameController.text != "") {
+      String email = usernameController.text;
+
+      // bool hasEmail = await _auth.checkEmailExists(email);
+
+      try {
+        await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+        showDialog(
+            context: context,
+            builder: (context) {
+              return CustomAlertDialog(
+                  colorMessage: Colors.greenAccent,
+                  title: "Success",
+                  onPressedCloseBtn: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                      "An email has been sent to your account with instructions on how to change your password. Thank you!"));
+            });
+      } catch (e) {
+        showDialog(
+            context: context,
+            builder: (context) {
+              return CustomAlertDialog(
+                  colorMessage: Colors.redAccent,
+                  actionLabel: "Close",
+                  title: "No Email Error",
+                  onPressedCloseBtn: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("There's an error: $e"));
+            });
+      }
+
+      // ignore: use_build_context_synchronously
+    } else {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return CustomAlertDialog(
+                colorMessage: Colors.redAccent,
+                actionLabel: "Close",
+                title: "No Email Error",
+                onPressedCloseBtn: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text(
+                    "Please enter a valid email address. It appears that no email address was provided or the entered address is not valid."));
           });
     }
   }
@@ -209,6 +296,8 @@ class _LoginPageState extends State<LoginPage> {
                                 key: const Key('forgotPasswordButton'),
                                 onPressed: () {
                                   // Add forgot password functionality
+
+                                  _forgotPassword();
                                 },
                                 child: const Text('Forgot?',
                                     style: TextStyle(color: Colors.black)),
