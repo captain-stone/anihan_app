@@ -108,7 +108,7 @@ class _CustomProductViewingPageState extends State<CustomProductViewingPage> {
               ? Container(
                   width: _width,
                   alignment: Alignment.centerLeft,
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   child: Text(
                       "${widget.product.productVariant!.length} Variant Images"))
               : Container(),

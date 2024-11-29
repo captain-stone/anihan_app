@@ -5,6 +5,7 @@ import 'package:anihan_app/feature/data/models/dto/seller_registrations_dto.dart
 import 'package:anihan_app/feature/data/models/dto/user_information_dto.dart';
 import 'package:anihan_app/feature/domain/parameters/farmers_registration_params.dart';
 import 'package:anihan_app/feature/services/date_services.dart';
+import 'package:anihan_app/feature/services/get_location_name.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:logger/logger.dart';
@@ -89,6 +90,13 @@ class UserInformationServiceApi {
   Future<SellerRegistrationsDto> sellersInformation(
       FarmersRegistrationParams params) async {
     DateServices date = DateServices();
+
+    List<String> parts = params.storeAddress.split(',');
+
+    // Convert the strings to double
+    double latitude = double.parse(parts[0].trim());
+    double longitude = double.parse(parts[1].trim());
+
     //generate storeID: store+uid
 
     User user = await gettingUserId();
@@ -106,20 +114,27 @@ class UserInformationServiceApi {
     };
 
     var storeData = {
-      storeId: {
-        "storeName": params.storeName,
-        "storeAddress": params.storeAddress,
-        //  : true,
-      }
+      "storeName": params.storeName,
+      "storeLocation": (await getCityName(latitude, longitude)) ?? "None",
+      "storeAddress": params.storeAddress,
+      "created_at": date.dateNowMillis(),
+    };
+
+    var location = {
+      "lat": latitude,
+      "longi": longitude,
     };
 
     try {
       DatabaseReference _farmersRef = db.ref("farmers/${user.uid}");
-      DatabaseReference _storeRef = db.ref("store");
+      DatabaseReference _storeRef = db.ref("store/$storeId");
+      DatabaseReference _location =
+          db.ref("location/${await getCityName(latitude, longitude)}");
       // DatabaseReference _userRef = db.ref("users/${user.uid}");
 
       _farmersRef.set(sellersData);
       _storeRef.set(storeData);
+      _location.push().set(location);
       // _userRef.update({'farmers' : true}); //this is the logic if you want to approve
       //initially not approved
       return SellerRegistrationsDto(

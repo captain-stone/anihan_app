@@ -1,7 +1,13 @@
+import 'package:anihan_app/feature/presenter/gui/widgets/addons/informations_widgets/page/my_reviews.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
+import '../../../routers/app_routers.dart';
+
 class ActivitiesWidget extends StatelessWidget {
-  const ActivitiesWidget({super.key});
+  final String uid;
+
+  const ActivitiesWidget({super.key, required this.uid});
 
   @override
   Widget build(BuildContext context) {
@@ -26,12 +32,16 @@ class ActivitiesWidget extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _buildActivityRow([
-              _buildActivityItem('My Likes', Icons.favorite, Colors.red),
-              _buildActivityItem('Buy Again', Icons.shopping_bag, Colors.green),
+              _buildActivityItem(
+                  'My Likes', Icons.favorite, Colors.red, context),
+              _buildActivityItem(
+                  'Buy Again', Icons.shopping_bag, Colors.green, context),
             ]),
             _buildActivityRow([
-              _buildActivityItem('My Reviews', Icons.rate_review, Colors.amber),
-              _buildActivityItem('Viewed Products', Icons.history, Colors.blue),
+              _buildActivityItem(
+                  'My Reviews', Icons.rate_review, Colors.amber, context),
+              _buildActivityItem(
+                  'Viewed Products', Icons.history, Colors.blue, context),
             ]),
           ],
         ),
@@ -46,7 +56,8 @@ class ActivitiesWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildActivityItem(String label, IconData icon, Color iconColor) {
+  Widget _buildActivityItem(
+      String label, IconData icon, Color iconColor, BuildContext context) {
     return Expanded(
       child: Container(
         margin: const EdgeInsets.all(8),
@@ -62,7 +73,15 @@ class ActivitiesWidget extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(8.0),
-            onTap: () {},
+            onTap: () {
+              if (label == 'My Likes') {
+                AutoRouter.of(context).push(MyLikeRoute(uid: uid));
+              }
+              if (label == "My Reviews") {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => ReviewsPage()));
+              }
+            },
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Column(

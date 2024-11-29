@@ -11,3 +11,11 @@ class GetUidEvent extends UserInformationBlocEvent {
   @override
   List<Object> get props => [params];
 }
+
+class LogoutEvent extends UserInformationBlocEvent {
+  final NoParams noParams;
+
+  const LogoutEvent(this.noParams);
+  @override
+  List<Object?> get props => [noParams];
+}

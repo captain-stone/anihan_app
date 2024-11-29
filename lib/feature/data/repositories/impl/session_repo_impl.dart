@@ -5,6 +5,7 @@ import 'package:anihan_app/feature/domain/entities/login_entity.dart';
 import 'package:anihan_app/feature/domain/entities/sign_up_entity.dart';
 import 'package:anihan_app/feature/domain/parameters/login_params.dart';
 import 'package:anihan_app/feature/domain/parameters/sign_up_params.dart';
+import 'package:anihan_app/feature/services/date_services.dart';
 import 'package:injectable/injectable.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 
@@ -94,6 +95,8 @@ class SessionRepoImpl extends SessionsRepositories {
   Future<ApiResult<SignUpEntity>> getSignUpEntity(SignUpParams params) async {
     //CHECK IF THERES NO INTERNET FIRST.
 
+    final dateTime = DateServices();
+
     if (!(await internetConnectionChecker.hasConnection)) {
       return const ApiResult.noInternetConenction();
     } else {
@@ -118,6 +121,7 @@ class SessionRepoImpl extends SessionsRepositories {
             'fullName': params.fullName,
             'phoneNumber': params.phoneNumber,
             'emailAddress': params.emailAddress,
+            'created_at': dateTime.dateNowMillis(),
           });
 
           return ApiResult.success(SignUpEntity(fullName: params.fullName));

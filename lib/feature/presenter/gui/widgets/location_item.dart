@@ -1,7 +1,10 @@
-// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: library_private_types_in_public_api, prefer_final_fields
 
+import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/debugger/logger_debugger.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 
 import 'animation_theme.dart';
 
@@ -18,6 +21,9 @@ class _LocationItemState extends State<LocationItem>
     with SingleTickerProviderStateMixin, LoggerEvent {
   bool _isPressed = false;
   late final AnimationController _controller;
+  String _location = "";
+  // final _center = LatLng(latitude, longitude)
+  LatLng _center = const LatLng(14.084558, 121.149701);
 
   @override
   void initState() {
@@ -54,6 +60,22 @@ class _LocationItemState extends State<LocationItem>
         });
         // Placeholder for future functionality when location is clicked
         debug('Location ${widget.location} clicked');
+
+        if (widget.location == "Sambat") {
+          _location = "Sambat";
+          _center = const LatLng(14.082060511234795, 121.12909413658744);
+        } else if (widget.location == "Malvar") {
+          _location = "Malvar";
+          _center = const LatLng(14.04373503588802, 121.15885602263576);
+        } else if (widget.location == "Sto. Tomas") {
+          _location = "Santo Tomas";
+          _center = const LatLng(14.108881082993346, 121.14602689397782);
+        } else {
+          _location = widget.location;
+          _center = _center;
+        }
+
+        AutoRouter.of(context).push(MapRoute(center: _center, city: _location));
       },
       onTapCancel: () {
         setState(() {

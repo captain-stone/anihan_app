@@ -13,7 +13,6 @@ class FriendRequestService {
       final requestRef = _db.child('friend_requests').child(toUserId);
       // final requestRef = _db.child('friend_requests/get').child(fromUserId);
 
-      // Check if the request already exists
       final snapshot =
           await requestRef.orderByChild('fromUser').equalTo(fromUserId).get();
       if (!snapshot.exists) {

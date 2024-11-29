@@ -10,8 +10,10 @@ import '../../pages/user_information_bloc/user_information_page.dart';
 
 class YouMayLikeWidget extends StatefulWidget {
   final String uid;
+  final BuildContext sellerContext;
   final List<ProductEntity> state;
-  const YouMayLikeWidget(this.uid, {super.key, required this.state});
+  const YouMayLikeWidget(this.uid,
+      {super.key, required this.state, required this.sellerContext});
 
   @override
   _YouMayLikeWidgetState createState() => _YouMayLikeWidgetState();
@@ -21,14 +23,14 @@ class _YouMayLikeWidgetState extends State<YouMayLikeWidget> {
   // late Future<List<Product>> _recommendedProductsFuture;
   late Future<List<ProductEntity>> _recommendedProductsFuture;
 
-  late final List<ProductEntity> state;
+  late final List<ProductEntity> _state;
   final logger = Logger();
 
   @override
   void initState() {
     super.initState();
     setState(() {
-      state = widget.state;
+      _state = widget.state;
       _recommendedProductsFuture = _fetchRecommendedProducts();
     });
   }
@@ -38,33 +40,14 @@ class _YouMayLikeWidgetState extends State<YouMayLikeWidget> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.state != widget.state) {
       setState(() {
-        state = widget.state;
-        _recommendedProductsFuture =
-            _fetchRecommendedProducts(); // Refresh the future
+        _state = widget.state;
+        _recommendedProductsFuture = _fetchRecommendedProducts();
       });
     }
   }
 
-  // Future<List<Product>> _fetchRecommendedProducts() async {
-  //   await Future.delayed(const Duration(seconds: 2));
-  //   // logger.d(state);
-
-  //   return state
-  //       .map((e) => Product(
-  //           imageUrl: e.productImage.first,
-  //           name: e.productName,
-  //           price: e.productPrice))
-  //       .toList();
-  // }
-
   Future<List<ProductEntity>> _fetchRecommendedProducts() async {
-    // return state
-    //     .map((e) => Product(
-    //         imageUrl: e.productImage.first,
-    //         name: e.productName,
-    //         price: e.productPrice))
-    //     .toList();
-    return state.map((e) => e).toList();
+    return _state.map((e) => e).toList();
   }
 
   @override
@@ -79,7 +62,11 @@ class _YouMayLikeWidgetState extends State<YouMayLikeWidget> {
             child: Text('Failed to load products. Please try again.'),
           );
         } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-          return _buildProductGrid(snapshot.data!);
+          var data = snapshot.data!
+              .where((value) => value.storeId != "storeId-${widget.uid}-id")
+              .toList();
+
+          return _buildProductGrid(data);
         } else {
           return const Center(
             child: Text('No recommended products available.'),
@@ -104,65 +91,14 @@ class _YouMayLikeWidgetState extends State<YouMayLikeWidget> {
         ),
         itemBuilder: (context, index) {
           return ProductCard(
+            parentContext: widget.sellerContext,
             uid: widget.uid,
             product: products[index],
+            productList: products,
             dist: ProductDist.suggestions,
+            isFavoriteProduct: null,
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildProductCard(Product product) {
-    return GestureDetector(
-      onTap: () {
-        logger.d("THIS PRODUCT CLIC");
-      },
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-              child: Image.network(
-                product.imageUrl,
-                height: 100,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                product.name,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                '\$${product.price.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.green,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -3,6 +3,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:anihan_app/feature/presenter/gui/pages/add_ons_blocs/check_friends_bloc/check_friends_bloc.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/map__page/map_page_cubit.dart';
 import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -18,6 +20,8 @@ import '../widgets/products/products_add_ons_bloc/product_add_ons_bloc.dart';
 import '../widgets/sellers/seller_add_ons/seller_info_add_ons_bloc.dart';
 import 'chats_bloc/chats_page_bloc.dart';
 import 'notification_bloc/notification_page_bloc.dart';
+import 'wish_list_page/friends_bloc/friends_list_page_bloc.dart';
+import 'wish_list_page/wishlist_bloc/wish_list_page_bloc.dart';
 
 @RoutePage()
 class HomeNavigationPage extends StatefulWidget {
@@ -121,14 +125,21 @@ class _HomeNavigationPageState extends State<HomeNavigationPage> {
 
         BlocProvider(
           create: (context) => ProductCategoryItemsCubit(_allProductsRef),
-        )
+        ),
+
+        BlocProvider(
+          create: (context) => CheckFriendsBloc(),
+        ),
+
+        BlocProvider(create: (context) => WishListPageBloc()),
+        BlocProvider(create: (context) => FriendsListPageBloc()),
       ],
       child: WillPopScope(
         onWillPop: _onWillPop,
         child: AutoTabsRouter(
           // initialIndex: 12,
           routes: [
-            const WishListRoute(),
+            WishListRoute(uid: widget.uid),
             ChatsRoute(uid: widget.uid),
             HomeRoute(uid: widget.uid),
             NotificationRoute(uid: widget.uid),

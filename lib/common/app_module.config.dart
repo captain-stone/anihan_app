@@ -42,12 +42,18 @@ import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/chats_page_blo
     as _i346;
 import 'package:anihan_app/feature/presenter/gui/pages/login_bloc/login_page_bloc.dart'
     as _i550;
+import 'package:anihan_app/feature/presenter/gui/pages/map__page/map_page_cubit.dart'
+    as _i445;
 import 'package:anihan_app/feature/presenter/gui/pages/register_bloc/register_page_bloc.dart'
     as _i282;
 import 'package:anihan_app/feature/presenter/gui/pages/seller_registration_bloc/seller_registration_bloc.dart'
     as _i905;
 import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/user_information_bloc_bloc.dart'
     as _i860;
+import 'package:anihan_app/feature/presenter/gui/pages/wish_list_page/wishlist_bloc/wish_list_page_bloc.dart'
+    as _i604;
+import 'package:anihan_app/feature/presenter/gui/widgets/products/add_to_cart/add_to_cart_bloc.dart'
+    as _i786;
 import 'package:anihan_app/feature/presenter/gui/widgets/products/products_add_ons_bloc/product_add_ons_bloc.dart'
     as _i280;
 import 'package:anihan_app/feature/presenter/gui/widgets/sellers/seller_add_ons/seller_info_add_ons_bloc.dart'
@@ -88,6 +94,8 @@ extension GetItInjectableX on _i174.GetIt {
       preResolve: true,
     );
     gh.factory<_i346.ChatsPageBloc>(() => _i346.ChatsPageBloc());
+    gh.factory<_i445.MapPageCubit>(() => _i445.MapPageCubit());
+    gh.factory<_i604.WishListPageBloc>(() => _i604.WishListPageBloc());
     gh.lazySingleton<_i345.DatabaseReference>(() => appModule.ref);
     gh.lazySingleton<_i519.Client>(() => appModule.httpClient);
     gh.lazySingleton<_i361.Dio>(() => appModule.dio);
@@ -101,9 +109,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => appModule.internetConnectionChecker,
       instanceName: 'global',
     );
-    gh.factory<_i521.UserInformationRepository>(() =>
-        _i458.UserInformationRepoImpl(
-            gh<_i973.InternetConnectionChecker>(instanceName: 'global')));
     gh.factory<_i280.ProductAddOnsBloc>(
         () => _i280.ProductAddOnsBloc(gh<_i345.DatabaseReference>()));
     gh.factory<_i908.SessionsRepositories>(() => _i457.SessionRepoImpl(
@@ -113,12 +118,19 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i107.RegistrationFarmersRepository>(() =>
         _i774.RegistrationFarmersRepoImpl(
             gh<_i973.InternetConnectionChecker>(instanceName: 'global')));
-    gh.factory<_i619.UserInformationUsecase>(() =>
-        _i619.UserInformationUsecase(gh<_i521.UserInformationRepository>()));
+    gh.factory<_i521.UserInformationRepository>(
+        () => _i458.UserInformationRepoImpl(
+              gh<_i973.InternetConnectionChecker>(instanceName: 'global'),
+              gh<_i1057.LoginDao>(),
+            ));
     gh.factory<_i1033.ProductRepository>(() => _i234.ProductRepoImpl(
         gh<_i973.InternetConnectionChecker>(instanceName: 'global')));
+    gh.factory<_i946.LogoutUsecase>(
+        () => _i946.LogoutUsecase(gh<_i521.UserInformationRepository>()));
     gh.factory<_i593.ProductUsecase>(
         () => _i593.ProductUsecase(gh<_i1033.ProductRepository>()));
+    gh.factory<_i593.AddToCartProductUsecase>(
+        () => _i593.AddToCartProductUsecase(gh<_i1033.ProductRepository>()));
     gh.factory<_i946.LoginUsecase>(
         () => _i946.LoginUsecase(gh<_i908.SessionsRepositories>()));
     gh.factory<_i341.SignUpUsecase>(
@@ -126,16 +138,23 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i1068.RegistrationFarmersUsecase>(() =>
         _i1068.RegistrationFarmersUsecase(
             gh<_i107.RegistrationFarmersRepository>()));
-    gh.factory<_i860.UserInformationBlocBloc>(() =>
-        _i860.UserInformationBlocBloc(gh<_i619.UserInformationUsecase>()));
+    gh.factory<_i619.UserInformationUsecase>(() =>
+        _i619.UserInformationUsecase(gh<_i521.UserInformationRepository>()));
     gh.factory<_i905.AddProductPageBloc>(
         () => _i905.AddProductPageBloc(gh<_i593.ProductUsecase>()));
+    gh.factory<_i786.AddToCartBloc>(
+        () => _i786.AddToCartBloc(gh<_i593.AddToCartProductUsecase>()));
     gh.factory<_i905.SellerRegistrationBloc>(() =>
         _i905.SellerRegistrationBloc(gh<_i1068.RegistrationFarmersUsecase>()));
     gh.factory<_i282.RegisterPageBloc>(
         () => _i282.RegisterPageBloc(gh<_i341.SignUpUsecase>()));
     gh.factory<_i550.LoginPageBloc>(
         () => _i550.LoginPageBloc(gh<_i946.LoginUsecase>()));
+    gh.factory<_i860.UserInformationBlocBloc>(
+        () => _i860.UserInformationBlocBloc(
+              gh<_i619.UserInformationUsecase>(),
+              gh<_i946.LogoutUsecase>(),
+            ));
     return this;
   }
 }

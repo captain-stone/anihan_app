@@ -2,9 +2,8 @@
 
 import 'dart:async';
 
-import 'package:anihan_app/common/enum_files.dart';
 import 'package:anihan_app/feature/data/models/api/friend_request_api.dart';
-import 'package:anihan_app/feature/presenter/gui/pages/login_bloc/login_page_bloc.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -61,10 +60,10 @@ class ChatsPageBloc extends Bloc<ChatsPageEvent, ChatsPageState> {
             });
 
             for (var request in friendRequestsData) {
-              logger.d(request);
+              // logger.d(request);
               String fromUser = request['fromUser'];
               String requestedId = request['requestId'];
-              logger.d(fromUser);
+              // logger.d(fromUser);
               // Fetch user information for 'fromUser'
               DataSnapshot userSnapshot =
                   await usersRef.child(requestedId).get();
@@ -75,6 +74,7 @@ class ChatsPageBloc extends Bloc<ChatsPageEvent, ChatsPageState> {
                 // Combine friend request data with user info
                 enrichedFriendRequests.add({
                   'requestId': request['requestId'],
+                  'requestFrom': fromUser,
                   'status': request['status'],
                   'timestamp': request['timestamp'],
                   'userInfo': userInfo, // Include user's info
@@ -89,12 +89,17 @@ class ChatsPageBloc extends Bloc<ChatsPageEvent, ChatsPageState> {
           if (usersSnapshot.exists) {
             Map<dynamic, dynamic> allUsers = usersSnapshot.value as Map;
 // logger.d(enrichedFriendRequests.map())
-            logger.d(enrichedFriendRequests);
+            // logger.d(enrichedFriendRequests);
 
             Set<String> friendRequestUserIds = enrichedFriendRequests
-                .map((request) => request['requestId']) // Get the userKey
-                .whereType<String>() // Filter out null values
+                .map((request) {
+                  if (request['requestFrom'] == currentUserId) {
+                    return request['requestId'];
+                  }
+                })
+                .whereType<String>()
                 .toSet();
+
             friendSuggestions = allUsers.entries
                 .where((entry) =>
                     !friendRequestUserIds.contains(entry.key) &&
@@ -123,7 +128,7 @@ class ChatsPageBloc extends Bloc<ChatsPageEvent, ChatsPageState> {
         await _subscription!.asFuture();
       } catch (e) {
         logger.e("Failed to load friend requests and suggestions: $e");
-        emit(ChatsPageErrorState("Error loading data"));
+        emit(const ChatsPageErrorState("Error loading data"));
       }
 
       // DatabaseReference _refs = db.ref("users/");

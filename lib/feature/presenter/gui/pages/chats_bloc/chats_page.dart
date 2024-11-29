@@ -1,15 +1,17 @@
 // ignore_for_file: unused_element, unused_field, prefer_final_fields, no_leading_underscores_for_local_identifiers
 
-import 'package:anihan_app/common/app_module.dart';
 import 'package:anihan_app/common/enum_files.dart';
 import 'package:anihan_app/feature/data/models/api/firebase_model.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/chats_page_bloc.dart';
+import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
+import 'package:anihan_app/feature/presenter/gui/widgets/addons/custom_alert_dialog.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/debugger/logger_debugger.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:firebase_core/firebase_core.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 
 @RoutePage()
 class ChatsPage extends StatefulWidget {
@@ -42,6 +44,7 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
   List<FirebaseDataModel?> friends = [];
   List<FirebaseDataModel?> notFriends = [];
   List<FirebaseDataModel> searchData = [];
+  final logger = Logger();
 
   @override
   void initState() {
@@ -94,6 +97,10 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
     // logger.d(userId);
   }
 
+  void _onChatMessage(String userId) {
+    AutoRouter.of(context).push(ChatWithRoute(friendId: userId));
+  }
+
   Widget showFriendsAndNotFriends(Size size) {
     double _width = size.width;
     double _height = size.height;
@@ -133,7 +140,11 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
             // color: Colors.red,
             width: _width,
             child: friends.isNotEmpty
-                ? ShowFriendListToChat(widget.uid!, notFriends)
+                ? ShowFriendListToChat(
+                    widget.uid!,
+                    notFriends,
+                    onChat: _onChatMessage,
+                  )
                 : Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
                     child: Container(
@@ -250,9 +261,7 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
         body: SingleChildScrollView(
           child: BlocBuilder<ChatsPageBloc, ChatsPageState>(
             builder: (context, state) {
-              logger.d(state);
-              var userFriendPending = {};
-              List<FirebaseDataModel?> userData = [];
+              // logger.d(state);
 
               if (state is ChatsPageLoadingState) {
                 return SizedBox(
@@ -281,14 +290,16 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
                         key: entry["requestId"], value: entry))
                     .toList();
 
-                friends = requestedUsers.map((e) {
+                friends = requestedUsers
+                    .where((e) => e.value["requestFrom"] == widget.uid)
+                    .map((e) {
                   return FirebaseDataModel(
                       key: e.key,
                       value: e.value["userInfo"],
                       status: e.value["status"]);
                 }).toList();
 
-                logger.d(friends);
+                // logger.d(friends);
                 notFriends = users
                     .map((e) {
                       if (e.key == widget.uid) {
@@ -304,6 +315,7 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
                     })
                     .where((element) => element != null)
                     .toList();
+                // logger.d(notFriends);
 
                 return Column(
                   children: [
@@ -344,6 +356,7 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
                             ? ShowFriendListToChat(
                                 widget.uid!,
                                 friends,
+                                onChat: _onChatMessage,
                               )
                             : Padding(
                                 padding: const EdgeInsets.symmetric(
@@ -525,7 +538,11 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
                         // color: Colors.red,
                         width: _width,
                         child: friends.isNotEmpty
-                            ? ShowFriendListToChat(widget.uid!, notFriends)
+                            ? ShowFriendListToChat(
+                                widget.uid!,
+                                notFriends,
+                                onChat: _onChatMessage,
+                              )
                             : Padding(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 24.0),
@@ -629,7 +646,7 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
               }
 
               if (state is FriendRequestSuccessState) {
-                logger.d(notFriends);
+                // logger.d(notFriends);
 
                 return showFriendsAndNotFriends(Size(_width, _height));
               }
@@ -639,23 +656,6 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
               }
 
               return Container();
-              // return friends.isEmpty && notFriends.isNotEmpty
-              //     ?
-              //     //SHOWIGN SUGGESTIONS
-              //     FriendsSuggestions(_bloc, widget.uid!, friends)
-              //     :
-              //     //YOU CAN ADD FRIENDS HERE PAREN
-              //     friends.isNotEmpty && notFriends.isNotEmpty
-              //         ?
-              //         //MUST ADDING FRIENDS
-              //         ShowFriendListToChat(widget.uid!, notFriends)
-              //         : searchData.isNotEmpty
-              //             ? const Center(
-              //                 child: Text("Search"),
-              //               )
-              //             : const Center(
-              //                 child: CircularProgressIndicator(),
-              //               );
             },
           ),
         ));
@@ -737,7 +737,7 @@ class CustomAppBar extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           IconButton(
-            icon: const Icon(Icons.chat_rounded), // New chats icon
+            icon: const Icon(Icons.message), // New chats icon
             onPressed: () {
               // Placeholder for future chats function
             },
@@ -763,6 +763,7 @@ class FriendsSuggestions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final logger = Logger();
     // print(users);
 
     return SingleChildScrollView(
@@ -799,6 +800,7 @@ class FriendsSuggestions extends StatelessWidget {
                   TextButton(
                     onPressed: () {
                       var userId = user.key;
+                      logger.d(userId);
 
                       addFriendFunction(userId);
                     },
@@ -817,58 +819,125 @@ class FriendsSuggestions extends StatelessWidget {
 class ShowFriendListToChat extends StatelessWidget {
   final String uid;
   final List<FirebaseDataModel?> users;
+  final Function(String userId) onChat;
 
-  const ShowFriendListToChat(this.uid, this.users, {super.key});
+  const ShowFriendListToChat(this.uid, this.users,
+      {super.key, required this.onChat});
 
   @override
   Widget build(BuildContext context) {
+    final logger = Logger();
     // var usersInfo =
+    // final double _width = MediaQuery.of(context).size.width;
+    // final double _height = MediaQuery.of(context).size.height;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: users.map((friend) {
-          return Visibility(
-            visible: uid != friend!.key,
-            child: Container(
-              padding: const EdgeInsets.all(12.0),
-              margin:
-                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 6.0,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+          if (friend == null) {
+            return Container();
+          } else if (friend.status == null) {
+            logger.d("${friend.key}\n$uid");
+            return Visibility(
+              visible: uid != friend.key,
+              child: Container(
+                padding: const EdgeInsets.all(12.0),
+                margin:
+                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 6.0,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.people),
+                        const SizedBox(width: 16.0),
+                        Text(friend.value['fullName']),
+                      ],
+                    ),
+                    const CircularProgressIndicator()
+                  ],
+                ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.people),
-                      const SizedBox(width: 16.0),
-                      Text(friend.value['fullName']),
+            );
+          } else {
+            return Visibility(
+              visible: uid != friend.key,
+              child: GestureDetector(
+                onTap: () {
+                  logger.d("TAP: ${friend.key}");
+
+                  if (friend.status == FriendStatus.pending.name ||
+                      friend.status == FriendStatus.rejected.name) {
+                    showDialog(
+                        context: context,
+                        builder: (context) => CustomAlertDialog(
+                            colorMessage: Colors.red,
+                            onPressedCloseBtn: () {
+                              Navigator.pop(context);
+                            },
+                            title: "Information",
+                            child: const Text(
+                                "Oops! I think your still not a friend yet.")));
+                  }
+
+                  if (friend.status == FriendStatus.accepted.name) {
+                    //openCHat
+                    onChat(friend.key);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(12.0),
+                  margin: const EdgeInsets.symmetric(
+                      vertical: 8.0, horizontal: 16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 6.0,
+                        offset: const Offset(0, 2),
+                      ),
                     ],
                   ),
-                  Text(
-                    "${friend.status}",
-                    style: TextStyle(
-                        color: friend.status! == FriendStatus.accepted.name
-                            ? Colors.green
-                            : friend.status! == FriendStatus.rejected.name
-                                ? Colors.red
-                                : Colors.orange),
-                  )
-                ],
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.people),
+                          const SizedBox(width: 16.0),
+                          Text(friend.value['fullName']),
+                        ],
+                      ),
+                      Text(
+                        "${friend.status}",
+                        style: TextStyle(
+                            color: friend.status! == FriendStatus.accepted.name
+                                ? Colors.green
+                                : friend.status! == FriendStatus.rejected.name
+                                    ? Colors.red
+                                    : Colors.orange),
+                      )
+                    ],
+                  ),
+                ),
               ),
-            ),
-          );
+            );
+          }
         }).toList(),
       ),
     );
@@ -909,100 +978,6 @@ class ChatList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // List<ChatItem> chatItems = [
-    //   ChatItem(
-    //     imageUrl: 'https://example.com/profile1.jpg',
-    //     isOnline: true,
-    //     name: 'Vedanta',
-    //     recentMessage: 'Meron kaming stock ng bigas ngayon',
-    //     dateTime: parseTimeString('10:30 AM'),
-    //     isUnread: true,
-    //     isUserMessage: true,
-    //   ),
-    //   ChatItem(
-    //     imageUrl: 'https://example.com/profile2.jpg',
-    //     isOnline: false,
-    //     name: 'John Cena',
-    //     recentMessage: 'OFfer ko sayo 250 per kilo?',
-    //     dateTime: parseTimeString('08:15 AM'),
-    //     isUnread: false,
-    //     isUserMessage: false,
-    //   ),
-    //   ChatItem(
-    //     imageUrl: 'https://example.com/profile3.jpg',
-    //     isOnline: true,
-    //     name: 'Jane Doe',
-    //     recentMessage: 'Let\'s meet tomorrow at the office.',
-    //     dateTime: parseTimeString('Yesterday'),
-    //     isUnread: false,
-    //     isUserMessage: true,
-    //   ),
-    //   ChatItem(
-    //     imageUrl: 'https://example.com/profile4.jpg',
-    //     isOnline: false,
-    //     name: 'Michael Scott',
-    //     recentMessage: 'That\'s what she said!',
-    //     dateTime: parseTimeString('2 days ago'),
-    //     isUnread: true,
-    //     isUserMessage: true,
-    //   ),
-    //   ChatItem(
-    //     imageUrl: 'https://example.com/profile5.jpg',
-    //     isOnline: true,
-    //     name: 'Dwight Schrute',
-    //     recentMessage: 'Beets, bears, Battlestar Galactica.',
-    //     dateTime: parseTimeString('10:45 AM'),
-    //     isUnread: false,
-    //     isUserMessage: false,
-    //   ),
-    //   ChatItem(
-    //     imageUrl: 'https://example.com/profile6.jpg',
-    //     isOnline: false,
-    //     name: 'Pam Beesly',
-    //     recentMessage: 'Can you send me the files?',
-    //     dateTime: parseTimeString('1 hour ago'),
-    //     isUnread: true,
-    //     isUserMessage: true,
-    //   ),
-    //   ChatItem(
-    //     imageUrl: 'https://example.com/profile7.jpg',
-    //     isOnline: true,
-    //     name: 'Jim Halpert',
-    //     recentMessage: 'Pranks on Dwight are the best.',
-    //     dateTime: parseTimeString('30 minutes ago'),
-    //     isUnread: true,
-    //     isUserMessage: true,
-    //   ),
-    //   ChatItem(
-    //     imageUrl: 'https://example.com/profile8.jpg',
-    //     isOnline: false,
-    //     name: 'Stanley Hudson',
-    //     recentMessage: 'I\'ll be in Florida for the next week.',
-    //     dateTime: parseTimeString('3 days ago'),
-    //     isUnread: false,
-    //     isUserMessage: false,
-    //   ),
-    //   ChatItem(
-    //     imageUrl: 'https://example.com/profile9.jpg',
-    //     isOnline: true,
-    //     name: 'Ryan Howard',
-    //     recentMessage: 'The temp is the boss now.',
-    //     dateTime: parseTimeString('5 minutes ago'),
-    //     isUnread: true,
-    //     isUserMessage: true,
-    //   ),
-    //   ChatItem(
-    //     imageUrl: 'https://example.com/profile10.jpg',
-    //     isOnline: false,
-    //     name: 'Kelly Kapoor',
-    //     recentMessage: 'Fashion show at lunch?',
-    //     dateTime: parseTimeString('4 days ago'),
-    //     isUnread: false,
-    //     isUserMessage: false,
-    //   ),
-    // ];
-
-    // Sort chat items by their dateTime, most recent first
     chatItems.sort((a, b) => b.dateTime.compareTo(a.dateTime));
     if (isSearchEmpty) {
       if (chatItems.isEmpty) {

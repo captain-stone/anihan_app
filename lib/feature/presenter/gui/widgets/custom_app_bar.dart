@@ -1,18 +1,24 @@
-import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/chats_page_bloc.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/add_ons_blocs/check_friends_bloc/check_friends_bloc.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
 
+import '../pages/order_details/order_page.dart';
+
 class CustomAppBar extends StatelessWidget {
   final Function(String value) onChangeSearchCrops;
-  final void Function() onPressedIconUser;
-  final void Function() onPressedIconJournal;
 
-  const CustomAppBar(
-      {super.key,
-      required this.onChangeSearchCrops,
-      required this.onPressedIconUser,
-      required this.onPressedIconJournal});
+  // final void Function() onPressedIconUser;
+  final void Function() onPressedIconJournal;
+  final VoidCallback onPressedIconUser;
+
+  const CustomAppBar({
+    super.key,
+    required this.onChangeSearchCrops,
+    required this.onPressedIconUser,
+    required this.onPressedIconJournal,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -110,6 +116,8 @@ class CustomAppBar extends StatelessWidget {
             icon: const Icon(Icons.shopping_cart),
             onPressed: () {
               // Placeholder for future cart function
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) => OrdersPage()));
             },
           ),
         ],

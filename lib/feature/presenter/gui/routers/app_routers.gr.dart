@@ -25,6 +25,16 @@ abstract class _$AppRouters extends RootStackRouter {
         ),
       );
     },
+    ChatWithRoute.name: (routeData) {
+      final args = routeData.argsAs<ChatWithRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: ChatWithPage(
+          key: args.key,
+          friendId: args.friendId,
+        ),
+      );
+    },
     ChatsRoute.name: (routeData) {
       final args = routeData.argsAs<ChatsRouteArgs>(
           orElse: () => const ChatsRouteArgs());
@@ -46,6 +56,17 @@ abstract class _$AppRouters extends RootStackRouter {
           product: args.product,
           height: args.height,
           width: args.width,
+        ),
+      );
+    },
+    FriendRequestRoute.name: (routeData) {
+      final args = routeData.argsAs<FriendRequestRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: FriendRequestPage(
+          key: args.key,
+          data: args.data,
+          checkFriendBuildContext: args.checkFriendBuildContext,
         ),
       );
     },
@@ -76,6 +97,17 @@ abstract class _$AppRouters extends RootStackRouter {
         child: const LoginPage(),
       );
     },
+    MapRoute.name: (routeData) {
+      final args = routeData.argsAs<MapRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: MapPage(
+          key: args.key,
+          center: args.center,
+          city: args.city,
+        ),
+      );
+    },
     MyInformationFarmerRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -89,6 +121,16 @@ abstract class _$AppRouters extends RootStackRouter {
         child: MyInformationPage(
           args.uid,
           key: args.key,
+        ),
+      );
+    },
+    MyLikeRoute.name: (routeData) {
+      final args = routeData.argsAs<MyLikeRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: MyLikePage(
+          key: args.key,
+          uid: args.uid,
         ),
       );
     },
@@ -121,6 +163,12 @@ abstract class _$AppRouters extends RootStackRouter {
         ),
       );
     },
+    ShowChatRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const ShowChatPage(),
+      );
+    },
     ShowProductByCategoryRoute.name: (routeData) {
       final args = routeData.argsAs<ShowProductByCategoryRouteArgs>();
       return AutoRoutePage<dynamic>(
@@ -133,9 +181,14 @@ abstract class _$AppRouters extends RootStackRouter {
       );
     },
     WishListRoute.name: (routeData) {
+      final args = routeData.argsAs<WishListRouteArgs>(
+          orElse: () => const WishListRouteArgs());
       return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const WishListPage(),
+        child: WishListPage(
+          key: args.key,
+          uid: args.uid,
+        ),
       );
     },
   };
@@ -176,6 +229,44 @@ class AddProductFormRouteArgs {
   @override
   String toString() {
     return 'AddProductFormRouteArgs{key: $key, uid: $uid}';
+  }
+}
+
+/// generated route for
+/// [ChatWithPage]
+class ChatWithRoute extends PageRouteInfo<ChatWithRouteArgs> {
+  ChatWithRoute({
+    Key? key,
+    required String friendId,
+    List<PageRouteInfo>? children,
+  }) : super(
+          ChatWithRoute.name,
+          args: ChatWithRouteArgs(
+            key: key,
+            friendId: friendId,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'ChatWithRoute';
+
+  static const PageInfo<ChatWithRouteArgs> page =
+      PageInfo<ChatWithRouteArgs>(name);
+}
+
+class ChatWithRouteArgs {
+  const ChatWithRouteArgs({
+    this.key,
+    required this.friendId,
+  });
+
+  final Key? key;
+
+  final String friendId;
+
+  @override
+  String toString() {
+    return 'ChatWithRouteArgs{key: $key, friendId: $friendId}';
   }
 }
 
@@ -271,6 +362,49 @@ class CustomProductViewingRouteArgs {
 }
 
 /// generated route for
+/// [FriendRequestPage]
+class FriendRequestRoute extends PageRouteInfo<FriendRequestRouteArgs> {
+  FriendRequestRoute({
+    Key? key,
+    required List<Map<String, dynamic>> data,
+    required CheckFriendsBloc checkFriendBuildContext,
+    List<PageRouteInfo>? children,
+  }) : super(
+          FriendRequestRoute.name,
+          args: FriendRequestRouteArgs(
+            key: key,
+            data: data,
+            checkFriendBuildContext: checkFriendBuildContext,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'FriendRequestRoute';
+
+  static const PageInfo<FriendRequestRouteArgs> page =
+      PageInfo<FriendRequestRouteArgs>(name);
+}
+
+class FriendRequestRouteArgs {
+  const FriendRequestRouteArgs({
+    this.key,
+    required this.data,
+    required this.checkFriendBuildContext,
+  });
+
+  final Key? key;
+
+  final List<Map<String, dynamic>> data;
+
+  final CheckFriendsBloc checkFriendBuildContext;
+
+  @override
+  String toString() {
+    return 'FriendRequestRouteArgs{key: $key, data: $data, checkFriendBuildContext: $checkFriendBuildContext}';
+  }
+}
+
+/// generated route for
 /// [HomeNavigationPage]
 class HomeNavigationRoute extends PageRouteInfo<HomeNavigationRouteArgs> {
   HomeNavigationRoute({
@@ -360,6 +494,48 @@ class LoginRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [MapPage]
+class MapRoute extends PageRouteInfo<MapRouteArgs> {
+  MapRoute({
+    Key? key,
+    required LatLng center,
+    required String city,
+    List<PageRouteInfo>? children,
+  }) : super(
+          MapRoute.name,
+          args: MapRouteArgs(
+            key: key,
+            center: center,
+            city: city,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'MapRoute';
+
+  static const PageInfo<MapRouteArgs> page = PageInfo<MapRouteArgs>(name);
+}
+
+class MapRouteArgs {
+  const MapRouteArgs({
+    this.key,
+    required this.center,
+    required this.city,
+  });
+
+  final Key? key;
+
+  final LatLng center;
+
+  final String city;
+
+  @override
+  String toString() {
+    return 'MapRouteArgs{key: $key, center: $center, city: $city}';
+  }
+}
+
+/// generated route for
 /// [MyInformationFarmerPage]
 class MyInformationFarmerRoute extends PageRouteInfo<void> {
   const MyInformationFarmerRoute({List<PageRouteInfo>? children})
@@ -408,6 +584,43 @@ class MyInformationRouteArgs {
   @override
   String toString() {
     return 'MyInformationRouteArgs{uid: $uid, key: $key}';
+  }
+}
+
+/// generated route for
+/// [MyLikePage]
+class MyLikeRoute extends PageRouteInfo<MyLikeRouteArgs> {
+  MyLikeRoute({
+    Key? key,
+    required String uid,
+    List<PageRouteInfo>? children,
+  }) : super(
+          MyLikeRoute.name,
+          args: MyLikeRouteArgs(
+            key: key,
+            uid: uid,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'MyLikeRoute';
+
+  static const PageInfo<MyLikeRouteArgs> page = PageInfo<MyLikeRouteArgs>(name);
+}
+
+class MyLikeRouteArgs {
+  const MyLikeRouteArgs({
+    this.key,
+    required this.uid,
+  });
+
+  final Key? key;
+
+  final String uid;
+
+  @override
+  String toString() {
+    return 'MyLikeRouteArgs{key: $key, uid: $uid}';
   }
 }
 
@@ -513,6 +726,20 @@ class SellerRegistrationRouteArgs {
 }
 
 /// generated route for
+/// [ShowChatPage]
+class ShowChatRoute extends PageRouteInfo<void> {
+  const ShowChatRoute({List<PageRouteInfo>? children})
+      : super(
+          ShowChatRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'ShowChatRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
 /// [ShowProductByCategoryPage]
 class ShowProductByCategoryRoute
     extends PageRouteInfo<ShowProductByCategoryRouteArgs> {
@@ -558,14 +785,38 @@ class ShowProductByCategoryRouteArgs {
 
 /// generated route for
 /// [WishListPage]
-class WishListRoute extends PageRouteInfo<void> {
-  const WishListRoute({List<PageRouteInfo>? children})
-      : super(
+class WishListRoute extends PageRouteInfo<WishListRouteArgs> {
+  WishListRoute({
+    Key? key,
+    String? uid,
+    List<PageRouteInfo>? children,
+  }) : super(
           WishListRoute.name,
+          args: WishListRouteArgs(
+            key: key,
+            uid: uid,
+          ),
           initialChildren: children,
         );
 
   static const String name = 'WishListRoute';
 
-  static const PageInfo<void> page = PageInfo<void>(name);
+  static const PageInfo<WishListRouteArgs> page =
+      PageInfo<WishListRouteArgs>(name);
+}
+
+class WishListRouteArgs {
+  const WishListRouteArgs({
+    this.key,
+    this.uid,
+  });
+
+  final Key? key;
+
+  final String? uid;
+
+  @override
+  String toString() {
+    return 'WishListRouteArgs{key: $key, uid: $uid}';
+  }
 }

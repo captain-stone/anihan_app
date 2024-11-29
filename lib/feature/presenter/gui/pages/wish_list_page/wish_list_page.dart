@@ -1,14 +1,17 @@
 // ignore_for_file: unused_field, library_private_types_in_public_api, use_super_parameters
 
+import 'package:anihan_app/common/enum_files.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/wish_list_page/friends_bloc/friends_list_page_bloc.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/wish_list_page/wishlist_bloc/wish_list_page_bloc.dart';
 import 'package:auto_route/annotations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
 
-class User {
-  final String name;
-  final bool isOnline;
-
-  User(this.name, this.isOnline);
-}
+import '../../../../../common/api_result.dart';
+import '../../../../data/models/api/firebase_model.dart';
+import '../../../../domain/entities/product_entity.dart';
+import '../../widgets/products/product_favorite_cubit/product_card.dart';
 
 class Community {
   final String name;
@@ -17,28 +20,31 @@ class Community {
   Community(this.name, this.currentOnlineMembers);
 }
 
-class WishlistItem {
-  final String productName;
-  final String location;
-  final String imageUrl;
-
-  WishlistItem(this.productName, this.location, this.imageUrl);
-}
-
 @RoutePage()
 class WishListPage extends StatefulWidget {
-  const WishListPage({super.key});
+  final String? uid;
+  const WishListPage({super.key, this.uid});
   @override
   _WishListPageState createState() => _WishListPageState();
 }
 
 class _WishListPageState extends State<WishListPage> {
+  final logger = Logger();
+  List<FirebaseDataModel> requestedUsers = [];
+  List<FirebaseDataModel> friends = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    context.read<WishListPageBloc>().add(GetWishListEvent());
+    context.read<FriendsListPageBloc>().add(const GetUserListEvent());
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<User> users = [];
-
     List<Community> communities = [];
-    List<WishlistItem> wishlistItems = [];
+
     final double _height = MediaQuery.of(context).size.height;
     final double _width = MediaQuery.of(context).size.width;
     return Scaffold(
@@ -50,11 +56,76 @@ class _WishListPageState extends State<WishListPage> {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              FollowingSection(users: users, communities: communities),
+              BlocBuilder<FriendsListPageBloc, FriendsListPageState>(
+                builder: (context, state) {
+                  if (state is FriendsListPageSuccessState) {
+                    var data = state.data;
+                    logger.d(data);
+
+                    requestedUsers = data
+                        .where((status) =>
+                            status['status'] == FriendStatus.accepted.name)
+                        .map((entry) => FirebaseDataModel(
+                            key: entry["requestId"], value: entry))
+                        .toList();
+
+                    friends = requestedUsers
+                        .where((e) => e.value["requestFrom"] == widget.uid)
+                        .map((e) {
+                      // logger.d(
+                      //     "IS USERNAME EQUAL: ${e.value["requestFrom"] == widget.uid}\n${e.value["requestFrom"]}");
+
+                      return FirebaseDataModel(
+                          key: e.key,
+                          value: e.value["userInfo"],
+                          status: e.value["status"]);
+                    }).toList();
+
+                    logger.d(friends);
+                  }
+                  return FollowingSection(
+                      users: friends, communities: communities);
+                },
+              ),
               // const SizedBox(height: 20.0),
-              WishlistSection(
-                wishlistItems: wishlistItems,
-                size: Size(_width, _height),
+              BlocBuilder<WishListPageBloc, WishListPageState>(
+                builder: (context, state) {
+                  // logger.d(state);
+                  if (state is WishListPageSuccessState) {
+                    var productEntity = state.productEntityList;
+                    return WishlistSection(
+                      uid: widget.uid!,
+                      productEntityList: productEntity,
+                      // productListEntity
+                      size: Size(_width, _height),
+                    );
+                  } else {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Wishlist',
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.center,
+                          child: SizedBox(
+                            width: _width * 0.7,
+                            child: const Center(
+                              child: Text(
+                                "You do not have any wishlist, try adding one.",
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                },
               ),
             ],
           ),
@@ -103,7 +174,7 @@ class UpperBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 class FollowingSection extends StatelessWidget {
-  final List<User> users;
+  final List<FirebaseDataModel> users;
   final List<Community> communities;
 
   const FollowingSection(
@@ -208,7 +279,7 @@ class FollowingSection extends StatelessWidget {
     );
   }
 
-  Widget _buildUserItem(BuildContext context, User user) {
+  Widget _buildUserItem(BuildContext context, FirebaseDataModel user) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -219,10 +290,11 @@ class FollowingSection extends StatelessWidget {
             child: Icon(Icons.person, size: 30.0, color: Colors.grey[700]),
           ),
           const SizedBox(height: 5.0),
-          Text(user.name, style: Theme.of(context).textTheme.bodyMedium),
-          Text(user.isOnline ? 'Online' : 'Offline',
+          Text(user.value['fullName'],
+              style: Theme.of(context).textTheme.bodyMedium),
+          Text(true ? 'Online' : 'Offline',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: user.isOnline ? Colors.green : Colors.red,
+                    color: true ? Colors.green : Colors.red,
                   )),
         ],
       ),
@@ -254,11 +326,17 @@ class FollowingSection extends StatelessWidget {
 }
 
 class WishlistSection extends StatelessWidget {
-  final List<WishlistItem> wishlistItems;
+  final String label;
+  final String uid;
+  final List<ProductEntity> productEntityList;
   final Size size;
 
-  const WishlistSection(
-      {Key? key, required this.wishlistItems, required this.size})
+  WishlistSection(
+      {Key? key,
+      this.label = "Wishlist",
+      required this.uid,
+      required this.productEntityList,
+      required this.size})
       : super(key: key);
 
   @override
@@ -269,72 +347,37 @@ class WishlistSection extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(
-            'Wishlist',
+            label,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
         ),
-        wishlistItems.isNotEmpty
-            ? GridView.builder(
-                shrinkWrap:
-                    true, // Necessary to make the GridView fit inside a Column
-                physics:
-                    const NeverScrollableScrollPhysics(), // Prevent GridView from scrolling independently
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3, // Number of columns in the grid
-                  crossAxisSpacing: 10.0, // Space between columns
-                  mainAxisSpacing: 10.0, // Space between rows
-                  childAspectRatio: 0.75, // Adjust ratio to match your design
-                ),
-                itemCount: wishlistItems.length,
-                itemBuilder: (context, index) {
-                  return _buildWishlistItem(context, wishlistItems[index]);
-                },
-              )
-            : Align(
-                alignment: Alignment.center,
-                child: SizedBox(
-                  width: size.width * 0.7,
-                  child: const Center(
-                    child: Text(
-                      "You do not have any wishlist, try adding one.",
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-              ),
+        _buildProductGrid(context, productEntityList),
       ],
     );
   }
 
-  Widget _buildWishlistItem(BuildContext context, WishlistItem item) {
-    return Column(
-      children: [
-        Container(
-          height: 80.0,
-          width: 80.0,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.0),
-            image: DecorationImage(
-              image: NetworkImage(item.imageUrl),
-              fit: BoxFit.cover,
-            ),
-          ),
+  Widget _buildProductGrid(BuildContext context, List<ProductEntity> products) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: GridView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: products.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 10.0,
+          mainAxisSpacing: 10.0,
+          childAspectRatio: 0.75,
         ),
-        const SizedBox(height: 8.0),
-        Text(
-          item.productName,
-          style: Theme.of(context).textTheme.bodyMedium,
-          overflow: TextOverflow.ellipsis, // Truncate if too long
-        ),
-        Text(
-          item.location,
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium
-              ?.copyWith(color: Colors.black54),
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
+        itemBuilder: (context, index) {
+          return ProductCard(
+            parentContext: context,
+            uid: uid,
+            product: products[index],
+            dist: ProductDist.suggestions,
+          );
+        },
+      ),
     );
   }
 }

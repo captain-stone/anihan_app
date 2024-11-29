@@ -1,5 +1,7 @@
 import 'package:anihan_app/feature/domain/entities/user_information_and_data_entity.dart';
+import 'package:anihan_app/feature/domain/parameters/params.dart';
 import 'package:anihan_app/feature/domain/parameters/user_information_params.dart';
+import 'package:anihan_app/feature/domain/usecases/login_usecase.dart';
 import 'package:anihan_app/feature/domain/usecases/user_information_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -14,8 +16,10 @@ part 'user_information_bloc_state.dart';
 class UserInformationBlocBloc
     extends Bloc<UserInformationBlocEvent, UserInformationBlocState> {
   final UserInformationUsecase _usecase;
+  final LogoutUsecase _logoutUsecase;
 
-  UserInformationBlocBloc(this._usecase) : super(UserInformationBlocInitial()) {
+  UserInformationBlocBloc(this._usecase, this._logoutUsecase)
+      : super(UserInformationBlocInitial()) {
     on<GetUidEvent>((event, emit) async {
       emit(UserInformationLoadingState());
 
@@ -37,6 +41,24 @@ class UserInformationBlocBloc
         } else {
           emit(UserInformationErrorState(result.message!));
         }
+      }
+    });
+
+    on<LogoutEvent>((event, emit) async {
+      emit(UserInformationLoadingState());
+
+      var result = await _logoutUsecase(event.noParams);
+      var status = result.status;
+
+      if (status == Status.success) {
+        var data = result.data;
+        if (data == null) {
+          emit(const LogoutSuccessState("Thank you! Come back again"));
+        } else {
+          emit(LogOutErrorState(result.message!));
+        }
+      } else {
+        emit(LogOutErrorState(result.message!));
       }
     });
   }

@@ -172,6 +172,9 @@ class _LoginPageState extends State<LoginPage> {
                 return CustomAlertDialog(
                     colorMessage: Colors.red,
                     title: "Database Error",
+                    onPressedCloseBtn: () {
+                      Navigator.of(context).pop();
+                    },
                     child: Text(state.message));
               });
         }
