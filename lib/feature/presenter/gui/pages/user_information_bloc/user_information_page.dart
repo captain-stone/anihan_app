@@ -3,6 +3,7 @@
 import 'package:anihan_app/common/api_result.dart';
 import 'package:anihan_app/common/app_module.dart';
 import 'package:anihan_app/feature/domain/parameters/user_information_params.dart';
+import 'package:anihan_app/feature/presenter/gui/widgets/addons/customer_order.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/products/product_favorite_cubit/product_favorite_cubit.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/products/product_showcase_bloc/product_showcase_bloc.dart';
 
@@ -130,6 +131,77 @@ class _MyInformationPageState extends State<MyInformationPage> {
     );
   }
 
+  onOrders(
+    String label,
+  ) {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          double _w = MediaQuery.of(context).size.width;
+          double _h = MediaQuery.of(context).size.height;
+          return Container(
+              width: _w,
+              height: label == 'Shipments' ? _h * 0.3 : _h * 0.5,
+              padding: const EdgeInsets.all(18),
+              child: label == "Payments"
+                  ? Column(
+                      children: [
+                        Text("$label (cash)"),
+                        // ...accessRolesLabel
+                        const SizedBox(
+                          height: 18,
+                        ),
+                        Container(
+                            height: 100,
+                            width: _w,
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.green.shade50,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text("User's Name"),
+                                TextButton(
+                                    onPressed: () {},
+                                    child: const Text("approved"))
+                              ],
+                            ))
+                      ],
+                    )
+                  : label == "Shipments"
+                      ? Column(
+                          children: [
+                            Text("$label And Delivery"),
+                            // ...accessRolesLabel
+                            const SizedBox(
+                              height: 18,
+                            ),
+                            Container(
+                                height: 100,
+                                width: _w,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 24),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  color: Colors.green.shade50,
+                                ),
+                                child: const Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    CircleAvatar(),
+                                    CircleAvatar(),
+                                    CircleAvatar()
+                                  ],
+                                ))
+                          ],
+                        )
+                      : Container());
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     // logger.d(widget.uid);
@@ -237,6 +309,44 @@ class _MyInformationPageState extends State<MyInformationPage> {
                   });
                 },
               ),
+              BlocBuilder<SellerInfoAddOnsBloc, SellerInfoAddOnsState>(
+                  builder: (context, state) {
+                String isApproved = Approval.notApproved.name;
+
+                if (state is SellerInfoAddOnsSuccessState) {
+                  isApproved = state.dataModel['isApproved'];
+                  isFarmers = state.dataModel['isApproved'];
+                  if (state.dataModel['farmers'] != null) {
+                    isFarmers = state.dataModel['farmers'];
+                  }
+
+                  if (isApproved == Approval.approved.name) {
+                    if (!accessRolesLabel.contains('seller')) {
+                      // accessRolesLabel.add('seller');
+                      // accessRoles.add(widgetData);
+                      return CustomerOrder(
+                        onPressedPayments: () {
+                          print("Paymentsssss");
+                          onOrders("Payments");
+                        },
+                        onPressedShipments: () {
+                          print("Shipments");
+
+                          onOrders("Shipments");
+                        },
+                        onGoing: () {},
+                        onDone: () {},
+                      );
+                    }
+                  } else {
+                    if (accessRolesLabel.contains('seller')) {
+                      accessRolesLabel.remove('seller');
+                      accessRoles.remove(widgetData);
+                    }
+                  }
+                }
+                return Container();
+              }),
               const MyOrdersWidget(),
               const ActivitiesWidget(),
               Visibility(

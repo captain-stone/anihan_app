@@ -172,6 +172,8 @@ class CalendarWidget extends StatelessWidget {
   }
 
   bool _isDialogOpen = false;
+
+  CalendarWidget({super.key});
   // Function to show the event dialog
   void _showEventDialog(BuildContext context, DateTime date,
       Map<DateTime, List<Map<String, String>>> events) {
