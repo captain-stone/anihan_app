@@ -23,6 +23,21 @@ class ProductEntity extends AppEntity {
     required this.storeId,
   });
 
+  // factory ProductEntity.fromMap(String key, Map<dynamic, dynamic> data) {
+  //   return ProductEntity(
+  //     List<String>.from(data['productImage'] ?? []),
+  //     data['productName'] as String,
+  //     data['productLabel'] as String,
+  //     (data['productPrice'] as num).toDouble(),
+  //     data['itemDescriptions'] as String,
+  //     productKey: key,
+  //     storeId: data['storeId'] as String,
+  //     productVariant: (data['productVariant'] as List<dynamic>?)
+  //         ?.map((variant) => ProductVariantEntity.fromMap(variant))
+  //         .toList(),
+  //   );
+  // }
+
   @override
   List<Object?> get props => [
         productImage,
@@ -43,6 +58,8 @@ class ProductVariantEntity extends AppEntity {
 
   ProductVariantEntity(
       {this.imageData, this.images, this.varianName, this.variantPrice});
+
+  // factory ProductVariantEntity.fromMap()
 
   @override
   List<Object?> get props => [imageData, images, varianName, variantPrice];

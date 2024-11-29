@@ -1,8 +1,15 @@
 // ignore_for_file: library_private_types_in_public_api, unused_element, no_leading_underscores_for_local_identifiers
 
+import 'dart:io';
+
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:anihan_app/common/api_result.dart';
 import 'package:anihan_app/common/app_module.dart';
+import 'package:anihan_app/feature/domain/parameters/params.dart';
 import 'package:anihan_app/feature/domain/parameters/user_information_params.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/order_details/order_details_widget.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/order_details/order_page.dart';
+import 'package:anihan_app/feature/presenter/gui/widgets/products/add_to_cart/add_to_cart_bloc.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/products/product_favorite_cubit/product_favorite_cubit.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/products/product_showcase_bloc/product_showcase_bloc.dart';
 
@@ -10,11 +17,15 @@ import 'package:anihan_app/feature/presenter/gui/widgets/products/your_products.
 import 'package:anihan_app/feature/presenter/gui/widgets/sellers/seller_add_ons/seller_info_add_ons_bloc.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/user_information_bloc_bloc.dart';
 import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
+import 'package:anihan_app/feature/services/permission_handles_sevices.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:location/location.dart';
 import 'package:logger/logger.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../widgets/addons/informations_widgets/activities_widget.dart';
 import '../../widgets/addons/informations_widgets/header_widget.dart';
@@ -37,9 +48,11 @@ class _MyInformationPageState extends State<MyInformationPage> {
   final FirebaseDatabase db = FirebaseDatabase.instance;
 
   final _bloc = getIt<UserInformationBlocBloc>();
+  final _cartBloc = getIt<AddToCartBloc>();
   final _addProductBloc = getIt<ProductAddOnsBloc>();
   final logger = Logger();
   final ScrollController _scrollController = ScrollController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   List<String> accessRolesLabel = ['user'];
   List<Widget> accessRoles = [
@@ -130,9 +143,38 @@ class _MyInformationPageState extends State<MyInformationPage> {
     );
   }
 
+  Future<void> signOutUser() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      print("User signed out successfully.");
+      var currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        _bloc.add(LogoutEvent(NoParams()));
+      }
+    } catch (e) {
+      logger.e("Error signing out: $e");
+    }
+  }
+
+  _permission() {
+    checkPermision(Permission.locationWhenInUse).then((value) async {
+      if (Platform.isAndroid) {
+        Location location = Location();
+        bool isLocationEnabled = await location.serviceEnabled();
+
+        if (!isLocationEnabled) {
+          const intent = AndroidIntent(
+              action: 'android.settings.LOCATION_SOURCE_SETTINGS');
+          await intent.launch();
+        }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // logger.d(widget.uid);
+    final _width = MediaQuery.of(context).size.width;
 
     return BlocConsumer<UserInformationBlocBloc, UserInformationBlocState>(
       bloc: _bloc,
@@ -144,6 +186,10 @@ class _MyInformationPageState extends State<MyInformationPage> {
             phoneNumber = state.userInformationEntity.phoneNumber;
           });
         }
+
+        if (state is LogoutSuccessState) {
+          AutoRouter.of(context).replace(const LoginRoute());
+        }
       },
       builder: (context, widgetState) {
         if (widgetState is UserInformationLoadingState) {
@@ -151,6 +197,7 @@ class _MyInformationPageState extends State<MyInformationPage> {
         } // Show loading spinner
 
         return Scaffold(
+          key: _scaffoldKey,
           appBar: AppBar(
             automaticallyImplyLeading: false,
             backgroundColor: Theme.of(context).colorScheme.primary,
@@ -171,10 +218,18 @@ class _MyInformationPageState extends State<MyInformationPage> {
                   ),
                   Stack(
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.shopping_cart,
-                            color: Colors.white),
-                        onPressed: () {},
+                      BlocBuilder<AddToCartBloc, AddToCartState>(
+                        bloc: _cartBloc,
+                        builder: (context, state) {
+                          return IconButton(
+                            icon: const Icon(Icons.shopping_cart,
+                                color: Colors.white),
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => const OrdersPage()));
+                            },
+                          );
+                        },
                       ),
                       Positioned(
                         right: 4,
@@ -193,7 +248,9 @@ class _MyInformationPageState extends State<MyInformationPage> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.settings, color: Colors.white),
-                    onPressed: () {},
+                    onPressed: () {
+                      _scaffoldKey.currentState?.openEndDrawer();
+                    },
                   ),
                 ],
               )
@@ -229,6 +286,7 @@ class _MyInformationPageState extends State<MyInformationPage> {
                   return HeaderWidget(name,
                       isApproved: isApproved,
                       accessRoles: accessRoles, onPressSell: () {
+                    _permission();
                     AutoRouter.of(context).push(SellerRegistrationRoute(
                       uid: widget.uid!,
                       fullName: name,
@@ -238,7 +296,9 @@ class _MyInformationPageState extends State<MyInformationPage> {
                 },
               ),
               const MyOrdersWidget(),
-              const ActivitiesWidget(),
+              ActivitiesWidget(
+                uid: widget.uid!,
+              ),
               Visibility(
                 visible: isFarmers == Approval.approved.name,
                 child: SectionTitle(
@@ -256,11 +316,11 @@ class _MyInformationPageState extends State<MyInformationPage> {
                   // logger.d(state);
                   if (state is ProductSuccessState) {
                     var data = state.productEntity;
-                    logger.f(data);
+                    // logger.f(data);
                     return YourProduct(
                       widget.uid!,
-                      context,
-                      data,
+                      state: data,
+                      sellerContext: context,
                     );
                   } else {
                     return const SizedBox(
@@ -284,9 +344,10 @@ class _MyInformationPageState extends State<MyInformationPage> {
                 if (allProductState is AllProductSuccessState) {
                   // logger.d(state.productEntity);
                   var data = allProductState.productEntity;
-                  // var data = state.productEntity.productVariant;
+
                   // logger.d(data);
                   return YouMayLikeWidget(
+                    sellerContext: context,
                     widget.uid!,
                     state: data,
                   );
@@ -301,16 +362,33 @@ class _MyInformationPageState extends State<MyInformationPage> {
               })
             ],
           ),
+          endDrawer: Drawer(
+            width: _width * 0.45,
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                DrawerHeader(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  child: const Text(
+                    'Settings',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                    ),
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.logout),
+                  title: const Text('Logout'),
+                  onTap: signOutUser,
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
   }
-}
-
-class Product {
-  final String imageUrl;
-  final String name;
-  final double price;
-
-  Product({required this.imageUrl, required this.name, required this.price});
 }

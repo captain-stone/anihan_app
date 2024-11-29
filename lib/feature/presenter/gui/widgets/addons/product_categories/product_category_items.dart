@@ -53,9 +53,6 @@ class _ProductCategoryItemState extends State<ProductCategoryItem>
 
     return BlocConsumer<ProductCategoryItemsCubit, ProductCategoryItemsState>(
       listener: (context, state) {
-        // TODO: implement listener
-        // logger.d(state);
-
         if (state is ProductCategoryItemsSuccessState) {
           logger.d(state.productEntity);
           AutoRouter.of(context).push(ShowProductByCategoryRoute(

@@ -1,6 +1,8 @@
 // ignore_for_file: library_private_types_in_public_api
 
+import 'package:anihan_app/feature/presenter/gui/pages/add_ons_blocs/check_friends_bloc/check_friends_bloc.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/chats_page_bloc.dart';
+import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
 import 'package:auto_route/annotations.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -39,6 +41,26 @@ class _HomePageState extends State<HomePage> {
     context
         .read<ChatsPageBloc>()
         .add(GetPendingRequestEvent(currentUserId: widget.uid!));
+
+    // context.read<CheckFriendsBloc>().add(GetFriendListCountEvent());
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    context.read<CheckFriendsBloc>().add(GetFriendListCountEvent());
+    // });
+  }
+
+  void _showFriendRequestList(BuildContext context) {
+    var state = context.read<CheckFriendsBloc>().state;
+    logger.d(state);
+    if (state is CheckFriendsSuccessState) {
+      var data = state.data;
+      var buildContext = context.read<CheckFriendsBloc>();
+
+      AutoRouter.of(context).push(FriendRequestRoute(
+          data: data, checkFriendBuildContext: buildContext));
+    }
+    if (state is CheckFriendsErrorState) {
+      logger.d("NO DATA");
+    }
   }
 
   @override
@@ -48,7 +70,7 @@ class _HomePageState extends State<HomePage> {
         preferredSize: const Size.fromHeight(60.0),
         child: CustomAppBar(
           onChangeSearchCrops: _searchCrops,
-          onPressedIconUser: () {},
+          onPressedIconUser: () => _showFriendRequestList(context),
         ),
       ),
       body: SingleChildScrollView(

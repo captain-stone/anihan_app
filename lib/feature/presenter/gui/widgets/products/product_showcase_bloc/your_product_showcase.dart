@@ -26,6 +26,7 @@ class _YourProductShowcaseState extends State<YourProductShowcase> {
   void initState() {
     super.initState();
     logger.d(widget.products);
+    storeInfo = {};
 
     //     WidgetsBinding.instance.addPostFrameCallback((_) {
     context.read<ProductShowcaseBloc>().add(GetStoreInformations(
@@ -94,11 +95,11 @@ class _YourProductShowcaseState extends State<YourProductShowcase> {
               ),
             ],
           ),
-          StoreInfoSection(
-            storeName: storeInfo['storeName'],
-            storeLocations: storeInfo['storeLocations'],
-            storeAvatarUrl: storeInfo['storeAvatarUrl'],
-          )
+          // StoreInfoSection(
+          //   storeName: storeInfo['storeName'],
+          //   storeLocations: storeInfo['storeLocations'],
+          //   storeAvatarUrl: storeInfo['storeAvatarUrl'],
+          // )
         ],
       ),
     );

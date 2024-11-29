@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_debouncer/flutter_debouncer.dart';
 
 mixin ThrollService {

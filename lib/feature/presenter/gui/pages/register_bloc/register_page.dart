@@ -45,8 +45,6 @@ class _RegistrationFormStatePage extends State<RegistrationFormPage> {
   }
 
   void _registrationMethod() {
-    logger.d(phoneNumberController.text);
-    logger.d(emailAddressController.text == "");
     bool isNotNull = phoneNumberController.text != "" &&
         emailAddressController.text != "" &&
         fullNameController.text != "";

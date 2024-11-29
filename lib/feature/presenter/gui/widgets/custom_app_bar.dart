@@ -1,16 +1,22 @@
-import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/chats_page_bloc.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/add_ons_blocs/check_friends_bloc/check_friends_bloc.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
 
+import '../pages/order_details/order_page.dart';
+
 class CustomAppBar extends StatelessWidget {
   final Function(String value) onChangeSearchCrops;
-  final void Function() onPressedIconUser;
 
-  const CustomAppBar(
-      {super.key,
-      required this.onChangeSearchCrops,
-      required this.onPressedIconUser});
+  // final void Function() onPressedIconUser;
+  final VoidCallback onPressedIconUser;
+
+  const CustomAppBar({
+    super.key,
+    required this.onChangeSearchCrops,
+    required this.onPressedIconUser,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -74,13 +80,14 @@ class CustomAppBar extends StatelessWidget {
                 child: CircleAvatar(
                   radius: 8,
                   backgroundColor: Colors.red,
-                  child: BlocBuilder<ChatsPageBloc, ChatsPageState>(
+                  child: BlocBuilder<CheckFriendsBloc, CheckFriendsState>(
                     builder: (context, state) {
-                      int numberOfRequest = 123;
-                      logger.d(state);
-                      if (state is AllPendingRequestSuccessState) {
+                      // logger.d(state);
+                      if (state is CheckFriendsSuccessState) {
+                        int stateDataCount = state.data.length;
+                        // friendsRequestData = state.data;
                         return Text(
-                          '$numberOfRequest', // Notification count
+                          '$stateDataCount', // Notification count
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
@@ -105,6 +112,8 @@ class CustomAppBar extends StatelessWidget {
             icon: const Icon(Icons.shopping_cart),
             onPressed: () {
               // Placeholder for future cart function
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) => OrdersPage()));
             },
           ),
         ],

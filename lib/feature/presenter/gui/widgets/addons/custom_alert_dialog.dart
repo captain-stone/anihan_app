@@ -114,6 +114,7 @@ class CustomAlertDialog extends StatelessWidget {
   final Function()? onPressedCloseBtn;
   final Function()? onPressOkay;
   final Widget child;
+  final Color actionColor;
 
   const CustomAlertDialog({
     super.key,
@@ -127,6 +128,7 @@ class CustomAlertDialog extends StatelessWidget {
     this.onPressOkay,
     this.onPressedCloseBtn,
     required this.child,
+    this.actionColor = Colors.green,
   });
 
   @override
@@ -188,7 +190,7 @@ class CustomAlertDialog extends StatelessWidget {
                       BoxDecoration(borderRadius: BorderRadius.circular(12.0)),
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 159, 41, 33),
+                        backgroundColor: actionColor,
                         // primary: Colors.redAccent,
                         // onPrimary: Colors.black54,
                         shadowColor: Colors.redAccent,

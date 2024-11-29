@@ -1,10 +1,43 @@
+// ignore_for_file: library_private_types_in_public_api, prefer_final_fields
+
+import 'package:anihan_app/common/app_module.dart';
+import 'package:anihan_app/feature/data/models/api/store_user_services_api.dart';
+import 'package:anihan_app/feature/domain/parameters/product_add_cart_params.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/myinformation_farmer.dart';
+import 'package:anihan_app/feature/presenter/gui/widgets/addons/custom_alert_dialog.dart';
+import 'package:anihan_app/feature/presenter/gui/widgets/addons/informations_widgets/page/list_product.dart';
+import 'package:anihan_app/feature/presenter/gui/widgets/products/add_to_cart/add_to_cart_bloc.dart';
+import 'package:anihan_app/feature/presenter/gui/widgets/products/product_carousel.dart';
+import 'package:anihan_app/feature/presenter/gui/widgets/products/your_suggestions.dart';
+
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
+
+import '../../../../domain/entities/product_entity.dart';
+import '../../pages/add_ons_blocs/check_friends_bloc/check_friends_bloc.dart';
+import '../../pages/order_details/order_page.dart';
+import '../../routers/app_routers.dart';
+
 import 'product_custom_app_bar.dart';
 import '../sellers/seller_info_sections.dart';
+import 'product_favorite_cubit/product_favorite_cubit.dart';
 
 class ProductSectionPage extends StatefulWidget {
+  final String uid;
+  final ProductEntity productEntity;
+  final BuildContext checkUserContext;
+  final List<ProductEntity>? productList;
+
+  const ProductSectionPage(
+      {super.key,
+      required this.productEntity,
+      required this.checkUserContext,
+      required this.uid,
+      this.productList});
   @override
   _ProductSectionPageState createState() => _ProductSectionPageState();
 }
@@ -12,6 +45,13 @@ class ProductSectionPage extends StatefulWidget {
 class _ProductSectionPageState extends State<ProductSectionPage> {
   int _selectedIndex = 2;
   List<Map<String, dynamic>> cart = [];
+  List<String> variantImage = [];
+  final logger = Logger();
+  List<String> allImageUrl = [];
+  late final BuildContext _context;
+  late final CheckFriendsBloc checkFriendsBloc;
+  final _addToCartBloc = getIt<AddToCartBloc>();
+  List<ProductEntity> _productEntityList = [];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -19,30 +59,71 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
     });
   }
 
-  void _showBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.7,
-          maxChildSize: 0.9,
-          minChildSize: 0.5,
-          builder: (_, controller) {
-            return _buildBottomSheetContent();
-          },
-        );
-      },
-    );
+  @override
+  void initState() {
+    super.initState();
+
+    setState(() {
+      _context = widget.checkUserContext;
+      checkFriendsBloc = _context.read<CheckFriendsBloc>();
+      if (widget.productList != null) {
+        _productEntityList = widget.productList!;
+      }
+
+      allImageUrl = [...widget.productEntity.productImage];
+
+      if (widget.productEntity.productVariant != null) {
+        for (var image in widget.productEntity.productVariant!) {
+          if (image != null && image.images != null) {
+            allImageUrl.add(image.images!);
+          }
+        }
+      }
+    });
+
+    _context.read<CheckFriendsBloc>().add(GetFriendListCountEvent());
+    _context
+        .read<CheckFriendsBloc>()
+        .add(GetUserNameAndStoreNameEvent(widget.productEntity.storeId));
+
+    List<ProductVariantEntity?>? productVariant =
+        widget.productEntity.productVariant;
+    if (productVariant != null) {
+      for (var image in productVariant) {
+        if (image != null) {
+          String? imageUrl = image.images;
+          if (imageUrl != null) {
+            variantImage.add(imageUrl);
+          }
+        }
+      }
+    }
   }
 
-  Widget _buildBottomSheetContent() {
+  void _showBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (BuildContext context) =>
+            StatefulBuilder(builder: (context, setState) {
+              return DraggableScrollableSheet(
+                expand: false,
+                initialChildSize: 0.7,
+                maxChildSize: 0.9,
+                minChildSize: 0.5,
+                builder: (_, controller) {
+                  return _buildBottomSheetContent(setState);
+                },
+              );
+            }));
+  }
+
+  Widget _buildBottomSheetContent(StateSetter setState) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey[200],
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -52,48 +133,76 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
             Expanded(
               flex: 3, // Give more space to the left side
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Product Grid
-                  Expanded(
-                    child: GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2, // Change to 2 columns
-                        crossAxisSpacing: 10.0,
-                        mainAxisSpacing: 10.0,
-                      ),
-                      itemCount: 5,
+                  Flexible(
+                    // height: 340,
+                    fit: FlexFit.loose, // Use Flexible instead of Expanded
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: allImageUrl.length,
                       itemBuilder: (context, index) {
-                        return _buildProductCard(index);
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child:
+                              _buildProductCard(setState, allImageUrl, index),
+                        );
                       },
                     ),
                   ),
-                  SizedBox(height: 10),
-                  // Buttons at the bottom (Optional; can be removed if not needed)
+                  const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          // Add to cart action
+                          if (cart.isNotEmpty) {
+                            var listOfParams = cart
+                                .map((val) => ProductAddCartParams(
+                                    name: val['name'] as String,
+                                    quantity: val['quantity'],
+                                    price: val['price'],
+                                    image: val['image']))
+                                .toList();
+
+                            logger.d(widget.productEntity.storeId);
+
+                            _addToCartBloc.add(AddProductListToCart(
+                                widget.productEntity.storeId, listOfParams));
+                          } else {
+                            showDialog(
+                                context: context,
+                                builder: (context) => CustomAlertDialog(
+                                    colorMessage: Colors.red,
+                                    title: "Error",
+                                    onPressedCloseBtn: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text(
+                                        "The cart is empty please add your product to proceed")));
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               horizontal: 16.0, vertical: 12.0),
                         ),
-                        child: Text("Add to Cart",
+                        child: const Text("Add to Cart",
                             style: TextStyle(color: Colors.white)),
                       ),
                       ElevatedButton(
                         onPressed: () {
                           // Buy now action
+
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => OrdersPage()));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orange,
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               horizontal: 16.0, vertical: 12.0),
                         ),
-                        child: Text("Buy Now",
+                        child: const Text("Buy Now",
                             style: TextStyle(color: Colors.white)),
                       ),
                     ],
@@ -101,12 +210,12 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
                 ],
               ),
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
 
             // Right side - Order Details
             Expanded(
               flex: 2, // Make the right side wider
-              child: _buildOrderDetails(),
+              child: _buildOrderDetails(setState),
             ),
           ],
         ),
@@ -114,96 +223,71 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
     );
   }
 
-  Widget _buildProductCard(int index) {
-    final List<Map<String, dynamic>> products = [
-      {
-        'name': 'Lanzones',
-        'price': 180,
-        'imageUrl':
-            'https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65'
-      },
-      {
-        'name': 'Rambutans',
-        'price': 200,
-        'imageUrl':
-            'https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65'
-      },
-      {
-        'name': 'Durians',
-        'price': 140,
-        'imageUrl':
-            'https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65'
-      },
-      {
-        'name': 'Mangoes',
-        'price': 120,
-        'imageUrl':
-            'https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65'
-      },
-      {
-        'name': 'Bananas',
-        'price': 65,
-        'imageUrl':
-            'https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65'
-      },
-    ];
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          // Check if the product is already in the cart
-          int existingIndex = cart
-              .indexWhere((item) => item['name'] == products[index]['name']);
-          if (existingIndex >= 0) {
-            // If it exists, increment the quantity
-            cart[existingIndex]['quantity']++;
-          } else {
-            // If not, add it to the cart with quantity 1
-            cart.add({
-              'name': products[index]['name'],
-              'price': products[index]['price'],
-              'quantity': 1
-            });
-          }
-        });
-      },
-      child: Card(
-        elevation: 3.0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        child: Column(
-          children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(12.0)),
-                child: Image.network(
-                  products[index]['imageUrl']!,
-                  fit: BoxFit.cover,
+  Widget _buildProductCard(
+      StateSetter setState, List<String> images, int index) {
+    return Card(
+      elevation: 3.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          IconButton(
+              onPressed: () => _removeProduct(setState, images, index),
+              icon: const Icon(Icons.remove)),
+          Column(
+            children: [
+              SizedBox(
+                width: MediaQuery.of(context).size.width *
+                    0.25, // Constrained width (full screen width)
+                height: 100, // Fixed height for the image
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 12.0, left: 8, right: 8),
+                  child: ClipRRect(
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(12.0)),
+                    child: Image.network(
+                      allImageUrl[index],
+                      fit: BoxFit.cover, // Make sure the image covers the area
+                    ),
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 8.0),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                products[index]['name']!,
-                style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold),
+              const SizedBox(height: 8.0),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text(
+                  index + 1 > widget.productEntity.productImage.length
+                      ? widget
+                          .productEntity
+                          .productVariant![
+                              index - widget.productEntity.productImage.length]!
+                          .varianName!
+                      : widget.productEntity.productName,
+                  style: const TextStyle(
+                      fontSize: 12.0, fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-          ],
-        ),
+              const SizedBox(height: 8.0),
+            ],
+          ),
+          IconButton(
+              onPressed: () => _addProduct(setState, images, index),
+              icon: const Icon(Icons.add)),
+        ],
       ),
     );
   }
 
-  Widget _buildOrderDetails() {
-    int total = cart.fold(
+  Widget _buildOrderDetails(StateSetter setState) {
+    double total = cart.fold(
         0,
         (sum, item) =>
-            sum + (item['price'] as int) * (item['quantity'] as int));
+            sum + (item['price'] as double) * (item['quantity'] as int));
 
     return Container(
+      // width: MediaQuery.of(context).size.width * 0.5,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12.0),
@@ -214,9 +298,9 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Your Order/s",
+            const Text("Your Order/s",
                 style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)),
-            Divider(),
+            const Divider(),
             Expanded(
               child: ListView.builder(
                 itemCount: cart.length,
@@ -235,16 +319,16 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
                 },
               ),
             ),
-            Divider(),
+            const Divider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('TOTAL',
+                const Text('TOTAL',
                     style:
                         TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)),
                 Text('₱$total',
-                    style:
-                        TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)),
+                    style: const TextStyle(
+                        fontSize: 16.0, fontWeight: FontWeight.bold)),
               ],
             ),
           ],
@@ -253,465 +337,380 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const PreferredSize(
-        preferredSize: Size.fromHeight(60.0),
-        child: ProductCustomAppBar(),
-      ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Product Carousel
-                ProductCarousel(
-                  imageUrls: [
-                    "https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65"
-                    // 'https://example.com/image1.jpg',
-                    // 'https://example.com/image2.jpg',
-                    // 'https://example.com/image3.jpg',
-                  ],
-                  productName: 'Saplings',
-                  price: 180,
-                  productsSold: 3100, // Example value
-                ),
-                SizedBox(height: 16.0),
-
-                // Seller Info Section with Divider
-                const SellerInfoSection(
-                  sellerName: 'John Doe',
-                  sellerLocation: 'Tanauan City, Batangas',
-                  sellerAvatarUrl: '',
-                  rating: 4.8,
-                  reviewCount: 1400,
-                ),
-                const SizedBox(height: 16.0),
-
-                // Product Ratings Section with "View All" Button
-                ProductRatingsSection(
-                  rating: 4.8,
-                  reviewCount: 1400,
-                ),
-                SizedBox(height: 16.0),
-
-                // Latest Reviews Section with Image Carousel and Overlays
-                LatestReviewsSection(
-                  reviews: const [
-                    {
-                      'name': 'F****s',
-                      'rating': 5,
-                      'text': 'Excellent quality! Fast shipping!',
-                      'avatarUrl':
-                          'https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65',
-                      'images': [
-                        "https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65"
-                        // 'https://example.com/review1_img1.jpg',
-                        // 'https://example.com/review1_img2.jpg',
-                        // 'https://example.com/review1_img3.jpg',
-                        // 'https://example.com/review1_img4.jpg',
-                        // 'https://example.com/review1_img5.jpg',
-                      ]
-                    },
-                    {
-                      'name': 'S****a',
-                      'rating': 4,
-                      'text': 'Product is good, but delivery took a bit long.',
-                      'avatarUrl':
-                          'https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65',
-                      'images': [
-                        "https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65"
-                            "https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65",
-                      ] // No images for this review
-                    },
-                    {
-                      'name': 'M****o',
-                      'rating': 5,
-                      'text': 'Great seller, will definitely buy again!',
-                      'avatarUrl':
-                          'https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65',
-                      'images': [
-                        "https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65"
-                        // 'https://example.com/review3_img1.jpg',
-                        // 'https://example.com/review3_img2.jpg',
-                        // 'https://example.com/review3_img3.jpg'
-                      ]
-                    },
-                    {
-                      'name': 'L****a',
-                      'rating': 5,
-                      'text':
-                          'Fast shipping and excellent packaging. Highly recommended!',
-                      'avatarUrl':
-                          'https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65',
-                      'images': [
-                        "https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65"
-                        // 'https://example.com/review4_img1.jpg',
-                        // 'https://example.com/review4_img2.jpg'
-                      ]
-                    },
-                    {
-                      'name': 'P****l',
-                      'rating': 5,
-                      'text': 'Very satisfied with the product. Thank you!',
-                      'avatarUrl':
-                          'https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65',
-                      'images': [
-                        "https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65"
-                        // 'https://example.com/review5_img1.jpg',
-                        // 'https://example.com/review5_img2.jpg',
-                        // 'https://example.com/review5_img3.jpg',
-                        // 'https://example.com/review5_img4.jpg',
-                        // 'https://example.com/review5_img5.jpg',
-                        // 'https://example.com/review5_img6.jpg'
-                      ]
-                    },
-                  ],
-                ),
-                SizedBox(height: 16.0),
-
-                // Recommendations Section
-                RecommendationsSection(
-                  recommendations: [
-                    {
-                      'name': 'Product A',
-                      'rating': 4,
-                      'sold': 1200,
-                      'imageUrl':
-                          'https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65',
-                    },
-                    {
-                      'name': 'Product B',
-                      'rating': 5,
-                      'sold': 1500,
-                      'imageUrl':
-                          'https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65',
-                    },
-                    {
-                      'name': 'Product C',
-                      'rating': 4,
-                      'sold': 980,
-                      'imageUrl':
-                          'https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65',
-                    },
-                    {
-                      'name': 'Product D',
-                      'rating': 5,
-                      'sold': 1300,
-                      'imageUrl':
-                          'https://firebasestorage.googleapis.com/v0/b/captainstone-e005a.appspot.com/o/products%2Fproduct-idTDZgtkiOykhUNaeSpQAwDZrif3z2%2Fvariant-images%2Fasd?alt=media&token=cd179fae-94fb-484b-b8ac-8db3e2af5b65',
-                    },
-                  ],
-                ),
-                SizedBox(height: 80), // Adding space for sticky bar
-              ],
-            ),
-          ),
-
-          // Sticky Bottom Bar (Now Touching Bottom Navigation Bar)
-          Positioned(
-            bottom: 0, // Sticky bar touching the bottom navigation bar
-            left: 0,
-            right: 0,
-            child: Container(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 10,
-                    offset: Offset(0, -1), // Shadow above the bar
-                  ),
-                ],
-              ),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Shop Icon Button
-                    IconButton(
-                      onPressed: () {
-                        // Handle Shop icon button action
-                      },
-                      icon: const Icon(Icons.store),
-                      color: Colors.green.shade700,
-                      iconSize: 30.0,
-                    ),
-                    // Chat Seller Button
-                    ElevatedButton.icon(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green.shade700,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 10.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                      ),
-                      icon: const Icon(Icons.chat_bubble_outline),
-                      label: const Text("Chat Seller"),
-                    ),
-
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        _showBottomSheet(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange.shade700,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24.0, vertical: 10.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                      ),
-                      child: const Text(
-                        "Add to Cart",
-                        style: TextStyle(fontSize: 16.0),
-                      ),
-                    ),
-
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        _showBottomSheet(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red.shade700,
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 28.0, vertical: 10.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                      ),
-                      child: Text(
-                        "Buy Now",
-                        style: TextStyle(fontSize: 16.0),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-
-      // Bottom Navigation Bar
-      // bottomNavigationBar: BottomNavigationBar(
-      //   items: const [
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.favorite),
-      //       label: 'Wishlist',
-      //     ),
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.message),
-      //       label: 'Messages',
-      //     ),
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.home),
-      //       label: 'Home',
-      //     ),
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.notifications),
-      //       label: 'Notifications',
-      //     ),
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.person),
-      //       label: 'Account',
-      //     ),
-      //   ],
-      //   currentIndex: _selectedIndex,
-      //   selectedItemColor: Colors.green.shade700,
-      //   unselectedItemColor: Colors.black54,
-      //   backgroundColor: Colors.white,
-      //   showSelectedLabels: true,
-      //   showUnselectedLabels: false,
-      //   type: BottomNavigationBarType.fixed,
-      //   elevation: 8.0,
-      //   onTap: _onItemTapped,
-      // ),
-    );
+  void _searchCrops(String value) {
+    logger.d(value);
   }
-}
 
-class ProductCarousel extends StatefulWidget {
-  final List<String> imageUrls;
-  final String productName;
-  final int price;
-  final int productsSold;
+  void _showFriendRequestList(BuildContext context) {
+    var state = context.read<CheckFriendsBloc>().state;
+    logger.d(state);
+    if (state is CheckFriendsSuccessState) {
+      var data = state.data;
+      var buildContext = context.read<CheckFriendsBloc>();
 
-  ProductCarousel({
-    required this.imageUrls,
-    required this.productName,
-    required this.price,
-    required this.productsSold,
-  });
-
-  @override
-  _ProductCarouselState createState() => _ProductCarouselState();
-}
-
-class _ProductCarouselState extends State<ProductCarousel> {
-  int _currentImageIndex = 0;
-  bool _isLiked = false;
-
-  String _formatProductsSold(int sold) {
-    if (sold >= 1000) {
-      return '${(sold / 1000).toStringAsFixed(1)}k';
+      AutoRouter.of(context).push(FriendRequestRoute(
+          data: data, checkFriendBuildContext: buildContext));
     }
-    return '$sold';
+    if (state is CheckFriendsErrorState) {
+      logger.d("NO DATA");
+    }
+  }
+
+  _addProduct(StateSetter setState, List<String> image, int index) {
+    setState(() {
+      logger.d(cart);
+      // int existingIndex = cart.indexWhere((item) {
+      //   logger.d(item['name']);
+      //   return item['name'] == widget.productEntity.productName;
+      // });
+
+      int existingIndex = cart.indexWhere((item) {
+        String productName;
+
+        if (index + 1 > widget.productEntity.productImage.length) {
+          productName = widget
+              .productEntity
+              .productVariant![
+                  index - widget.productEntity.productImage.length]!
+              .varianName!;
+        } else {
+          productName = widget.productEntity.productName;
+        }
+
+        logger.d('Cart item name: ${item['name']}');
+        logger.d('Product name to compare: $productName');
+
+        // Compare the item name with the selected product name
+        return item['name'] == productName;
+      });
+
+      logger.d(existingIndex);
+
+      if (existingIndex >= 0) {
+        cart[existingIndex]['quantity']++;
+      } else {
+        if (index + 1 > widget.productEntity.productImage.length) {
+          widget
+              .productEntity
+              .productVariant![
+                  index - widget.productEntity.productImage.length]!
+              .varianName!;
+          cart.add({
+            'name': widget
+                .productEntity
+                .productVariant![
+                    index - widget.productEntity.productImage.length]!
+                .varianName,
+            'image': widget
+                .productEntity
+                .productVariant![
+                    index - widget.productEntity.productImage.length]!
+                .imageData,
+            'price': double.tryParse(widget
+                .productEntity
+                .productVariant![
+                    index - widget.productEntity.productImage.length]!
+                .variantPrice
+                .toString()),
+            'quantity': 1
+          });
+        } else {
+          cart.add({
+            'name': widget.productEntity.productName,
+            'image': widget.productEntity.productImage[index],
+            'price':
+                double.tryParse(widget.productEntity.productPrice.toString()),
+            'quantity': 1
+          });
+        }
+      }
+    });
+  }
+
+  _removeProduct(StateSetter setState, List<String> image, int index) {
+    setState(() {
+      int existingIndex = cart.indexWhere((item) {
+        String productName;
+
+        if (index + 1 > widget.productEntity.productImage.length) {
+          productName = widget
+              .productEntity
+              .productVariant![
+                  index - widget.productEntity.productImage.length]!
+              .varianName!;
+        } else {
+          productName = widget.productEntity.productName;
+        }
+
+        return item['name'] == productName;
+      });
+
+      if (existingIndex >= 0) {
+        if (cart[existingIndex]['quantity'] > 1) {
+          cart[existingIndex]['quantity']--;
+        } else {
+          cart.removeAt(existingIndex);
+        }
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Carousel Slider for Images
-        Stack(
-          children: [
-            CarouselSlider(
-              options: CarouselOptions(
-                height: 300.0,
-                viewportFraction: 1.0,
-                enableInfiniteScroll: true,
-                onPageChanged: (index, reason) {
-                  setState(() {
-                    _currentImageIndex = index;
-                  });
-                },
-              ),
-              items: widget.imageUrls.map((imageUrl) {
-                return Builder(
-                  builder: (BuildContext context) {
-                    return Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                    );
-                  },
-                );
-              }).toList(),
-            ),
-            // Like/Heart Button on top of carousel
-            Positioned(
-              top: 10,
-              right: 10,
-              child: IconButton(
-                icon: Icon(
-                  _isLiked ? Icons.favorite : Icons.favorite_border,
-                  color: _isLiked ? Colors.red : Colors.white,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _isLiked = !_isLiked;
-                  });
-                },
+    return BlocConsumer<AddToCartBloc, AddToCartState>(
+      bloc: _addToCartBloc,
+      listener: (context, state) {
+        // logger.d(state);
+        if (state is AddToCartLoadingState) {
+          showDialog(
+            context: context,
+            barrierDismissible:
+                false, // Prevent dismissing the dialog by tapping outside
+            builder: (context) => const AlertDialog(
+              content: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(width: 16),
+                  Text('Adding to cart...'), // Optional: Display a message
+                ],
               ),
             ),
-          ],
-        ),
-        SizedBox(height: 10),
+          );
+        }
 
-        // Image Thumbnails Slider (Horizontal)
-        Container(
-          height: 80, // Fixed height for thumbnail section
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: List.generate(widget.imageUrls.length, (index) {
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _currentImageIndex = index;
-                    });
+        if (state is AddToCartSuccessState) {
+          Navigator.pop(context);
+          showDialog(
+              context: context,
+              builder: (context) => CustomAlertDialog(
+                  colorMessage: Colors.green,
+                  title: "Success",
+                  actionOkayVisibility: true,
+                  actionLabel: "Checkout",
+                  onPressOkay: () {
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const OrdersPage()));
                   },
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                    padding: const EdgeInsets.all(2.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: _currentImageIndex == index
-                            ? Colors.green.shade700
-                            : Colors.transparent,
-                        width: 2,
+                  onPressedCloseBtn: () {
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                      "You have added a product to your cart with a total price of ${state.dataModel.totalPrice}. Would you like to proceed to checkout?")));
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(60.0),
+            child: ProductCustomAppBar(
+              blocBuilder: BlocBuilder<CheckFriendsBloc, CheckFriendsState>(
+                bloc: checkFriendsBloc,
+                builder: (addContext, state) {
+                  if (state is CheckFriendsSuccessState) {
+                    int stateDataCount = state.data.length;
+                    // friendsRequestData = state.data;
+                    return Text(
+                      '$stateDataCount', // Notification count
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
                       ),
+                    );
+                  }
+                  return const Text(
+                    '0', // Notification count
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
                     ),
-                    child: Image.network(
-                      widget.imageUrls[index],
-                      width: 60,
-                      height: 60,
-                    ),
-                  ),
-                );
-              }),
+                  );
+                },
+              ),
+              addContext: _context,
+              onPressedIconUser: () => _showFriendRequestList(_context),
             ),
           ),
-        ),
-        SizedBox(height: 10),
-
-        // Product Details Section with background color
-        Container(
-          color: Colors.green, // Background color for product details
-          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          body: Stack(
             children: [
-              // Product Price and Name
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '₱${widget.price}',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyLarge!
-                        .copyWith(fontWeight: FontWeight.bold, fontSize: 24),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    widget.productName,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ],
-              ),
-              // Sold count and Like button aligned to the right
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '${_formatProductsSold(widget.productsSold)} Sold',
-                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          color: Colors.black,
-                        ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      _isLiked ? Icons.favorite : Icons.favorite_border,
-                      color: _isLiked ? Colors.red : Colors.black,
+              SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Product Carousel
+                    ProductCarousel(
+                      imageUrls: widget.productEntity.productImage,
+                      productName: widget.productEntity.productLabel,
+                      price: widget.productEntity.productPrice,
+                      productsSold: 3100, // Example value
+                      productVariantEntity:
+                          widget.productEntity.productVariant ?? [],
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _isLiked = !_isLiked;
-                      });
-                    },
+                    const SizedBox(height: 16.0),
+
+                    // Seller Info Section with Divider
+                    BlocBuilder<CheckFriendsBloc, CheckFriendsState>(
+                      bloc: checkFriendsBloc,
+                      builder: (context, state) {
+                        Map<String, String> dataMap = {};
+                        if (state is GetUserAndStoreNameSuccessState) {
+                          dataMap = state.name;
+                        }
+                        return SellerInfoSection(
+                          sellerName: dataMap["userName"] ?? "None",
+                          sellerLocation: dataMap["storeLocation"] ?? "None",
+                          sellerAvatarUrl: '',
+                          rating: 4.8,
+                          reviewCount: 1400,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16.0),
+
+                    // Product Ratings Section with "View All" Button
+                    ProductRatingsSection(
+                      rating: 4.8,
+                      reviewCount: 1400,
+                    ),
+                    const SizedBox(height: 16.0),
+
+                    LatestReviewsSection(reviews: []),
+                    const SizedBox(height: 16.0),
+
+                    // Recommendations Section
+                    // YouMayLikeWidget(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16.0, horizontal: 16.0),
+                      child: Text(
+                        'Recommended for You',
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.0,
+                            ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    BlocProvider(
+                      create: (context) => ProductFavoriteCubit(),
+                      child: YouMayLikeWidget(widget.uid,
+                          state: _productEntityList,
+                          sellerContext: widget.checkUserContext),
+                    ),
+                    // ListProduct(uid: widget.uid, product: cpm, dist: dist, parentContext: parentContext)
+                    const SizedBox(height: 80), // Adding space for sticky bar
+                  ],
+                ),
+              ),
+
+              // Sticky Bottom Bar (Now Touching Bottom Navigation Bar)
+              Positioned(
+                bottom: 0, // Sticky bar touching the bottom navigation bar
+                left: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 10.0, horizontal: 16.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 10,
+                        offset: Offset(0, -1), // Shadow above the bar
+                      ),
+                    ],
                   ),
-                ],
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Shop Icon Button
+                        IconButton(
+                          onPressed: () {
+                            // Handle Shop icon button action
+                          },
+                          icon: const Icon(Icons.store),
+                          color: Colors.green.shade700,
+                          iconSize: 30.0,
+                        ),
+                        // Chat Seller Button
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            // logger.d(variantImage);
+                            StoreUserServicesApi s = StoreUserServicesApi();
+
+                            s.getStoreIdInfo(
+                                'storeId-um2CJNQK4EeVy4xFck5kciIEZHA3-id');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green.shade700,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 10.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          icon: const Icon(Icons.chat_bubble_outline),
+                          label: const Text("Chat Seller"),
+                        ),
+
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            _showBottomSheet(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange.shade700,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24.0, vertical: 10.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          child: const Text(
+                            "Add to Cart",
+                            style: TextStyle(fontSize: 16.0),
+                          ),
+                        ),
+
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            _showBottomSheet(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red.shade700,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 28.0, vertical: 10.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          child: const Text(
+                            "Buy Now",
+                            style: TextStyle(fontSize: 16.0),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
@@ -810,77 +809,85 @@ class LatestReviewsSection extends StatelessWidget {
                 ),
           ),
           SizedBox(height: 10),
-          Column(
-            children: List.generate(
-              reviews.length > 3 ? 3 : reviews.length,
-              (index) {
-                var review = reviews[index];
-                return Column(
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundImage: review['avatarUrl'] != null
-                              ? NetworkImage(review['avatarUrl'])
-                              : null,
-                          child: review['avatarUrl'] == null
-                              ? Icon(Icons.person, size: 20)
-                              : null,
-                        ),
-                        SizedBox(width: 12.0),
-                        Expanded(
-                          child: Column(
+          reviews.isNotEmpty
+              ? Column(
+                  children: List.generate(
+                    reviews.length > 3 ? 3 : reviews.length,
+                    (index) {
+                      var review = reviews[index];
+                      return Column(
+                        children: [
+                          Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                review['name'],
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge!
-                                    .copyWith(fontWeight: FontWeight.bold),
+                              CircleAvatar(
+                                radius: 20,
+                                backgroundImage: review['avatarUrl'] != null
+                                    ? NetworkImage(review['avatarUrl'])
+                                    : null,
+                                child: review['avatarUrl'] == null
+                                    ? Icon(Icons.person, size: 20)
+                                    : null,
                               ),
-                              Row(
-                                children: List.generate(5, (starIndex) {
-                                  return Icon(
-                                    starIndex < review['rating']
-                                        ? Icons.star
-                                        : Icons.star_border,
-                                    color: Colors.amber,
-                                    size: 16,
-                                  );
-                                }),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                review['text'],
-                                style: Theme.of(context).textTheme.bodyMedium,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              if (review['images'] != null &&
-                                  review['images'].length > 0)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child:
-                                      _buildImageRow(context, review['images']),
+                              SizedBox(width: 12.0),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      review['name'],
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge!
+                                          .copyWith(
+                                              fontWeight: FontWeight.bold),
+                                    ),
+                                    Row(
+                                      children: List.generate(5, (starIndex) {
+                                        return Icon(
+                                          starIndex < review['rating']
+                                              ? Icons.star
+                                              : Icons.star_border,
+                                          color: Colors.amber,
+                                          size: 16,
+                                        );
+                                      }),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      review['text'],
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    if (review['images'] != null &&
+                                        review['images'].length > 0)
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(top: 8.0),
+                                        child: _buildImageRow(
+                                            context, review['images']),
+                                      ),
+                                  ],
                                 ),
+                              ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                    Divider(
-                      color: Colors.grey.shade300,
-                      height: 16.0,
-                      thickness: 1.0,
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
+                          Divider(
+                            color: Colors.grey.shade300,
+                            height: 16.0,
+                            thickness: 1.0,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                )
+              : const Center(
+                  child: Text("No Reviews"),
+                )
         ],
       ),
     );
@@ -1027,7 +1034,7 @@ class FullScreenImageCarousel extends StatelessWidget {
 class RecommendationsSection extends StatelessWidget {
   final List<Map<String, dynamic>> recommendations;
 
-  RecommendationsSection({required this.recommendations});
+  const RecommendationsSection({super.key, required this.recommendations});
 
   String _formatSoldCount(int sold) {
     if (sold >= 1000) {
@@ -1051,14 +1058,14 @@ class RecommendationsSection extends StatelessWidget {
                   fontSize: 18.0,
                 ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
 
           // GridView for 2-column layout
           GridView.builder(
             physics:
-                NeverScrollableScrollPhysics(), // Prevent inner scroll, use the main scroll
+                const NeverScrollableScrollPhysics(), // Prevent inner scroll, use the main scroll
             shrinkWrap: true, // Allows GridView inside a Column
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2, // 2 items per row
               crossAxisSpacing: 12.0, // Spacing between columns
               mainAxisSpacing: 12.0, // Spacing between rows
@@ -1081,7 +1088,7 @@ class RecommendationsSection extends StatelessWidget {
                     children: [
                       // Product Image
                       ClipRRect(
-                        borderRadius: BorderRadius.vertical(
+                        borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(12.0),
                         ),
                         child: Image.network(
@@ -1106,7 +1113,7 @@ class RecommendationsSection extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            SizedBox(height: 4.0),
+                            const SizedBox(height: 4.0),
 
                             // Row for Rating (Numerical + Stars) and Sold Items
                             Row(
@@ -1125,7 +1132,7 @@ class RecommendationsSection extends StatelessWidget {
                                             color: Colors.amber,
                                           ),
                                     ),
-                                    SizedBox(width: 4.0),
+                                    const SizedBox(width: 4.0),
                                     Row(
                                       children: List.generate(5, (starIndex) {
                                         return Icon(

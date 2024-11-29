@@ -4,7 +4,7 @@ import 'package:anihan_app/common/app_module.dart';
 import 'package:anihan_app/feature/domain/entities/product_entity.dart';
 import 'package:anihan_app/feature/domain/parameters/product_params.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/add_product_page/add_product_page_bloc.dart';
-import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
+
 import 'package:anihan_app/feature/presenter/gui/widgets/debugger/logger_debugger.dart';
 
 import 'package:auto_route/auto_route.dart';

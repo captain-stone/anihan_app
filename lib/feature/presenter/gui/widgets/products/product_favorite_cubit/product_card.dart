@@ -1,6 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api
 
 import 'package:anihan_app/common/api_result.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/add_ons_blocs/check_friends_bloc/check_friends_bloc.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/products/product_showcase_bloc/your_product_showcase.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/products/product_favorite_cubit/product_favorite_cubit.dart';
 
@@ -11,17 +12,25 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
 
 import '../../../../../domain/entities/product_entity.dart';
+import '../product_showcase_bloc/product_showcase_bloc.dart';
 
 class ProductCard extends StatefulWidget {
   final ProductDist dist;
   final ProductEntity product;
   final String uid;
+  final BuildContext parentContext;
+  final bool? isFavoriteProduct;
+  final List<ProductEntity>? productList;
 
-  const ProductCard(
-      {super.key,
-      required this.uid,
-      required this.product,
-      required this.dist});
+  const ProductCard({
+    super.key,
+    required this.uid,
+    required this.product,
+    required this.dist,
+    required this.parentContext,
+    this.isFavoriteProduct,
+    this.productList,
+  });
 
   @override
   _ProductCardState createState() => _ProductCardState();
@@ -32,13 +41,20 @@ class _ProductCardState extends State<ProductCard> {
   int _currentPage = 0;
   bool isFavorite = false;
   final logger = Logger();
+
   @override
   void initState() {
     super.initState();
-    // logger.d(widget.product);
+
+    // if (widget.isFavoriteProduct != null) {
+    //   setState(() {
+    //     isFavorite = widget.isFavoriteProduct!;
+    //   });
+    // }
+
     context
         .read<ProductFavoriteCubit>()
-        .addToFavorite(widget.product.productKey);
+        .getAllFavorite(widget.product.productKey);
     _pageController = PageController();
     _pageController.addListener(() {
       setState(() {
@@ -58,39 +74,46 @@ class _ProductCardState extends State<ProductCard> {
       isFavorite = !isFavorite;
     });
 
-    if (isFavorite) {
-      logger.i('Product $productKey added to favorites');
-      context.read<ProductFavoriteCubit>().addToFavorite(productKey);
-    }
+    logger.d("${widget.product.productKey}\n$isFavorite");
+
+    context.read<ProductFavoriteCubit>().addToFavorite(productKey, isFavorite);
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<ProductFavoriteCubit, ProductFavoriteState>(
       listener: (context, state) {
-        if (state is ProductFavoriteSuccessState) {
-          var data = state.successMessage;
-          // logger.d(data);
-          // isFavorite = data["favorite"];
-          if (data['favorite'] == widget.product.productKey) {
-            isFavorite = true;
-          }
+        if (state is ProducFavoriteDataState) {
+          setState(() {
+            isFavorite = state.data.contains(widget.product.productKey);
+          });
+          // logger.d("${widget.product.productKey}\n$isFavorite");
         }
       },
       child: GestureDetector(
         onTap: () {
-          logger.d(widget.product.productKey);
-          logger.d(isFavorite);
+          // print(widget.product.storeId);
+          widget.parentContext
+              .read<CheckFriendsBloc>()
+              .add(GetFriendListCountEvent());
 
           if (widget.dist == ProductDist.personal) {
             Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-              return YourProductShowcase(
-                products: widget.product,
+              return BlocProvider(
+                create: (context) => ProductShowcaseBloc(),
+                child: YourProductShowcase(
+                  products: widget.product,
+                ),
               );
             }));
           } else {
             Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-              return ProductSectionPage();
+              return ProductSectionPage(
+                uid: widget.uid,
+                checkUserContext: widget.parentContext,
+                productEntity: widget.product,
+                productList: widget.productList,
+              );
             }));
           }
 

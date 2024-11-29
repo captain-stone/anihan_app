@@ -36,3 +36,18 @@ class UserInformationInternetErrorState extends UserInformationBlocState {
   @override
   List<Object> get props => [message];
 }
+
+class LogOutErrorState extends UserInformationBlocState {
+  final String message;
+
+  const LogOutErrorState(this.message);
+  @override
+  List<Object> get props => [message];
+}
+
+class LogoutSuccessState extends UserInformationBlocState {
+  final String message;
+  const LogoutSuccessState(this.message);
+  @override
+  List<Object> get props => [message];
+}

@@ -40,13 +40,16 @@ class AllProductsAddOnsBloc
               }
             } else {
               var dataObject = (event.snapshot.value as Map<dynamic, dynamic>?);
-
+              logger.d(dataObject);
               if (dataObject != null) {
                 List<ProductEntity> productList = [];
 
                 dataObject.forEach((productId, productDetails) {
+                  var productIdModified =
+                      productId.replaceFirst("product-id", "");
                   productDetails.forEach((key, productInfo) {
                     String productIdKey = key;
+
                     if (productInfo['imageUrls'] != null &&
                         productInfo['name'] != null &&
                         productInfo['label'] != null &&
@@ -58,12 +61,21 @@ class AllProductsAddOnsBloc
                       String productLabel = productInfo['label'];
                       double productPrice = productInfo['price'].toDouble();
                       String itemDescriptions = productInfo['itemDescriptions'];
-                      String storeId = "storeId-${user!.uid}-id";
+                      String storeId = "storeId-$productIdModified-id";
 
                       List<ProductVariantEntity?>? productVariants;
-                      if (productInfo['variant-$productId-id'] != null) {
+
+                      logger.d(productInfo[
+                          'variant-${productId.replaceFirst("product-id", "")}-id']);
+                      // logger.d('variant-$productId-id');
+                      //logger.d(productInfo);
+
+                      if (productInfo
+                          .containsKey('variant-$productIdModified-id')) {
+                        logger.d("IT's OKAY");
                         productVariants =
-                            (productInfo['variant-$productId-id'] as List)
+                            (productInfo['variant-$productIdModified-id']
+                                    as List)
                                 .map((variant) => ProductVariantEntity(
                                     images: variant['variantImages'],
                                     varianName: variant['variantName'],

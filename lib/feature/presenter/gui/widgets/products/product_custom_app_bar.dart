@@ -1,7 +1,17 @@
+import 'package:anihan_app/feature/presenter/gui/pages/add_ons_blocs/check_friends_bloc/check_friends_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ProductCustomAppBar extends StatelessWidget {
-  const ProductCustomAppBar({super.key});
+  final VoidCallback onPressedIconUser;
+  final BuildContext addContext;
+  final BlocBuilder blocBuilder;
+
+  const ProductCustomAppBar(
+      {super.key,
+      required this.onPressedIconUser,
+      required this.addContext,
+      required this.blocBuilder});
 
   @override
   Widget build(BuildContext context) {
@@ -17,23 +27,15 @@ class ProductCustomAppBar extends StatelessWidget {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.people),
-                    onPressed: () {
-                      // Placeholder for future community function
-                    },
+                    onPressed: onPressedIconUser,
                   ),
-                  const Positioned(
+                  Positioned(
                     right: 4,
                     top: 4,
                     child: CircleAvatar(
                       radius: 8,
                       backgroundColor: Colors.red,
-                      child: Text(
-                        '3', // Notification count
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                        ),
-                      ),
+                      child: blocBuilder,
                     ),
                   ),
                 ],
