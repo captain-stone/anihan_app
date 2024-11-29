@@ -6,11 +6,13 @@ import 'package:logger/logger.dart';
 class CustomAppBar extends StatelessWidget {
   final Function(String value) onChangeSearchCrops;
   final void Function() onPressedIconUser;
+  final void Function() onPressedIconJournal;
 
   const CustomAppBar(
       {super.key,
       required this.onChangeSearchCrops,
-      required this.onPressedIconUser});
+      required this.onPressedIconUser,
+      required this.onPressedIconJournal});
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +22,7 @@ class CustomAppBar extends StatelessWidget {
       title: Row(
         children: [
           // SizedBox(width: 10),
+
           Expanded(
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -64,43 +67,45 @@ class CustomAppBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          Stack(
-            children: [
-              IconButton(
-                  icon: const Icon(Icons.people), onPressed: onPressedIconUser),
-              Positioned(
-                right: 4,
-                top: 4,
-                child: CircleAvatar(
-                  radius: 8,
-                  backgroundColor: Colors.red,
-                  child: BlocBuilder<ChatsPageBloc, ChatsPageState>(
-                    builder: (context, state) {
-                      int numberOfRequest = 123;
-                      logger.d(state);
-                      if (state is AllPendingRequestSuccessState) {
-                        return Text(
-                          '$numberOfRequest', // Notification count
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                          ),
-                        );
-                      }
-                      return const Text(
-                        '0', // Notification count
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 10),
+          // Stack(
+          //   children: [
+          //     IconButton(
+          //         icon: const Icon(Icons.people), onPressed: onPressedIconUser),
+          //     Positioned(
+          //       right: 4,
+          //       top: 4,
+          //       child: CircleAvatar(
+          //         radius: 8,
+          //         backgroundColor: Colors.red,
+          //         child: BlocBuilder<ChatsPageBloc, ChatsPageState>(
+          //           builder: (context, state) {
+          //             int numberOfRequest = 123;
+          //             logger.d(state);
+          //             if (state is AllPendingRequestSuccessState) {
+          //               return Text(
+          //                 '$numberOfRequest', // Notification count
+          //                 style: const TextStyle(
+          //                   color: Colors.white,
+          //                   fontSize: 10,
+          //                 ),
+          //               );
+          //             }
+          //             return const Text(
+          //               '0', // Notification count
+          //               style: TextStyle(
+          //                 color: Colors.white,
+          //                 fontSize: 10,
+          //               ),
+          //             );
+          //           },
+          //         ),
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          IconButton(
+              onPressed: onPressedIconJournal,
+              icon: Icon(Icons.insert_drive_file_rounded)),
           IconButton(
             icon: const Icon(Icons.shopping_cart),
             onPressed: () {

@@ -1,5 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api
 
+import 'package:anihan_app/feature/presenter/gui/pages/Journal/journal_page.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/chats_page_bloc.dart';
 import 'package:auto_route/annotations.dart';
 import 'package:auto_route/auto_route.dart';
@@ -49,6 +50,11 @@ class _HomePageState extends State<HomePage> {
         child: CustomAppBar(
           onChangeSearchCrops: _searchCrops,
           onPressedIconUser: () {},
+          onPressedIconJournal: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return JournalPage();
+            }));
+          },
         ),
       ),
       body: SingleChildScrollView(
