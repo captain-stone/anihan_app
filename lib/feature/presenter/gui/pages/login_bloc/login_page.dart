@@ -3,7 +3,6 @@ import 'package:anihan_app/feature/domain/parameters/login_params.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/login_bloc/login_page_bloc.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/addons/custom_alert_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../../../services/auth_services.dart';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
@@ -59,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
           builder: (builder) {
             return CustomAlertDialog(
                 colorMessage: Colors.red,
-                title: "Login Erro",
+                title: "Login Error",
                 onPressedCloseBtn: () {
                   Navigator.of(context).pop();
                 },
