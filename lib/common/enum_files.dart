@@ -7,3 +7,12 @@ enum FriendStatus {
   unknown,
   request
 }
+
+enum JoinCommunity {
+  pending,
+  accepted,
+  requested,
+  error,
+  none,
+  join,
+}

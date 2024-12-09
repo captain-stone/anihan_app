@@ -16,11 +16,11 @@ class StoreUserServicesApi {
     try {
       DataSnapshot dataSnapshot =
           await _refs.once().then((event) => event.snapshot);
-      logger.d(dataSnapshot.value);
+      // logger.d(dataSnapshot.value);
       if (dataSnapshot.exists) {
         Map<dynamic, dynamic>? storeData = dataSnapshot.value as Map?;
 
-        logger.d(storeData);
+        // logger.d(storeData);
         if (storeData != null) {
           var createdAt = storeData['created_at'];
           var storeAddress = await getFullAddress(storeData['storeAddress']);

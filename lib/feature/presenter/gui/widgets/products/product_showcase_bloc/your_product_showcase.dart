@@ -25,7 +25,7 @@ class _YourProductShowcaseState extends State<YourProductShowcase> {
   @override
   void initState() {
     super.initState();
-    logger.d(widget.products);
+
     storeInfo = {};
 
     //     WidgetsBinding.instance.addPostFrameCallback((_) {

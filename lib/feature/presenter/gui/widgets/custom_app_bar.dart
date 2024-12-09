@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
 
+import '../pages/chats_bloc/blocs/chat_page/chats_page_bloc.dart';
 import '../pages/order_details/order_page.dart';
 
 class CustomAppBar extends StatelessWidget {
@@ -12,12 +13,14 @@ class CustomAppBar extends StatelessWidget {
   // final void Function() onPressedIconUser;
   final void Function() onPressedIconJournal;
   final VoidCallback onPressedIconUser;
+  final String uid;
 
   const CustomAppBar({
     super.key,
     required this.onChangeSearchCrops,
     required this.onPressedIconUser,
     required this.onPressedIconJournal,
+    required this.uid,
   });
 
   @override
@@ -73,42 +76,42 @@ class CustomAppBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          // Stack(
-          //   children: [
-          //     IconButton(
-          //         icon: const Icon(Icons.people), onPressed: onPressedIconUser),
-          //     Positioned(
-          //       right: 4,
-          //       top: 4,
-          //       child: CircleAvatar(
-          //         radius: 8,
-          //         backgroundColor: Colors.red,
-          //         child: BlocBuilder<ChatsPageBloc, ChatsPageState>(
-          //           builder: (context, state) {
-          //             int numberOfRequest = 123;
-          //             logger.d(state);
-          //             if (state is AllPendingRequestSuccessState) {
-          //               return Text(
-          //                 '$numberOfRequest', // Notification count
-          //                 style: const TextStyle(
-          //                   color: Colors.white,
-          //                   fontSize: 10,
-          //                 ),
-          //               );
-          //             }
-          //             return const Text(
-          //               '0', // Notification count
-          //               style: TextStyle(
-          //                 color: Colors.white,
-          //                 fontSize: 10,
-          //               ),
-          //             );
-          //           },
-          //         ),
-          //       ),
-          //     ),
-          //   ],
-          // ),
+          Stack(
+            children: [
+              IconButton(
+                  icon: const Icon(Icons.people), onPressed: onPressedIconUser),
+              Positioned(
+                right: 4,
+                top: 4,
+                child: CircleAvatar(
+                  radius: 8,
+                  backgroundColor: Colors.red,
+                  child: BlocBuilder<ChatsPageBloc, ChatsPageState>(
+                    builder: (context, state) {
+                      int numberOfRequest = 123;
+                      logger.d(state);
+                      if (state is AllPendingRequestSuccessState) {
+                        return Text(
+                          '$numberOfRequest', // Notification count
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                          ),
+                        );
+                      }
+                      return const Text(
+                        '0', // Notification count
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
           IconButton(
               onPressed: onPressedIconJournal,
               icon: Icon(Icons.insert_drive_file_rounded)),
@@ -116,8 +119,10 @@ class CustomAppBar extends StatelessWidget {
             icon: const Icon(Icons.shopping_cart),
             onPressed: () {
               // Placeholder for future cart function
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (context) => OrdersPage()));
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => OrdersPage(
+                        uid: uid,
+                      )));
             },
           ),
         ],

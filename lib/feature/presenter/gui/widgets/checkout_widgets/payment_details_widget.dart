@@ -18,7 +18,7 @@ class PaymentDetailsWidget extends StatelessWidget {
             _buildDetailRow("Merchandise Subtotal", "₱$total"),
             _buildDetailRow("Shipping Subtotal", "₱50"),
             const Divider(),
-            _buildDetailRow("Total Payment", "₱1250", isBold: true),
+            _buildDetailRow("Total Payment", "₱${total + 50}", isBold: true),
           ],
         ),
       ),

@@ -37,6 +37,7 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
   final _labelController = TextEditingController();
   final _priceController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _productQuantityQuantity = TextEditingController();
   bool isLoading = false;
   String? selectedValue;
   final List<String> label = [
@@ -63,7 +64,7 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
         setState(() {
           _imageDataList.add(data);
         });
-        logger.d(fileExtension);
+        // logger.d(fileExtension);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -121,7 +122,6 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
 
     // Check if at least one image is uploaded
     if (_imageDataList.isEmpty) {
-      logger.d("PRODUCT VARIANT IMAGE: ");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('Please upload at least one product image.')),
@@ -134,7 +134,6 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
       final state = key.currentState;
 
       if (state == null) {
-        logger.d('State is null for key: ${key.currentState}');
         return false;
       }
 
@@ -148,12 +147,13 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
       _productNameController.text,
       selectedValue ?? "None",
       double.tryParse(_priceController.text)!,
+      double.tryParse(_productQuantityQuantity.text)!,
       _imageDataList,
       _descriptionController.text,
       productVariant: data,
     );
 
-    logger.d(params);
+    logger.d(data);
 
     // logger.d(
     //     "DETAILS:\n${data[1]['productVariantImage'].length}\n${data[0]['productVariantImage'].runtimeType}");
@@ -290,18 +290,44 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextFormField(
-          controller: _productNameController,
-          decoration: InputDecoration(
-            labelText: 'Product Name:',
-            labelStyle: Theme.of(context).textTheme.bodyMedium,
-          ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter a product name.';
-            }
-            return null;
-          },
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _productNameController,
+                decoration: InputDecoration(
+                  labelText: 'Product Name:',
+                  labelStyle: Theme.of(context).textTheme.bodyMedium,
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a product name.';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            Expanded(
+              child: TextFormField(
+                controller: _productQuantityQuantity,
+                decoration: InputDecoration(
+                  labelText: 'Quantity:',
+                  labelStyle: Theme.of(context).textTheme.bodyMedium,
+                ),
+                keyboardType: TextInputType.number,
+                // validator: (value) {
+                //   if (value == null || value.isEmpty) {
+                //     return 'Please enter a price.';
+                //   }
+                //   return null;
+                // },
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 10),
         Row(
@@ -321,22 +347,6 @@ class _AddProductFormState extends State<AddProductFormPage> with LoggerEvent {
                         selectedValue = value;
                       });
                     })),
-
-            // Expanded(
-            //   child: TextFormField(
-            //     controller: _labelController,
-            //     decoration: InputDecoration(
-            //       labelText: 'Label:',
-            //       labelStyle: Theme.of(context).textTheme.bodyMedium,
-            //     ),
-            //     validator: (value) {
-            //       if (value == null || value.isEmpty) {
-            //         return 'Please enter a label.';
-            //       }
-            //       return null;
-            //     },
-            //   ),
-            // ),
             const SizedBox(width: 10),
             Expanded(
               child: TextFormField(

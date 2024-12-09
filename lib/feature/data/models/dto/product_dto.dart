@@ -7,8 +7,13 @@ class ProductVariantDto {
   final String? variantName;
   final String? variantPrice;
   final String? variantImages;
+  final String? variantQuantity;
 
-  ProductVariantDto({this.variantName, this.variantPrice, this.variantImages});
+  ProductVariantDto(
+      {this.variantName,
+      this.variantPrice,
+      this.variantImages,
+      this.variantQuantity});
 
   factory ProductVariantDto.fromJson(Map<String, dynamic> json) =>
       _$ProductVariantDtoFromJson(json);
@@ -28,6 +33,7 @@ class ProductDataDto {
   final String productItemDescriptions;
   @JsonKey(name: "price")
   final double productPrice;
+  final double productQuantity;
   final String? storeId;
   final String? userId;
   // final List<Map<String, dynamic>?>? productVariantDtoList;
@@ -38,6 +44,7 @@ class ProductDataDto {
     required this.productLabel,
     required this.productItemDescriptions,
     required this.productPrice,
+    required this.productQuantity,
     // this.productVariantDtoList,
     this.storeId,
     this.userId,

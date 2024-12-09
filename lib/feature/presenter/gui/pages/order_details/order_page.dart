@@ -1,3 +1,5 @@
+// ignore_for_file: use_super_parameters
+
 import 'package:anihan_app/common/api_result.dart';
 import 'package:anihan_app/common/app_module.dart';
 import 'package:anihan_app/feature/data/models/api/store_user_services_api.dart';
@@ -13,7 +15,8 @@ import 'package:logger/logger.dart';
 import '../../../../domain/entities/add_to_cart_entity.dart';
 
 class OrdersPage extends StatefulWidget {
-  const OrdersPage({super.key});
+  final String uid;
+  const OrdersPage({super.key, required this.uid});
 
   @override
   State<OrdersPage> createState() => _OrdersPageState();
@@ -21,9 +24,10 @@ class OrdersPage extends StatefulWidget {
 
 class _OrdersPageState extends State<OrdersPage> {
   final _cartBloc = getIt<AddToCartBloc>();
-  List<AddToCartEntity> productsCart = [];
+  List<AllCartEntity> productsCart = [];
   final logger = Logger();
   int currentIndex = 0;
+  bool hasData = true;
 
   @override
   void initState() {
@@ -43,7 +47,14 @@ class _OrdersPageState extends State<OrdersPage> {
 
         if (state is AllCartSuccessState) {
           setState(() {
+            hasData = true;
             productsCart = state.dataModel;
+          });
+        }
+
+        if (state is AddToCartErrorState) {
+          setState(() {
+            hasData = false;
           });
         }
       },
@@ -86,70 +97,69 @@ class _OrdersPageState extends State<OrdersPage> {
               ),
             ],
           ),
-          // body: ListView.builder(
-          //   padding: const EdgeInsets.symmetric(vertical: 8.0),
-          //   itemCount: productsCart.length, // Example item count
-          //   itemBuilder: (context, index) {
-          //     return _OrderCard(
-          //       orderId: productsCart[index].cartId,
-          //       customerName: productsCart[index].storeId,
-          //       dateMillis: productsCart[index].createAt,
-          //       totalPrice: productsCart[index].totalPrice,
-          //       products: productsCart[index].productEntity,
-          //     );
-          //   },
-          // ),
+          body: !hasData
+              ? const Center(
+                  child: Text("No products available for checkout"),
+                )
+              : Column(
+                  children: [
+                    // The list of orders
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        itemCount: productsCart.length,
+                        itemBuilder: (context, index) {
+                          logger.e(productsCart[index].productEntity);
+                          // if (productsCart[index].cartId ==
+                          //     productsCart[index].productEntity[index]
+                          //         [productsCart[index].cartId]) {
+                          logger.d(productsCart[index]);
+                          // AllCartEntity
+                          // }
+                          return Column(
+                            children: [
+                              _OrderCard(
+                                data: productsCart[index],
+                                // orderId: productsCart[index].cartId,
+                                // customerName: productsCart[index].storeId,
+                                // dateMillis: productsCart[index].createAt,
+                                // totalPrice: productsCart[index].totalPrice,
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
 
-          body: Column(
-            children: [
-              // The list of orders
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  itemCount: productsCart.length,
-                  itemBuilder: (context, index) {
-                    logger.e(productsCart[index].productEntity);
-                    return Column(
-                      children: [
-                        _OrderCard(
-                          orderId: productsCart[index].cartId,
-                          customerName: productsCart[index].storeId,
-                          dateMillis: productsCart[index].createAt,
-                          totalPrice: productsCart[index].totalPrice,
-                          products: productsCart[index].productEntity,
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Your button action here
+                          // ScaffoldMessenger.of(context).showSnackBar(
+                          //   const SnackBar(content: Text('Checkout clicked!')),
+                          // );
+
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => CheckoutPage(
+                                    uid: widget.uid,
+                                    productEntity: productsCart,
+                                  )));
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          minimumSize:
+                              const Size.fromHeight(50), // Button height
                         ),
-                      ],
-                    );
-                  },
+                        child: const Text(
+                          'Checkout',
+                          style: TextStyle(fontSize: 18, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Your button action here
-                    // ScaffoldMessenger.of(context).showSnackBar(
-                    //   const SnackBar(content: Text('Checkout clicked!')),
-                    // );
-
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => CheckoutPage(
-                              productEntity: productsCart,
-                            )));
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    minimumSize: const Size.fromHeight(50), // Button height
-                  ),
-                  child: const Text(
-                    'Checkout',
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                  ),
-                ),
-              ),
-            ],
-          ),
         );
       },
     );
@@ -157,19 +167,20 @@ class _OrdersPageState extends State<OrdersPage> {
 }
 
 class _OrderCard extends StatefulWidget {
-  final String customerName;
-  final String orderId;
-  final int dateMillis;
-  final double totalPrice;
-  final List<AddToCartProductEntity> products;
+  // final String customerName;
+  // final String orderId;
+  // final int dateMillis;
+  // final double totalPrice;
+
+  final AllCartEntity data;
 
   const _OrderCard({
     Key? key,
-    required this.customerName,
-    required this.orderId,
-    required this.dateMillis,
-    required this.totalPrice,
-    required this.products,
+    required this.data,
+    // required this.customerName,
+    // required this.orderId,
+    // required this.dateMillis,
+    // required this.totalPrice,
   }) : super(key: key);
 
   @override
@@ -181,6 +192,7 @@ class _OrderCardState extends State<_OrderCard> {
   final StoreUserServicesApi storeUserServicesApi = StoreUserServicesApi();
   // late StoreDataEntity? storeDataEntity;
   String storeName = "";
+  String storeAddress = '';
   final logger = Logger();
   @override
   void initState() {
@@ -188,7 +200,7 @@ class _OrderCardState extends State<_OrderCard> {
     // logger.d(widget.products);
 
     Future.delayed(const Duration(milliseconds: 275)).then((_) async {
-      var data = await storeUserServicesApi.getStoreIdInfo(widget.customerName);
+      var data = await storeUserServicesApi.getStoreIdInfo(widget.data.storeId);
       var status = data.status;
 
       if (status == Status.success && mounted) {
@@ -197,16 +209,19 @@ class _OrderCardState extends State<_OrderCard> {
           if (data.data != null) {
             StoreDataEntity storeDataEntity = data.data!;
             storeName = storeDataEntity.storeName;
+            storeAddress = storeDataEntity.storeAddress;
           }
         });
       }
     });
+
+    // logger.d(widget.data.productEntity);
   }
 
   @override
   Widget build(BuildContext context) {
     final DateTime orderDate =
-        DateTime.fromMillisecondsSinceEpoch(widget.dateMillis);
+        DateTime.fromMillisecondsSinceEpoch(widget.data.createAt);
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 12.0),
@@ -232,10 +247,6 @@ class _OrderCardState extends State<_OrderCard> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const CircleAvatar(
-                    radius: 28.0,
-                  ),
-                  const SizedBox(width: 12.0),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,7 +264,7 @@ class _OrderCardState extends State<_OrderCard> {
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         Text(
-                          'Location: Banjo West, Tanauan City',
+                          'Location: $storeAddress',
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         // Text(
@@ -272,7 +283,7 @@ class _OrderCardState extends State<_OrderCard> {
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: Text(
-                      widget.orderId,
+                      widget.data.cartId,
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
                   ),
@@ -289,17 +300,27 @@ class _OrderCardState extends State<_OrderCard> {
                     ),
                     const SizedBox(height: 8.0),
                     // Example product list
+
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: widget.products.length,
+                      itemCount: widget.data.productEntity.length,
                       itemBuilder: (context, index) {
-                        final product = widget.products[index];
-                        return _buildProductItem(
-                          product.name,
-                          product.quantity,
-                          product.price,
-                        );
+                        final product = widget.data.productEntity[index]
+                            [widget.data.storeId];
+                        // logger.d(product);
+
+                        if (product != null) {
+                          if (product is AddToCartProductEntity) {
+                            return _buildProductItem(
+                              product.name,
+                              product.quantity,
+                              product.price,
+                              product.image,
+                            );
+                          }
+                        }
+                        return SizedBox.shrink();
                       },
                     ),
                   ],
@@ -312,14 +333,57 @@ class _OrderCardState extends State<_OrderCard> {
     );
   }
 
-  Widget _buildProductItem(String name, int quantity, double price) {
+  Widget _buildProductItem(
+      String name, int quantity, double price, String image) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('$name (x$quantity)'),
-          Text('₱${(quantity * price).toStringAsFixed(2)}'),
+          CircleAvatar(
+            radius: 30,
+            backgroundColor: Colors.grey[200],
+            child: ClipOval(
+              child: Image.network(
+                image,
+                width: 60,
+                height: 60,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              (loadingProgress.expectedTotalBytes ?? 1)
+                          : null,
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(
+                    Icons.broken_image,
+                    size: 30,
+                    color: Colors.grey,
+                  );
+                },
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                '$name (x$quantity)',
+                style: const TextStyle(fontSize: 16),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+          Text(
+            '₱${(quantity * price).toStringAsFixed(2)}',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );

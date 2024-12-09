@@ -3,6 +3,7 @@
 import 'package:anihan_app/common/enum_files.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/wish_list_page/friends_bloc/friends_list_page_bloc.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/wish_list_page/wishlist_bloc/wish_list_page_bloc.dart';
+import 'package:anihan_app/feature/presenter/gui/widgets/addons/custom_alert_dialog.dart';
 import 'package:auto_route/annotations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -32,6 +33,7 @@ class _WishListPageState extends State<WishListPage> {
   final logger = Logger();
   List<FirebaseDataModel> requestedUsers = [];
   List<FirebaseDataModel> friends = [];
+  final _communityController = TextEditingController();
 
   @override
   void initState() {
@@ -60,7 +62,7 @@ class _WishListPageState extends State<WishListPage> {
                 builder: (context, state) {
                   if (state is FriendsListPageSuccessState) {
                     var data = state.data;
-                    logger.d(data);
+                    // logger.d(data);
 
                     requestedUsers = data
                         .where((status) =>
@@ -84,47 +86,18 @@ class _WishListPageState extends State<WishListPage> {
                     logger.d(friends);
                   }
                   return FollowingSection(
-                      users: friends, communities: communities);
-                },
-              ),
-              // const SizedBox(height: 20.0),
-              BlocBuilder<WishListPageBloc, WishListPageState>(
-                builder: (context, state) {
-                  // logger.d(state);
-                  if (state is WishListPageSuccessState) {
-                    var productEntity = state.productEntityList;
-                    return WishlistSection(
-                      uid: widget.uid!,
-                      productEntityList: productEntity,
-                      // productListEntity
-                      size: Size(_width, _height),
-                    );
-                  } else {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            'Wishlist',
-                            style: Theme.of(context).textTheme.headlineSmall,
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.center,
-                          child: SizedBox(
-                            width: _width * 0.7,
-                            child: const Center(
-                              child: Text(
-                                "You do not have any wishlist, try adding one.",
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }
+                    users: friends,
+                    communities: communities,
+                    communityController: _communityController,
+                    saveCommunityNameFunction: () {
+                      logger.d("HAhsHDASDS;A");
+                      setState(() {
+                        communities
+                            .add(Community(_communityController.text, 0));
+                        logger.d(communities);
+                      });
+                    },
+                  );
                 },
               ),
             ],
@@ -176,9 +149,15 @@ class UpperBar extends StatelessWidget implements PreferredSizeWidget {
 class FollowingSection extends StatelessWidget {
   final List<FirebaseDataModel> users;
   final List<Community> communities;
+  final TextEditingController communityController;
+  final void Function() saveCommunityNameFunction;
 
   const FollowingSection(
-      {Key? key, required this.users, required this.communities})
+      {Key? key,
+      required this.users,
+      required this.communities,
+      required this.communityController,
+      required this.saveCommunityNameFunction})
       : super(key: key);
 
   @override
@@ -234,12 +213,55 @@ class FollowingSection extends StatelessWidget {
         const SizedBox(
           height: 12,
         ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            'Communities',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Communities',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextButton(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return CustomAlertDialog(
+                              colorMessage: Colors.green,
+                              title: "Community",
+                              actionLabel: "Save",
+                              onPressedCloseBtn: () {
+                                Navigator.of(context).pop();
+                              },
+                              actionCloseVisibility: true,
+                              actionOkayVisibility: true,
+                              onPressOkay: saveCommunityNameFunction,
+                              child: TextFormField(
+                                controller: communityController,
+                                decoration: InputDecoration(
+                                  labelText: 'Community Name:',
+                                  labelStyle:
+                                      Theme.of(context).textTheme.bodyMedium,
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your community name.';
+                                  }
+                                  return null;
+                                },
+                              ));
+                        });
+                  },
+                  child: Text(
+                    'add',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  )),
+            ),
+          ],
         ),
         const SizedBox(
           height: 12,

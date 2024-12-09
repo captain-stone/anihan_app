@@ -158,7 +158,7 @@ class CustomAlertDialog extends StatelessWidget {
         child: child,
       ),
       contentPadding:
-          const EdgeInsets.symmetric(horizontal: 18.0, vertical: 18.0),
+          const EdgeInsets.symmetric(horizontal: 18.0, vertical: 14.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
       actionsPadding: const EdgeInsets.all(18.0),
       actions: [

@@ -24,7 +24,7 @@ class YourProduct extends StatefulWidget {
 class _YourProductState extends State<YourProduct> {
   late Future<List<ProductEntity>> _recommendedProductsFuture;
 
-  late final List<ProductEntity> _state;
+  List<ProductEntity> _state = [];
   final logger = Logger();
 
   @override

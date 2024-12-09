@@ -59,6 +59,7 @@ class ProductAddOnsBloc extends Bloc<ProductAddOnsEvent, ProductAddOnsState>
                     String productLabel = value['label'];
                     double productPrice =
                         double.parse(value['price'].toString());
+                    int productQuantity = int.parse(value['price'].toString());
                     String itemDescriptions = value['itemDescriptions'];
                     String storeId = "storeId-${user!.uid}-id";
 
@@ -68,13 +69,20 @@ class ProductAddOnsBloc extends Bloc<ProductAddOnsEvent, ProductAddOnsState>
                                 ?.map((variant) => ProductVariantEntity(
                                     images: variant['variantImages'],
                                     varianName: variant['variantName'],
-                                    variantPrice: variant['variantPrice']))
+                                    variantPrice: variant['variantPrice'],
+                                    variantQuantity:
+                                        variant['variantQuantity']))
                                 .toList() ??
                             []; // Fallback to an empty list if null
 
                     // Create a ProductEntity and add it to the list
-                    productList.add(ProductEntity(productImages, productName,
-                        productLabel, productPrice, itemDescriptions,
+                    productList.add(ProductEntity(
+                        productImages,
+                        productName,
+                        productLabel,
+                        productPrice,
+                        productQuantity,
+                        itemDescriptions,
                         productVariant: productVariants,
                         productKey: key,
                         storeId: storeId));

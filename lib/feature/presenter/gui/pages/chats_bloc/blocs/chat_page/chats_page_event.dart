@@ -37,3 +37,18 @@ class SearchFriendEvent extends ChatsPageEvent {
   @override
   List<Object> get props => [query];
 }
+
+class GetAllCommunityEvent extends ChatsPageEvent {
+  const GetAllCommunityEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class AddCommunityEvent extends ChatsPageEvent {
+  final String communityName;
+  const AddCommunityEvent(this.communityName);
+
+  @override
+  List<Object?> get props => [communityName];
+}

@@ -7,12 +7,13 @@ import 'package:anihan_app/common/api_result.dart';
 import 'package:anihan_app/common/app_module.dart';
 import 'package:anihan_app/feature/domain/parameters/params.dart';
 import 'package:anihan_app/feature/domain/parameters/user_information_params.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/cubit/add_update_user_address_cubit.dart';
+import 'package:anihan_app/feature/presenter/gui/widgets/addons/custom_alert_dialog.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/addons/customer_order.dart';
-import 'package:anihan_app/feature/presenter/gui/pages/order_details/order_details_widget.dart';
+
 import 'package:anihan_app/feature/presenter/gui/pages/order_details/order_page.dart';
+import 'package:anihan_app/feature/presenter/gui/widgets/checkout_widgets/modal/add_update_address.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/products/add_to_cart/add_to_cart_bloc.dart';
-import 'package:anihan_app/feature/presenter/gui/widgets/products/product_favorite_cubit/product_favorite_cubit.dart';
-import 'package:anihan_app/feature/presenter/gui/widgets/products/product_showcase_bloc/product_showcase_bloc.dart';
 
 import 'package:anihan_app/feature/presenter/gui/widgets/products/your_products.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/sellers/seller_add_ons/seller_info_add_ons_bloc.dart';
@@ -49,11 +50,16 @@ class _MyInformationPageState extends State<MyInformationPage> {
   final FirebaseDatabase db = FirebaseDatabase.instance;
 
   final _bloc = getIt<UserInformationBlocBloc>();
+  final _addUpdateCubit = getIt<AddUpdateUserAddressCubit>();
   final _cartBloc = getIt<AddToCartBloc>();
   final _addProductBloc = getIt<ProductAddOnsBloc>();
   final logger = Logger();
   final ScrollController _scrollController = ScrollController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  final TextEditingController addressController = TextEditingController();
+  List<String> _listOfAddress = [];
+  String _selectedAddress = "";
 
   List<String> accessRolesLabel = ['user'];
   List<Widget> accessRoles = [
@@ -106,6 +112,7 @@ class _MyInformationPageState extends State<MyInformationPage> {
 
     // context.updateUserInformation(widget.uid!);
     _bloc.add(GetUidEvent(UserUidParams(widget.uid!)));
+    _addUpdateCubit.getAllTheSavedAddress(widget.uid!);
   }
 
   @override
@@ -243,6 +250,15 @@ class _MyInformationPageState extends State<MyInformationPage> {
     });
   }
 
+  _onSectedValue(String? value, StateSetter setState) {
+    // logger.d(value);
+    setState(() {
+      _selectedAddress = value ?? "None";
+    });
+
+    _addUpdateCubit.updateSelectedAddress(widget.uid!, _selectedAddress);
+  }
+
   @override
   Widget build(BuildContext context) {
     // logger.d(widget.uid);
@@ -298,7 +314,9 @@ class _MyInformationPageState extends State<MyInformationPage> {
                                 color: Colors.white),
                             onPressed: () {
                               Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => const OrdersPage()));
+                                  builder: (context) => OrdersPage(
+                                        uid: widget.uid!,
+                                      )));
                             },
                           );
                         },
@@ -321,6 +339,7 @@ class _MyInformationPageState extends State<MyInformationPage> {
                   IconButton(
                     icon: const Icon(Icons.settings, color: Colors.white),
                     onPressed: () {
+                      // _bloc.add(GetUidEvent(UserUidParams(widget.uid!)));
                       _scaffoldKey.currentState?.openEndDrawer();
                     },
                   ),
@@ -370,6 +389,7 @@ class _MyInformationPageState extends State<MyInformationPage> {
               BlocBuilder<SellerInfoAddOnsBloc, SellerInfoAddOnsState>(
                   builder: (context, state) {
                 String isApproved = Approval.notApproved.name;
+                // logger.d(state);
 
                 if (state is SellerInfoAddOnsSuccessState) {
                   isApproved = state.dataModel['isApproved'];
@@ -379,28 +399,19 @@ class _MyInformationPageState extends State<MyInformationPage> {
                   }
 
                   if (isApproved == Approval.approved.name) {
-                    if (!accessRolesLabel.contains('seller')) {
-                      // accessRolesLabel.add('seller');
-                      // accessRoles.add(widgetData);
-                      return CustomerOrder(
-                        onPressedPayments: () {
-                          print("Paymentsssss");
-                          onOrders("Payments");
-                        },
-                        onPressedShipments: () {
-                          print("Shipments");
+                    return CustomerOrder(
+                      onPressedPayments: () {
+                        print("Paymentsssss");
+                        onOrders("Payments");
+                      },
+                      onPressedShipments: () {
+                        print("Shipments");
 
-                          onOrders("Shipments");
-                        },
-                        onGoing: () {},
-                        onDone: () {},
-                      );
-                    }
-                  } else {
-                    if (accessRolesLabel.contains('seller')) {
-                      accessRolesLabel.remove('seller');
-                      accessRoles.remove(widgetData);
-                    }
+                        onOrders("Shipments");
+                      },
+                      onGoing: () {},
+                      onDone: () {},
+                    );
                   }
                 }
                 return Container();
@@ -472,30 +483,113 @@ class _MyInformationPageState extends State<MyInformationPage> {
               })
             ],
           ),
-          endDrawer: Drawer(
-            width: _width * 0.45,
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: <Widget>[
-                DrawerHeader(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  child: const Text(
-                    'Settings',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
+          endDrawer:
+              BlocBuilder<AddUpdateUserAddressCubit, AddUpdateUserAddressState>(
+            bloc: _addUpdateCubit,
+            builder: (context, state) {
+              // logger.d(state);
+
+              if (state is AddUpdateUserAddressSuccessState) {
+                _listOfAddress = state.data['saveAddress'];
+                _selectedAddress = state.data['address'];
+              }
+
+              if (state is AllSaveAddressSuccessState) {
+                // logger.d(state);
+                _listOfAddress = state.data;
+              }
+              return Drawer(
+                width: _width * 0.45,
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: <Widget>[
+                    DrawerHeader(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      child: const Text(
+                        'Settings',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                        ),
+                      ),
                     ),
-                  ),
+                    ListTile(
+                      leading: const Icon(Icons.location_city),
+                      title: const Text(
+                        'Set Up Address',
+                        style: TextStyle(fontSize: 10),
+                      ),
+                      onTap: () {
+                        showModalBottomSheet(
+                            context: context,
+                            builder: (context) =>
+                                StatefulBuilder(builder: (context, setState) {
+                                  return AddUpdateAddress(
+                                    controller: addressController,
+                                    listOfAddress: _listOfAddress,
+                                    selectedAddress: _selectedAddress,
+                                    onPressedAddAddress: () {
+                                      if (addressController.text.isNotEmpty) {
+                                        // logger.d(addressController.text);
+
+                                        // Update state
+                                        setState(() {
+                                          _listOfAddress
+                                              .add(addressController.text);
+                                          if (_selectedAddress.isEmpty) {
+                                            _selectedAddress =
+                                                addressController.text;
+                                          }
+                                        });
+
+                                        // Prepare parameters and call Cubit method
+                                        var params = UserAddressParams(
+                                            widget.uid!,
+                                            addressController.text);
+                                        _addUpdateCubit.addUpdateAddress(
+                                            params.uid,
+                                            params.address,
+                                            _selectedAddress);
+
+                                        // Clear the input field
+                                        addressController.clear();
+                                      } else {
+                                        showDialog(
+                                            context: context,
+                                            builder: (context) =>
+                                                CustomAlertDialog(
+                                                    colorMessage: Colors.red,
+                                                    title:
+                                                        "Saving Address Error",
+                                                    onPressedCloseBtn: () {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
+                                                    child: const Text(
+                                                        "Please fill up the address to proceed")));
+                                      }
+                                    },
+                                    onSelectedValue: (value) {
+                                      _onSectedValue(value, setState);
+                                    },
+                                  );
+                                }));
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.logout),
+                      title: const Text(
+                        'Logout',
+                        style: TextStyle(fontSize: 10),
+                      ),
+                      onTap: signOutUser,
+                    ),
+                  ],
                 ),
-                ListTile(
-                  leading: const Icon(Icons.logout),
-                  title: const Text('Logout'),
-                  onTap: signOutUser,
-                ),
-              ],
-            ),
+              );
+            },
           ),
         );
       },

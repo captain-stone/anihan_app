@@ -105,19 +105,25 @@ class CheckFriendsBloc extends Bloc<CheckFriendsEvent, CheckFriendsState> {
         // var data = await friendRequestService.respondToFriendRequest(_user!.uid, userRequestId, true);
         DataSnapshot friendDataSnapShot =
             await _friendRef.child(_user!.uid).get();
+        DataSnapshot userRequestSnapshot =
+            await _friendRef.child(userRequestId).get();
+
+        logger.d(userRequestSnapshot.exists);
+        int newTimestamp = DateTime.now().millisecondsSinceEpoch;
 
         if (friendDataSnapShot.exists) {
-          logger.d(friendDataSnapShot.value);
+          // logger.d(friendDataSnapShot.value);
 
           Map<String, dynamic> data =
               Map<String, dynamic>.from(friendDataSnapShot.value as Map);
-          logger.d(data);
-          int newTimestamp = DateTime.now().millisecondsSinceEpoch;
+          // logger.d(data);
           String? keyToUpdate;
           data.forEach((key, value) {
             if (value["fromUser"] == userRequestId) {
               keyToUpdate = key;
             }
+
+            // if(value["to"])
           });
 
           if (keyToUpdate != null) {
@@ -133,6 +139,25 @@ class CheckFriendsBloc extends Bloc<CheckFriendsEvent, CheckFriendsState> {
           } else {
             logger.d("fromUser not found");
           }
+        }
+
+        if (userRequestSnapshot.exists) {
+          Map<String, dynamic> data =
+              Map<String, dynamic>.from(userRequestSnapshot.value as Map);
+          logger.d(data);
+          String? keyToUpdate;
+
+          data.forEach((key, value) async {
+            if (value["fromUser"] == _user.uid) {
+              keyToUpdate = key;
+            }
+
+            if (keyToUpdate != null) {
+              await _friendRef
+                  .child("$userRequestId/$keyToUpdate")
+                  .update({"status": action, "timestamp": newTimestamp});
+            }
+          });
         }
 
         DataSnapshot finalData = await _friendRef.child(_user.uid).get();

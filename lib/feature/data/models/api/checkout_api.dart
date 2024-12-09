@@ -58,9 +58,15 @@ mixin CheckoutApi {
                   return null;
                 }
 
+                // var da = entry.key;
+
                 final map = entry.value as Map<dynamic, dynamic>;
-                return AddToCartProductEntity(map["name"],
-                    double.tryParse(map["price"].toString())!, map["quantity"]);
+                return AddToCartProductEntity(
+                  map["name"],
+                  double.tryParse(map["price"].toString())!,
+                  map["quantity"],
+                  map['image'],
+                );
               })
               .whereType<AddToCartProductEntity>()
               .toList();
@@ -93,7 +99,7 @@ mixin CheckoutApi {
   }
 
   Future<bool> saveCheckoutData({
-    required List<AddToCartEntity> productEntity,
+    required List<AllCartEntity> productEntity,
     required double total,
     required String deliveryDate,
   }) async {
@@ -103,10 +109,18 @@ mixin CheckoutApi {
       // Structure data for saving
 
       // var dateEntity =
+      List<String> cartId = [];
+
+      List<Map<String, dynamic>> jsonList = productEntity.map((entity) {
+        cartId.add(entity.cartId);
+        return entity.toJson();
+      }).toList();
+      logger.d(cartId);
+
       Map<String, dynamic> checkoutData = {
         'total': total,
         'deliveryDate': deliveryDate,
-        'products': productEntity.map((e) => e.toJson()).toList(),
+        'products': jsonList,
         'timestamp': DateTime.now().toIso8601String(),
       };
 
@@ -115,7 +129,7 @@ mixin CheckoutApi {
 
       return true; // Indicate success
     } catch (e) {
-      print("Error saving checkout data: $e");
+      logger.e("Error saving checkout data: $e");
       return false;
     }
   }

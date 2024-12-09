@@ -40,7 +40,7 @@ class AllProductsAddOnsBloc
               }
             } else {
               var dataObject = (event.snapshot.value as Map<dynamic, dynamic>?);
-              logger.d(dataObject);
+              // logger.d(dataObject);
               if (dataObject != null) {
                 List<ProductEntity> productList = [];
 
@@ -60,26 +60,29 @@ class AllProductsAddOnsBloc
                       String productName = productInfo['name'];
                       String productLabel = productInfo['label'];
                       double productPrice = productInfo['price'].toDouble();
+                      int productQuantity = productInfo['productQuantity'] ?? 0;
                       String itemDescriptions = productInfo['itemDescriptions'];
                       String storeId = "storeId-$productIdModified-id";
 
                       List<ProductVariantEntity?>? productVariants;
 
-                      logger.d(productInfo[
-                          'variant-${productId.replaceFirst("product-id", "")}-id']);
+                      // logger.d(productInfo[
+                      //     'variant-${productId.replaceFirst("product-id", "")}-id']);
                       // logger.d('variant-$productId-id');
                       //logger.d(productInfo);
 
                       if (productInfo
                           .containsKey('variant-$productIdModified-id')) {
-                        logger.d("IT's OKAY");
+                        // logger.d("IT's OKAY");
                         productVariants =
                             (productInfo['variant-$productIdModified-id']
                                     as List)
                                 .map((variant) => ProductVariantEntity(
                                     images: variant['variantImages'],
                                     varianName: variant['variantName'],
-                                    variantPrice: variant['variantPrice']))
+                                    variantPrice: variant['variantPrice'],
+                                    variantQuantity:
+                                        variant['variantQuantity']))
                                 .toList();
                       }
 
@@ -88,6 +91,7 @@ class AllProductsAddOnsBloc
                         productName,
                         productLabel,
                         productPrice,
+                        productQuantity,
                         itemDescriptions,
                         productVariant: productVariants,
                         productKey: productIdKey,

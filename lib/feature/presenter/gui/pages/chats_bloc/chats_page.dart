@@ -2,7 +2,9 @@
 
 import 'package:anihan_app/common/enum_files.dart';
 import 'package:anihan_app/feature/data/models/api/firebase_model.dart';
-import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/chats_page_bloc.dart';
+import 'package:anihan_app/feature/domain/entities/community_data.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/blocs/chat_page/chats_page_bloc.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/blocs/join_community_cubit/join_community_cubit.dart';
 import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/addons/custom_alert_dialog.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/debugger/logger_debugger.dart';
@@ -13,6 +15,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 
+import '../../../../../common/app_module.dart';
+import 'show_friend_list_to_chat.dart';
+
 @RoutePage()
 class ChatsPage extends StatefulWidget {
   final String? uid;
@@ -22,11 +27,14 @@ class ChatsPage extends StatefulWidget {
 }
 
 class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
-  // final _bloc = getIt<ChatsPageBloc>();
+  final _chatPageBloc = getIt<ChatsPageBloc>();
+  final _joinCommunity = getIt<JoinCommunityCubit>();
   int _selectedIndex = 2;
   bool isFriendsExpanded = true;
-  bool isFriendsSuggestionExpanded = true;
+  bool isFriendsSuggestionExpanded = false;
+  bool isCommunitExpanded = false;
   bool isLoading = false;
+  JoinCommunity isJoin = JoinCommunity.join;
 
   static const List<ChatItem> chatItems = [];
   List<FirebaseDataModel> users = [];
@@ -45,13 +53,12 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
   List<FirebaseDataModel?> notFriends = [];
   List<FirebaseDataModel> searchData = [];
   final logger = Logger();
+  final TextEditingController communityController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    context
-        .read<ChatsPageBloc>()
-        .add(GetUserListEvent(currentUserId: widget.uid!));
+    _chatPageBloc.add(GetUserListEvent(currentUserId: widget.uid!));
 
     // _bloc.add(GetUserListEvent());
   }
@@ -73,16 +80,14 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
     if (value != "") {
       setState(() {
         searchEmpty = false;
-        context.read<ChatsPageBloc>().add(SearchFriendEvent(_searchQuery));
+        _chatPageBloc.add(SearchFriendEvent(_searchQuery));
       });
     } else {
       setState(() {
         searchEmpty = true;
         friends = [];
         notFriends = [];
-        context
-            .read<ChatsPageBloc>()
-            .add(GetUserListEvent(currentUserId: widget.uid!));
+        _chatPageBloc.add(GetUserListEvent(currentUserId: widget.uid!));
       });
     }
   }
@@ -99,6 +104,184 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
 
   void _onChatMessage(String userId) {
     AutoRouter.of(context).push(ChatWithRoute(friendId: userId));
+  }
+
+  void _onPressedCommunit() {
+    _chatPageBloc.add(const GetAllCommunityEvent());
+
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) => BlocBuilder<ChatsPageBloc, ChatsPageState>(
+        bloc: _chatPageBloc,
+        builder: (context, state) {
+          if (state is GetAllCommunityLoadingState) {
+            return const AlertDialog(
+              content: SizedBox(
+                width: 50,
+                height: 50,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            );
+          }
+
+          if (state is GetAllCommunitySuccessState) {
+            String currentUserId =
+                widget.uid!; // Assuming `uid` is the current user's ID
+            List<CommunityData> sortedCommunities =
+                List.from(state.communities);
+
+            sortedCommunities.sort((a, b) {
+              if (a.ownerId == currentUserId && b.ownerId != currentUserId) {
+                return -1;
+              } else if (a.ownerId != currentUserId &&
+                  b.ownerId == currentUserId) {
+                return 1;
+              } else {
+                return 0;
+              }
+            });
+            return _buildCommunityDialog(sortedCommunities);
+          }
+
+          if (state is AddCommunitySuccessState) {
+            Navigator.of(context).pop();
+            return _buildSuccessDialog("Community added successfully!");
+          }
+
+          if (state is GetAllCommunityErrorState) {
+            return _buildErrorDialog(state.message);
+          }
+
+          if (state is AddCommunityErrorState) {
+            return _buildErrorDialog(state.message);
+          }
+
+          return const AlertDialog(
+            content: Text("Wait. Loading..."),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildCommunityDialog(List<CommunityData> communities) {
+    return CustomAlertDialog(
+      height: MediaQuery.of(context).size.height * 0.4,
+      colorMessage: Colors.green,
+      title: "Community",
+      actionOkayVisibility: true,
+      actionLabel: "Add",
+      onPressedCloseBtn: () {
+        Navigator.of(context).pop();
+        _chatPageBloc.add(GetUserListEvent(currentUserId: widget.uid!));
+      },
+      onPressOkay: () {
+        showDialog(
+            context: context,
+            builder: (context) {
+              return _addCommunity();
+            });
+      },
+      child: ListView.builder(
+        itemCount: communities.length,
+        itemBuilder: (context, index) {
+          CommunityData community = communities[index];
+          return Container(
+            margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: Colors.green,
+            ),
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(community.name),
+                community.ownerId == widget.uid
+                    ? const Text(
+                        "Admin",
+                        style: TextStyle(fontSize: 12),
+                      )
+                    : TextButton(
+                        onPressed: () async {
+                          // Handle j oin logic
+
+                          // setState(() {
+                          //   isJoin = !isJoin;
+                          // });
+                          JoinCommunity _isJoin =
+                              await _joinCommunity.joinCommunity(
+                                  community.ownerId, JoinCommunity.requested);
+                          setState(() {
+                            isJoin = _isJoin;
+                          });
+
+                          logger.d(isJoin);
+                        },
+                        child: Text(isJoin.name),
+                      ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSuccessDialog(String message) {
+    return CustomAlertDialog(
+      colorMessage: Colors.green,
+      title: "Success",
+      onPressedCloseBtn: () {
+        Navigator.of(context).pop();
+        _chatPageBloc.add(GetUserListEvent(currentUserId: widget.uid!));
+      },
+      child: Text(message),
+    );
+  }
+
+  Widget _buildErrorDialog(String errorMessage) {
+    return CustomAlertDialog(
+      colorMessage: Colors.red,
+      title: "Error",
+      actionOkayVisibility: true,
+      actionLabel: "Add",
+      onPressOkay: () {
+        Navigator.of(context).pop();
+        showDialog(
+            context: context,
+            builder: (context) {
+              return _addCommunity();
+            });
+      },
+      onPressedCloseBtn: () {
+        Navigator.of(context).pop();
+        _chatPageBloc.add(GetUserListEvent(currentUserId: widget.uid!));
+      },
+      child: Text(errorMessage),
+    );
+  }
+
+  Widget _addCommunity() {
+    return CustomAlertDialog(
+        colorMessage: Colors.green,
+        title: "Add Community",
+        actionLabel: "Add",
+        actionOkayVisibility: true,
+        onPressOkay: () {
+          //add
+
+          _chatPageBloc.add(AddCommunityEvent(communityController.text));
+        },
+        onPressedCloseBtn: () {
+          Navigator.of(context).pop();
+          _chatPageBloc.add(GetUserListEvent(currentUserId: widget.uid!));
+        },
+        child: TextFormField(
+          controller: communityController,
+          decoration: const InputDecoration(label: Text("Community Name")),
+        ));
   }
 
   Widget showFriendsAndNotFriends(Size size) {
@@ -239,6 +422,32 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
                     ),
                   ),
           ),
+        Container(
+          width: _width,
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              //title
+              const Text(
+                "List of Community",
+                style: TextStyle(fontSize: 18),
+              ),
+              IconButton(
+                  onPressed: () {
+                    setState(() {
+                      isCommunitExpanded = !isCommunitExpanded;
+                    });
+                  },
+                  icon: Icon(
+                    !isCommunitExpanded
+                        ? Icons.arrow_forward_ios_outlined
+                        : Icons.keyboard_arrow_down,
+                    size: 18,
+                  ))
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -256,10 +465,12 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
             isSearching: searchEmpty,
             onChanged: (value) => onChange(value),
             onSearchFunction: onSearchFunction,
+            onPressedCommunity: _onPressedCommunit,
           ),
         ),
         body: SingleChildScrollView(
           child: BlocBuilder<ChatsPageBloc, ChatsPageState>(
+            bloc: _chatPageBloc,
             builder: (context, state) {
               // logger.d(state);
 
@@ -664,6 +875,7 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
 
 class CustomAppBar extends StatelessWidget {
   final Function(String value) onChanged;
+  final void Function() onPressedCommunity;
   final String valueString;
   final ChatsPageBloc bloc;
   final bool isSearching;
@@ -675,6 +887,7 @@ class CustomAppBar extends StatelessWidget {
       required this.onChanged,
       required this.isSearching,
       required this.onSearchFunction,
+      required this.onPressedCommunity,
       super.key});
 
   @override
@@ -737,11 +950,8 @@ class CustomAppBar extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           IconButton(
-            icon: const Icon(Icons.message), // New chats icon
-            onPressed: () {
-              // Placeholder for future chats function
-            },
-          ),
+              icon: const Icon(Icons.handshake), // New chats icon
+              onPressed: onPressedCommunity),
         ],
       ),
       backgroundColor: Theme.of(context).colorScheme.primary,
@@ -811,134 +1021,6 @@ class FriendsSuggestions extends StatelessWidget {
             );
           }).toList(),
         ),
-      ),
-    );
-  }
-}
-
-class ShowFriendListToChat extends StatelessWidget {
-  final String uid;
-  final List<FirebaseDataModel?> users;
-  final Function(String userId) onChat;
-
-  const ShowFriendListToChat(this.uid, this.users,
-      {super.key, required this.onChat});
-
-  @override
-  Widget build(BuildContext context) {
-    final logger = Logger();
-    // var usersInfo =
-    // final double _width = MediaQuery.of(context).size.width;
-    // final double _height = MediaQuery.of(context).size.height;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: users.map((friend) {
-          if (friend == null) {
-            return Container();
-          } else if (friend.status == null) {
-            logger.d("${friend.key}\n$uid");
-            return Visibility(
-              visible: uid != friend.key,
-              child: Container(
-                padding: const EdgeInsets.all(12.0),
-                margin:
-                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 6.0,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.people),
-                        const SizedBox(width: 16.0),
-                        Text(friend.value['fullName']),
-                      ],
-                    ),
-                    const CircularProgressIndicator()
-                  ],
-                ),
-              ),
-            );
-          } else {
-            return Visibility(
-              visible: uid != friend.key,
-              child: GestureDetector(
-                onTap: () {
-                  logger.d("TAP: ${friend.key}");
-
-                  if (friend.status == FriendStatus.pending.name ||
-                      friend.status == FriendStatus.rejected.name) {
-                    showDialog(
-                        context: context,
-                        builder: (context) => CustomAlertDialog(
-                            colorMessage: Colors.red,
-                            onPressedCloseBtn: () {
-                              Navigator.pop(context);
-                            },
-                            title: "Information",
-                            child: const Text(
-                                "Oops! I think your still not a friend yet.")));
-                  }
-
-                  if (friend.status == FriendStatus.accepted.name) {
-                    //openCHat
-                    onChat(friend.key);
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(12.0),
-                  margin: const EdgeInsets.symmetric(
-                      vertical: 8.0, horizontal: 16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 6.0,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.people),
-                          const SizedBox(width: 16.0),
-                          Text(friend.value['fullName']),
-                        ],
-                      ),
-                      Text(
-                        "${friend.status}",
-                        style: TextStyle(
-                            color: friend.status! == FriendStatus.accepted.name
-                                ? Colors.green
-                                : friend.status! == FriendStatus.rejected.name
-                                    ? Colors.red
-                                    : Colors.orange),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }
-        }).toList(),
       ),
     );
   }

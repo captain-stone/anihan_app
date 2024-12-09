@@ -14,9 +14,6 @@ import 'package:geocoding/geocoding.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:logger/logger.dart';
 
-import '../../widgets/custom_app_bar.dart';
-import '../add_ons_blocs/check_friends_bloc/check_friends_bloc.dart';
-
 @RoutePage()
 class SellerRegistrationPage extends StatefulWidget {
   final String uid;

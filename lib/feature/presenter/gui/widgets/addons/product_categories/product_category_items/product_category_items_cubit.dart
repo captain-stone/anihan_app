@@ -55,6 +55,7 @@ class ProductCategoryItemsCubit extends Cubit<ProductCategoryItemsState> {
                     String productName = productInfo['name'];
                     String productLabel = productInfo['label'];
                     double productPrice = productInfo['price'].toDouble();
+                    int productQuantity = productInfo['productQuantity'] as int;
                     String itemDescriptions = productInfo['itemDescriptions'];
                     String storeId = "storeId-${user!.uid}-id";
 
@@ -65,12 +66,18 @@ class ProductCategoryItemsCubit extends Cubit<ProductCategoryItemsState> {
                               .map((variant) => ProductVariantEntity(
                                   images: variant['variantImages'],
                                   varianName: variant['variantName'],
-                                  variantPrice: variant['variantPrice']))
+                                  variantPrice: variant['variantPrice'],
+                                  variantQuantity: variant['variantQuantity']))
                               .toList();
                     }
 
-                    productList.add(ProductEntity(productImages, productName,
-                        productLabel, productPrice, itemDescriptions,
+                    productList.add(ProductEntity(
+                        productImages,
+                        productName,
+                        productLabel,
+                        productPrice,
+                        productQuantity,
+                        itemDescriptions,
                         productVariant: productVariants,
                         productKey: key,
                         storeId: storeId));

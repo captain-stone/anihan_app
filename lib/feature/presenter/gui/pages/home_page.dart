@@ -2,7 +2,7 @@
 
 import 'package:anihan_app/feature/presenter/gui/pages/Journal/journal_page.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/add_ons_blocs/check_friends_bloc/check_friends_bloc.dart';
-import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/chats_page_bloc.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/blocs/chat_page/chats_page_bloc.dart';
 import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
 import 'package:auto_route/annotations.dart';
 import 'package:auto_route/auto_route.dart';
@@ -56,6 +56,8 @@ class _HomePageState extends State<HomePage> {
       var data = state.data;
       var buildContext = context.read<CheckFriendsBloc>();
 
+      logger.d(data);
+
       AutoRouter.of(context).push(FriendRequestRoute(
           data: data, checkFriendBuildContext: buildContext));
     }
@@ -70,6 +72,7 @@ class _HomePageState extends State<HomePage> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60.0),
         child: CustomAppBar(
+          uid: widget.uid!,
           onChangeSearchCrops: _searchCrops,
           onPressedIconUser: () => _showFriendRequestList(context),
           onPressedIconJournal: () {

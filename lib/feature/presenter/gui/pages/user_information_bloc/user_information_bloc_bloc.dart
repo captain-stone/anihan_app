@@ -6,6 +6,7 @@ import 'package:anihan_app/feature/domain/usecases/user_information_usecase.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
 
 import '../../../../../common/api_result.dart';
 
@@ -43,6 +44,14 @@ class UserInformationBlocBloc
         }
       }
     });
+
+    // on<AddUpdateUserLocation>((event, emit) async {
+    //   emit(UserInformationLoadingState());
+    //   var data = event.params;
+    //   Logger logger = Logger();
+
+    //   logger.d(data);
+    // });
 
     on<LogoutEvent>((event, emit) async {
       emit(UserInformationLoadingState());

@@ -29,7 +29,7 @@ Future<String?> getFullAddress(String locationString) async {
     List<Placemark> placemarks =
         await placemarkFromCoordinates(latitude, longitude);
 
-    logger.d(placemarks);
+    // logger.d(placemarks);
     if (placemarks.isNotEmpty) {
       var name = placemarks[0].name;
       var street = placemarks[0].thoroughfare;

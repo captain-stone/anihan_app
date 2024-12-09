@@ -18,7 +18,7 @@ import '../widgets/products/product_favorite_cubit/product_favorite_cubit.dart';
 import '../widgets/products/product_showcase_bloc/product_showcase_bloc.dart';
 import '../widgets/products/products_add_ons_bloc/product_add_ons_bloc.dart';
 import '../widgets/sellers/seller_add_ons/seller_info_add_ons_bloc.dart';
-import 'chats_bloc/chats_page_bloc.dart';
+import 'chats_bloc/blocs/chat_page/chats_page_bloc.dart';
 import 'notification_bloc/notification_page_bloc.dart';
 import 'wish_list_page/friends_bloc/friends_list_page_bloc.dart';
 import 'wish_list_page/wishlist_bloc/wish_list_page_bloc.dart';
@@ -118,10 +118,10 @@ class _HomeNavigationPageState extends State<HomeNavigationPage> {
           create: (context) => ChatsPageBloc(),
         ),
 
-        BlocProvider(
-          create: (context) => NotificationPageBloc()
-            ..add(GetFarmersNotificationsEvent(uid: widget.uid)),
-        ),
+        // BlocProvider(
+        //   create: (context) => NotificationPageBloc()
+        //     ..add(GetFarmersNotificationsEvent(uid: widget.uid)),
+        // ),
 
         BlocProvider(
           create: (context) => ProductCategoryItemsCubit(_allProductsRef),
@@ -152,8 +152,8 @@ class _HomeNavigationPageState extends State<HomeNavigationPage> {
               bottomNavigationBar: BottomNavigationBar(
                 items: const [
                   BottomNavigationBarItem(
-                    icon: Icon(Icons.favorite),
-                    label: 'Wishlist',
+                    icon: Icon(Icons.handshake),
+                    label: 'Community',
                   ),
                   BottomNavigationBarItem(
                     icon: Icon(Icons.message),

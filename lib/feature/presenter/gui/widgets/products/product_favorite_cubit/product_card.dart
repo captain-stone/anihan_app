@@ -46,12 +46,6 @@ class _ProductCardState extends State<ProductCard> {
   void initState() {
     super.initState();
 
-    // if (widget.isFavoriteProduct != null) {
-    //   setState(() {
-    //     isFavorite = widget.isFavoriteProduct!;
-    //   });
-    // }
-
     context
         .read<ProductFavoriteCubit>()
         .getAllFavorite(widget.product.productKey);

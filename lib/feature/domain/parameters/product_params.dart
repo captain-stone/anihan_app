@@ -7,6 +7,7 @@ class ProductParams extends Params {
   final String productName;
   final String productLabel;
   final double productPrice;
+  final double productQuantity;
   final String itemDescriptions;
   final List<Uint8List> imageDataList;
   final List<ProductVariantEntity?>? productVariant;
@@ -16,6 +17,7 @@ class ProductParams extends Params {
     this.productName,
     this.productLabel,
     this.productPrice,
+    this.productQuantity,
     this.imageDataList,
     this.itemDescriptions, {
     this.productVariant,
@@ -26,6 +28,7 @@ class ProductParams extends Params {
         productName,
         productLabel,
         productPrice,
+        productQuantity,
         itemDescriptions,
         productVariant,
         imageDataList,

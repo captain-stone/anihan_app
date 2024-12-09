@@ -63,6 +63,7 @@ mixin ProductServiceApi {
               variantImages: variantImage,
               variantName: data.varianName,
               variantPrice: data.variantPrice,
+              variantQuantity: data.variantQuantity,
             ).toJson());
 
             countNum++;
@@ -77,14 +78,15 @@ mixin ProductServiceApi {
             productLabel: params.productLabel,
             productItemDescriptions: params.itemDescriptions,
             // productVariantDtoList: productVariantDtoList,
-            productPrice: params.productPrice);
+            productPrice: params.productPrice,
+            productQuantity: params.productQuantity);
 
         //* THIS METHOD IS ADDING STOREID;
         productData = ProductDataDto.customToJson(
             productDataDto, productVariantDtoList, userId);
 
-        logger.d(productData);
-        logger.d(productDataDto.toJson());
+        // logger.d(productData);
+        // logger.d(productDataDto.toJson());
 
         await newProductRef.set(productData);
         // _refsVariations.set(variants);
@@ -116,6 +118,9 @@ mixin ProductServiceApi {
                       productInfo['label'] as String? ?? 'No Label';
                   double productPrice =
                       (productInfo['price'] as num?)?.toDouble() ?? 0.0;
+
+                  int productQuantity =
+                      (productInfo['productQuantity'] as int?) ?? 0;
                   String itemDescriptions =
                       productInfo['itemDescriptions'] as String? ??
                           'No Description';
@@ -133,7 +138,8 @@ mixin ProductServiceApi {
                               ?.map((variant) => ProductVariantEntity(
                                   images: variant['variantImages'],
                                   varianName: variant['variantName'],
-                                  variantPrice: variant['variantPrice']))
+                                  variantPrice: variant['variantPrice'],
+                                  variantQuantity: variant['variantQuantity']))
                               .toList() ??
                           []; // Fallback to an empty list
                   return ProductEntity(
@@ -141,6 +147,7 @@ mixin ProductServiceApi {
                     productName,
                     productLabel,
                     productPrice,
+                    productQuantity,
                     itemDescriptions,
                     productVariant: productVariants,
                     productKey: productIdKey,

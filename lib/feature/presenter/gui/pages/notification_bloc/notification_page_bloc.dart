@@ -2,14 +2,21 @@
 
 import 'dart:async';
 
+import 'package:anihan_app/common/enum_files.dart';
+import 'package:anihan_app/feature/data/models/api/user_information_service_api.dart';
+import 'package:anihan_app/feature/domain/entities/community_data.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/wish_list_page/wish_list_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 
 part 'notification_page_event.dart';
 part 'notification_page_state.dart';
 
+@injectable
 class NotificationPageBloc
     extends Bloc<NotificationPageEvent, NotificationPageState> {
   final FirebaseDatabase db = FirebaseDatabase.instance;
@@ -71,6 +78,93 @@ class NotificationPageBloc
       } catch (e) {
         logger.d(e);
         emit(NotificationPageErrorState("Error Occured: $e"));
+      }
+    });
+
+    on<GetCommunityNotification>((event, emit) async {
+      emit(const NotificationCommunitiesLoadingState());
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        emit(const NotificationCommunitiesErrorState("User not authenticated"));
+        return;
+      }
+
+      DatabaseReference _ref = db.ref("community/community-id-${user.uid}");
+      UserInformationServiceApi _serviceApi = UserInformationServiceApi();
+
+      try {
+        List<CommunityData> comminities = [];
+
+        _subscription = _ref.onValue.listen((event) async {
+          if (event.snapshot.value == null) {
+            if (!emit.isDone) {
+              emit(const NotificationPageErrorState(
+                  "There's no update about our community"));
+            }
+            // return;
+          }
+
+          var object = event.snapshot.value as Map?;
+          if (object != null) {
+            comminities.clear(); // Prevent duplicate entries
+
+            var membersMap = (object['members'] as Map?) ?? {};
+            var memberDetails = await Future.wait(
+              membersMap.entries.map((entry) async {
+                var value = entry.value;
+                // logger.d(value['status']);
+                // logger.d(value['status'].runtimeType);
+                // logger.d(JoinCommunity.requested.name);
+                // logger.d(value['status'] == JoinCommunity.requested.name);
+                // logger.d(value['status'] == JoinCommunity.requested);
+                if (value['status'] == JoinCommunity.requested.name) {
+                  var userInformation =
+                      await _serviceApi.userInformation(value['id']);
+                  return CommunityData(
+                    name: object['name'],
+                    ownerId: object['ownerId'],
+                    createdAt: DateTime.parse(object['createdAt']),
+                    members: {
+                      'usersName': userInformation.displayName,
+                      'status': value['status'],
+                    },
+                  );
+                }
+                if (value['status'] == JoinCommunity.accepted.name) {
+                  var userInformation =
+                      await _serviceApi.userInformation(value['id']);
+                  return CommunityData(
+                    name: object['name'],
+                    ownerId: object['ownerId'],
+                    createdAt: DateTime.parse(object['createdAt']),
+                    members: {
+                      'usersName': userInformation.displayName,
+                      'status': value['status'],
+                    },
+                  );
+                }
+                return null;
+              }).where((e) => e != null),
+            );
+
+            comminities.addAll(memberDetails.cast<CommunityData>());
+            if (!emit.isDone) {
+              emit(NotificationCommunitiesSuccessState(comminities));
+            }
+          }
+        }, onError: (error) {
+          if (!emit.isDone) {
+            emit(NotificationCommunitiesErrorState(
+                "There's an error occurred: $error"));
+          }
+        }, onDone: () {
+          _subscription!.asFuture();
+        });
+
+        await _subscription!.asFuture();
+      } catch (e) {
+        emit(
+            NotificationCommunitiesErrorState("There's an error occurred: $e"));
       }
     });
   }

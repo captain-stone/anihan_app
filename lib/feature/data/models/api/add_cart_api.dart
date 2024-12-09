@@ -48,7 +48,7 @@ mixin CartServiceApi {
             await _refs.once().then((event) => event.snapshot);
 
         Map<dynamic, dynamic>? cartDataList = dataSnapshot.value as Map?;
-        logger.d(cartDataList);
+        // logger.d(cartDataList);
 
         if (cartDataList != null) {
           // String cartIdFromFirebase = "None";
@@ -59,8 +59,11 @@ mixin CartServiceApi {
                 }
 
                 final map = entry.value as Map<dynamic, dynamic>;
-                return AddToCartProductEntity(map["name"],
-                    double.tryParse(map["price"].toString())!, map["quantity"]);
+                return AddToCartProductEntity(
+                    map["name"],
+                    double.tryParse(map["price"].toString())!,
+                    map["quantity"],
+                    map['image'] ?? "");
               })
               .whereType<AddToCartProductEntity>()
               .toList();

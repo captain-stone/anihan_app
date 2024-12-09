@@ -46,6 +46,7 @@ class AddToCartBloc extends Bloc<AddToCartEvent, AddToCartState> {
     });
 
     on<GetAllCartEvent>((event, emit) async {
+      emit(AddToCartLoadingState());
       FirebaseAuth auth = FirebaseAuth.instance;
       User? user = auth.currentUser;
       final DateServices date = DateServices();
@@ -58,17 +59,19 @@ class AddToCartBloc extends Bloc<AddToCartEvent, AddToCartState> {
           DatabaseReference _refs = db.ref("cart/${user.uid}");
 
           _subscriptionProducts = _refs.onValue.listen((event) {
+            logger.d(event.snapshot.value);
             if (event.snapshot.value == null) {
               if (!emit.isDone) {
                 emit(const AddToCartErrorState("No Data Save"));
               }
             } else {
               var dataObject = (event.snapshot.value as Map<dynamic, dynamic>?);
-              logger.d(dataObject);
+
               if (dataObject != null) {
                 List<Map<dynamic, dynamic>> extractedData = [];
-                List<AddToCartProductEntity> products = [];
-                List<AddToCartEntity> productsCart = [];
+                // List<AddToCartProductEntity> products = [];
+                List<Map<String, dynamic>> products = [];
+                List<AllCartEntity> productsCart = [];
                 double totalPrice = 0.0;
                 String storeId = "";
                 String cartId = "";
@@ -86,17 +89,20 @@ class AddToCartBloc extends Bloc<AddToCartEvent, AddToCartState> {
                         var productEntity = AddToCartProductEntity(
                             map["name"],
                             double.tryParse(map["price"].toString())!,
-                            map["quantity"]);
+                            map["quantity"],
+                            map['image']);
 
-                        products.add(productEntity);
+                        products.add({storeId: productEntity});
                       } else if (key == 'total') {
                         totalPrice = map.toDouble() ?? 0.0;
+                      } else if (key == 'created_at') {
+                        createdAt = map;
                       } else {
                         // No action required for other keys
                       }
                     });
                   });
-                  productsCart.add(AddToCartEntity(
+                  productsCart.add(AllCartEntity(
                     storeId: storeId,
                     cartId: cartId,
                     createAt: createdAt,

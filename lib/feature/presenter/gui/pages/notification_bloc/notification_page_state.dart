@@ -2,9 +2,6 @@ part of 'notification_page_bloc.dart';
 
 abstract class NotificationPageState extends Equatable {
   const NotificationPageState();
-
-  @override
-  List<Object> get props => [];
 }
 
 class NotificationPageInitial extends NotificationPageState {
@@ -30,4 +27,28 @@ class NotificationPageErrorState extends NotificationPageState {
   const NotificationPageErrorState(this.message);
   @override
   List<Object> get props => [message];
+}
+
+class NotificationCommunitiesLoadingState extends NotificationPageState {
+  // final List<CommunityData> communities;
+  const NotificationCommunitiesLoadingState();
+  @override
+  List<Object> get props => [];
+}
+
+//
+class NotificationCommunitiesSuccessState extends NotificationPageState {
+  final List<CommunityData> communities;
+  const NotificationCommunitiesSuccessState(this.communities);
+  @override
+  List<Object> get props => [communities];
+}
+
+class NotificationCommunitiesErrorState extends NotificationPageState {
+  // final List<CommunityData> communities;
+  final String message;
+  const NotificationCommunitiesErrorState(this.message);
+
+  @override
+  List<Object> get props => [];
 }

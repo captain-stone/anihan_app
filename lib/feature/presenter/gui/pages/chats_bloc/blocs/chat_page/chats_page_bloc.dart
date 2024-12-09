@@ -3,6 +3,8 @@
 import 'dart:async';
 
 import 'package:anihan_app/feature/data/models/api/friend_request_api.dart';
+import 'package:anihan_app/feature/domain/entities/community_data.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -10,8 +12,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 
-import '../../../../../common/api_result.dart';
-import '../../../../data/models/api/firebase_model.dart';
+import '../../../../../../../../../common/api_result.dart';
+import '../../../../../../data/models/api/firebase_model.dart';
 
 part 'chats_page_event.dart';
 part 'chats_page_state.dart';
@@ -88,7 +90,7 @@ class ChatsPageBloc extends Bloc<ChatsPageEvent, ChatsPageState> {
           DataSnapshot usersSnapshot = await usersRef.get();
           if (usersSnapshot.exists) {
             Map<dynamic, dynamic> allUsers = usersSnapshot.value as Map;
-// logger.d(enrichedFriendRequests.map())
+            // logger.d(enrichedFriendRequests.map())
             // logger.d(enrichedFriendRequests);
 
             Set<String> friendRequestUserIds = enrichedFriendRequests
@@ -272,5 +274,72 @@ class ChatsPageBloc extends Bloc<ChatsPageEvent, ChatsPageState> {
         }
       });
     });
+
+    on<GetAllCommunityEvent>(
+      (event, emit) async {
+        emit(const GetAllCommunityLoadingState());
+
+        try {
+          DatabaseReference _ref = db.ref("community");
+          DatabaseEvent dataEvent = await _ref.once();
+          Map<dynamic, dynamic>? data =
+              dataEvent.snapshot.value as Map<dynamic, dynamic>?;
+          List<CommunityData> communities = [];
+
+          if (data != null) {
+            data.forEach((key, value) {
+              // key is communityOwnerId
+
+              communities.add(CommunityData(
+                  name: value["name"],
+                  ownerId: value["ownerId"],
+                  members: (value["members"] as Map?)?.map(
+                        (key, val) => MapEntry(key as String, val),
+                      ) ??
+                      {},
+                  createdAt: DateTime.parse(value["createdAt"].toString())));
+            });
+
+            //   (value as Map<dynamic, dynamic>).forEach((key, value) {
+
+            // });
+
+            emit(GetAllCommunitySuccessState(communities));
+          } else {
+            emit(const GetAllCommunityErrorState(
+                "There is no community, try adding one"));
+          }
+        } catch (e) {
+          logger.e(e);
+          emit(GetAllCommunityErrorState("There an error occured: (Error) $e"));
+        }
+      },
+    );
+
+    on<AddCommunityEvent>(
+      (event, emit) async {
+        emit(const GetAllCommunityLoadingState());
+
+        User? user = FirebaseAuth.instance.currentUser;
+
+        try {
+          DatabaseReference _ref =
+              db.ref("community/community-id-${user!.uid}");
+
+          var data = {
+            "name": event.communityName,
+            "ownerId": user.uid,
+            // "members": 1,
+            "createdAt": DateTime.now().toIso8601String()
+          };
+
+          _ref.set(data);
+
+          emit(const AddCommunitySuccessState("Success"));
+        } catch (e) {
+          emit(AddCommunityErrorState("There an error occured: (Error) $e"));
+        }
+      },
+    );
   }
 }

@@ -29,7 +29,7 @@ class AddToCartErrorState extends AddToCartState {
 }
 
 class AllCartSuccessState extends AddToCartState {
-  final List<AddToCartEntity> dataModel;
+  final List<AllCartEntity> dataModel;
   const AllCartSuccessState(this.dataModel);
   @override
   List<Object> get props => [dataModel];

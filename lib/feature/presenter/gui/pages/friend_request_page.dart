@@ -79,6 +79,7 @@ class _FriendRequestPageState extends State<FriendRequestPage> {
                                             BorderRadius.circular(8))),
                                 onPressed: () {
                                   var userWhoRequest = userData['requestedId'];
+
                                   widget.checkFriendBuildContext.add(
                                       UpdateFriendRequestEvent(
                                           "accepted", userWhoRequest));

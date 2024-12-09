@@ -18,20 +18,21 @@ class VariationCardState extends State<VariationCard> {
   Uint8List? _variationImage;
   final _variationNameController = TextEditingController();
   final _variationPriceController = TextEditingController();
+  final _variationQuantityController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>(); // FormKey for the variation card
 
   TextEditingController get controllerName => _variationNameController;
   TextEditingController get controllerPrice => _variationPriceController;
+  TextEditingController get controllerQuantity => _variationQuantityController;
   Map<String, dynamic> get variantData => {};
 
   ProductVariantEntity get data => ProductVariantEntity(
-      imageData: _variationImage,
-      varianName: controllerName.text,
-      variantPrice: controllerPrice.text);
-  // "productVariantImage": _variationImage,
-  // "productName": controllerName.text,
-  // "productPrice": controllerPrice.text,
+        imageData: _variationImage,
+        varianName: controllerName.text,
+        variantPrice: controllerPrice.text,
+        variantQuantity: controllerQuantity.text,
+      );
 
   Future<void> _pickVariationImage() async {
     final XFile? selected = await _picker.pickImage(
@@ -135,6 +136,7 @@ class VariationCardState extends State<VariationCard> {
               TextFormField(
                 controller: _variationNameController,
                 decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.all(8),
                   labelText: 'Variation Name',
                   filled: true,
                   fillColor: Colors.grey.shade100,
@@ -153,6 +155,7 @@ class VariationCardState extends State<VariationCard> {
               TextFormField(
                 controller: _variationPriceController,
                 decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.all(8),
                   labelText: 'Variation Price',
                   filled: true,
                   fillColor: Colors.grey.shade100,
@@ -164,6 +167,26 @@ class VariationCardState extends State<VariationCard> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a variation price.';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 5),
+              TextFormField(
+                controller: _variationQuantityController,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.all(8),
+                  labelText: 'Variation Quantity',
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a variation quantity.';
                   }
                   return null;
                 },

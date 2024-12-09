@@ -50,7 +50,7 @@ class ProductRepoImpl extends ProductRepository
         return ApiResult.success(listOfCartResponse);
       } catch (e) {
         error(e);
-        return const ApiResult.error("An Error Occueed: e");
+        return ApiResult.error("An Error Occueed: $e");
       }
     }
   }

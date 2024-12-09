@@ -18,15 +18,15 @@ class _ShippingOptionWidgetState extends State<ShippingOptionWidget> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: const EdgeInsets.all(12),
       child: ListTile(
-        leading: Checkbox(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-          value: _isSelected,
-          onChanged: (value) {
-            setState(() {
-              _isSelected = value ?? false;
-            });
-          },
-        ),
+        // leading: Checkbox(
+        //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        //   value: _isSelected,
+        //   onChanged: (value) {
+        //     setState(() {
+        //       _isSelected = value ?? false;
+        //     });
+        //   },
+        // ),
         title: const Text("Standard Local by Seller"),
         subtitle: Text("Guaranteed to arrive by ${widget.date}"),
         trailing: const Text("₱50"),

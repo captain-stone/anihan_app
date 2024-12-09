@@ -23,7 +23,7 @@ class _YouMayLikeWidgetState extends State<YouMayLikeWidget> {
   // late Future<List<Product>> _recommendedProductsFuture;
   late Future<List<ProductEntity>> _recommendedProductsFuture;
 
-  late final List<ProductEntity> _state;
+  List<ProductEntity> _state = [];
   final logger = Logger();
 
   @override

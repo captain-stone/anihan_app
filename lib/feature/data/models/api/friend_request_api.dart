@@ -11,6 +11,8 @@ class FriendRequestService {
     try {
       // Reference to the friend requests of the recipient
       final requestRef = _db.child('friend_requests').child(toUserId);
+      final fromUserIdUpdateRequestRef =
+          _db.child('friend_requests').child(fromUserId);
       // final requestRef = _db.child('friend_requests/get').child(fromUserId);
 
       final snapshot =
@@ -20,6 +22,12 @@ class FriendRequestService {
         await requestRef.push().set({
           'fromUser': fromUserId,
           'status': 'pending',
+          'timestamp': ServerValue.timestamp,
+        });
+
+        await fromUserIdUpdateRequestRef.push().set({
+          'fromUser': toUserId,
+          'status': 'request',
           'timestamp': ServerValue.timestamp,
         });
         logger.d("Friend request sent successfully.");
@@ -38,11 +46,14 @@ class FriendRequestService {
       String toUserId, String requestId, bool isAccepted) async {
     final requestRef =
         _db.child('friend_requests').child(toUserId).child(requestId);
+    final currentRequestRef =
+        _db.child('friend_requests').child(requestId).child(toUserId);
 
     try {
       if (isAccepted) {
         // Update the status of the request to "accepted"
         await requestRef.update({'status': 'accepted'});
+        await currentRequestRef.update({'status': 'accepted'});
 
         // Add both users to each other's friends list
         final fromUserId =

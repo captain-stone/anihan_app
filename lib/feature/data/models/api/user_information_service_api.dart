@@ -3,8 +3,10 @@
 import 'package:anihan_app/common/api_result.dart';
 import 'package:anihan_app/feature/data/models/dto/seller_registrations_dto.dart';
 import 'package:anihan_app/feature/data/models/dto/user_information_dto.dart';
+import 'package:anihan_app/feature/domain/entities/user_information_and_data_entity.dart';
 import 'package:anihan_app/feature/domain/parameters/farmers_registration_params.dart';
 import 'package:anihan_app/feature/services/date_services.dart';
+import 'package:anihan_app/feature/services/generate_hash_key.dart';
 import 'package:anihan_app/feature/services/get_location_name.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -12,6 +14,7 @@ import 'package:logger/logger.dart';
 
 class UserInformationServiceApi {
   final FirebaseDatabase db = FirebaseDatabase.instance;
+  final logger = Logger();
 
   Future<User> gettingUserId() async {
     FirebaseAuth auth = FirebaseAuth.instance;
@@ -41,14 +44,12 @@ class UserInformationServiceApi {
       // Await the data snapshot
       DataSnapshot dataSnapshot =
           await _refs.once().then((event) => event.snapshot);
-      logger.d(dataSnapshot.exists);
 
       // Check if data exists in the database
       if (dataSnapshot.exists) {
         Map<dynamic, dynamic> data =
             dataSnapshot.value as Map<dynamic, dynamic>;
 
-        // String displayName = data['displayName'] ?? 'Unknown';
         String displayName = user.displayName ?? 'unknown';
         // String approvalRemarks =
         String emailAddress = data['emailAddress'] ?? user.email ?? 'No email';
@@ -144,5 +145,86 @@ class UserInformationServiceApi {
     } catch (e) {
       return SellerRegistrationsDto(storeName: "", storeAddress: "");
     }
+  }
+
+  Future<Map<String, dynamic>> updateUserAddress(
+      String uid, String address, String selectedAddress) async {
+    DatabaseReference _refs = db.ref("users/$uid/saveAddress");
+    var generatedHashKey = generate16CharHash("$address+$uid");
+
+    var data = {
+      generatedHashKey: address,
+      "address": selectedAddress,
+    };
+
+    _refs.update(data);
+
+    DataSnapshot _snapshot = await _refs.once().then((event) => event.snapshot);
+    if (_snapshot.exists) {
+      Map<String, String> _refData =
+          Map<String, String>.from(_snapshot.value as Map);
+      logger.d(_refData);
+      List<String> data = _refData.values.toList();
+    }
+    return {"saveAddress": data, "address": data["address"]};
+  }
+
+  Future<Map<String, dynamic>> updateSelectedAddress(
+      String uid, String selectedAddress) async {
+    DatabaseReference _refs = db.ref("users/$uid/saveAddress");
+
+    var data = {
+      "address": selectedAddress,
+    };
+
+    _refs.update(data);
+
+    DataSnapshot _snapshot = await _refs.once().then((event) => event.snapshot);
+    if (_snapshot.exists) {
+      Map<String, String> _refData =
+          Map<String, String>.from(_snapshot.value as Map);
+      logger.d(_refData);
+      List<String> data = _refData.values.toList();
+    }
+    return {"saveAddress": data, "address": data["address"]};
+  }
+
+  Future<List<String>> getAllSavedAddressApi(String uid) async {
+    DatabaseReference _refs = db.ref("users/$uid/saveAddress");
+    List<String> data = [];
+
+    DataSnapshot _snapshot = await _refs.once().then((event) => event.snapshot);
+    if (_snapshot.exists) {
+      Map<String, String> _refData =
+          Map<String, String>.from(_snapshot.value as Map);
+      logger.d(_refData);
+
+      data = _refData.entries
+          .where((entry) => entry.key != "address") // Exclude specific key
+          .map((entry) => entry.value) // Extract values only
+          .toList();
+    }
+    return data;
+  }
+
+  Future<Map<String, dynamic>> getAllSavedAndSelectedAddressApi(
+      String uid) async {
+    DatabaseReference _refs = db.ref("users/$uid/saveAddress");
+    List<String> data = [];
+    String selectedData = '';
+
+    DataSnapshot _snapshot = await _refs.once().then((event) => event.snapshot);
+    if (_snapshot.exists) {
+      Map<String, String> _refData =
+          Map<String, String>.from(_snapshot.value as Map);
+      logger.d(_refData);
+      selectedData = _refData['address']!;
+
+      data = _refData.entries
+          .where((entry) => entry.key != "address") // Exclude specific key
+          .map((entry) => entry.value) // Extract values only
+          .toList();
+    }
+    return {"selectedAddress": selectedData, "data": data};
   }
 }

@@ -11,3 +11,12 @@ class GetFarmersNotificationsEvent extends NotificationPageEvent {
   @override
   List<Object?> get props => [uid];
 }
+
+class GetCommunityNotification extends NotificationPageEvent {
+  // final List<CommunityData> communities;
+
+  const GetCommunityNotification();
+
+  @override
+  List<Object?> get props => [];
+}

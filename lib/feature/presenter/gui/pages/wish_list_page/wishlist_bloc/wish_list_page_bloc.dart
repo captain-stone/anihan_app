@@ -81,6 +81,7 @@ class WishListPageBloc extends Bloc<WishListPageEvent, WishListPageState> {
                   String productName = productData['name'];
                   String productLabel = productData['label'];
                   double productPrice = productData['price'].toDouble();
+                  int productQuantity = productData['productQuantity'] ?? 0;
                   String itemDescriptions = productData['itemDescriptions'];
 
                   String? storeIdKey;
@@ -109,7 +110,8 @@ class WishListPageBloc extends Bloc<WishListPageEvent, WishListPageState> {
                             .map((variant) => ProductVariantEntity(
                                 images: variant['variantImages'],
                                 varianName: variant['variantName'],
-                                variantPrice: variant['variantPrice']))
+                                variantPrice: variant['variantPrice'],
+                                variantQuantity: variant['variantQuantity']))
                             .toList();
                   }
 
@@ -118,6 +120,7 @@ class WishListPageBloc extends Bloc<WishListPageEvent, WishListPageState> {
                     productName,
                     productLabel,
                     productPrice,
+                    productQuantity,
                     itemDescriptions,
                     productVariant: productVariants,
                     productKey: productIdKey,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class PanelContainerWidget extends StatelessWidget {
   final String notification;
@@ -34,9 +35,9 @@ class PanelContainerWidget extends StatelessWidget {
             const SizedBox(
               width: 8,
             ),
-            notification == "message"
-                ? Container()
-                : notification == "approval"
+            notification == "community"
+                ? CommunityNotificationWidgets("Community", data)
+                : notification == "notifications"
                     ? TitleContentWidgetPanelContainer(
                         "Approval",
                         data,
@@ -44,6 +45,65 @@ class PanelContainerWidget extends StatelessWidget {
                     : notification == "merchant"
                         ? Container()
                         : Container(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class CommunityNotificationWidgets extends StatelessWidget {
+  final String title;
+  final Map<String, dynamic> data;
+
+  const CommunityNotificationWidgets(this.title, this.data, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // TextAlign alingment = TextAlign.left;
+    String formattedDate =
+        DateFormat('MM-dd-yyyy h:mma').format(data["createdAt"]).toLowerCase();
+    return Expanded(
+      child: SizedBox(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(title,
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(formattedDate, style: const TextStyle(fontSize: 10))
+              ],
+            ),
+            Text(
+              data['membersName'],
+            ),
+            Text(
+              "Request to join your community: ${data['name']}",
+              softWrap: true,
+              overflow: TextOverflow.clip,
+            ),
+            Row(
+              children: [
+                ElevatedButton(onPressed: () {}, child: const Text('Accept')),
+                const SizedBox(
+                  width: 8,
+                ),
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent),
+                  child: const Text(
+                    'Deny',
+                    style: TextStyle(color: Colors.black87),
+                  ),
+                ),
+              ],
+            )
           ],
         ),
       ),

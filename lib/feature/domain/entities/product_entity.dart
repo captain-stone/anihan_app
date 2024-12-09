@@ -7,6 +7,7 @@ class ProductEntity extends AppEntity {
   final String productName;
   final String productLabel;
   final double productPrice;
+  final int productQuantity;
   final List<ProductVariantEntity?>? productVariant;
   final String itemDescriptions;
   final String productKey;
@@ -17,6 +18,7 @@ class ProductEntity extends AppEntity {
     this.productName,
     this.productLabel,
     this.productPrice,
+    this.productQuantity,
     this.itemDescriptions, {
     this.productVariant,
     required this.productKey,
@@ -44,6 +46,7 @@ class ProductEntity extends AppEntity {
         productName,
         productLabel,
         productPrice,
+        productQuantity,
         itemDescriptions,
         productKey,
         storeId,
@@ -55,12 +58,18 @@ class ProductVariantEntity extends AppEntity {
   final String? images;
   final String? varianName;
   final String? variantPrice;
+  final String? variantQuantity;
 
   ProductVariantEntity(
-      {this.imageData, this.images, this.varianName, this.variantPrice});
+      {this.imageData,
+      this.images,
+      this.varianName,
+      this.variantPrice,
+      this.variantQuantity});
 
   // factory ProductVariantEntity.fromMap()
 
   @override
-  List<Object?> get props => [imageData, images, varianName, variantPrice];
+  List<Object?> get props =>
+      [imageData, images, varianName, variantPrice, variantQuantity];
 }

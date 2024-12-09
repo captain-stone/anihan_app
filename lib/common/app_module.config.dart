@@ -38,16 +38,26 @@ import 'package:anihan_app/feature/domain/usecases/user_information_usecase.dart
     as _i619;
 import 'package:anihan_app/feature/presenter/gui/pages/add_product_page/add_product_page_bloc.dart'
     as _i905;
-import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/chats_page_bloc.dart'
-    as _i346;
+import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/blocs/chat_page/chats_page_bloc.dart'
+    as _i609;
+import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/blocs/chat_with_page_bloc/chat_with_bloc.dart'
+    as _i1006;
+import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/blocs/join_community_cubit/join_community_cubit.dart'
+    as _i705;
+import 'package:anihan_app/feature/presenter/gui/pages/checkout_page/cubit/remove_checkout_cubit.dart'
+    as _i726;
 import 'package:anihan_app/feature/presenter/gui/pages/login_bloc/login_page_bloc.dart'
     as _i550;
 import 'package:anihan_app/feature/presenter/gui/pages/map__page/map_page_cubit.dart'
     as _i445;
+import 'package:anihan_app/feature/presenter/gui/pages/notification_bloc/notification_page_bloc.dart'
+    as _i517;
 import 'package:anihan_app/feature/presenter/gui/pages/register_bloc/register_page_bloc.dart'
     as _i282;
 import 'package:anihan_app/feature/presenter/gui/pages/seller_registration_bloc/seller_registration_bloc.dart'
     as _i905;
+import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/cubit/add_update_user_address_cubit.dart'
+    as _i1003;
 import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/user_information_bloc_bloc.dart'
     as _i860;
 import 'package:anihan_app/feature/presenter/gui/pages/wish_list_page/wishlist_bloc/wish_list_page_bloc.dart'
@@ -93,9 +103,15 @@ extension GetItInjectableX on _i174.GetIt {
       () => appModule.notification,
       preResolve: true,
     );
-    gh.factory<_i346.ChatsPageBloc>(() => _i346.ChatsPageBloc());
+    gh.factory<_i609.ChatsPageBloc>(() => _i609.ChatsPageBloc());
+    gh.factory<_i1006.ChatWithBloc>(() => _i1006.ChatWithBloc());
+    gh.factory<_i726.RemoveCheckoutCubit>(() => _i726.RemoveCheckoutCubit());
     gh.factory<_i445.MapPageCubit>(() => _i445.MapPageCubit());
+    gh.factory<_i517.NotificationPageBloc>(() => _i517.NotificationPageBloc());
+    gh.factory<_i1003.AddUpdateUserAddressCubit>(
+        () => _i1003.AddUpdateUserAddressCubit());
     gh.factory<_i604.WishListPageBloc>(() => _i604.WishListPageBloc());
+    gh.factory<_i705.JoinCommunityCubit>(() => _i705.JoinCommunityCubit());
     gh.lazySingleton<_i345.DatabaseReference>(() => appModule.ref);
     gh.lazySingleton<_i519.Client>(() => appModule.httpClient);
     gh.lazySingleton<_i361.Dio>(() => appModule.dio);

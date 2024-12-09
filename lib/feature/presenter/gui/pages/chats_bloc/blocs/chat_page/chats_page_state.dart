@@ -64,3 +64,38 @@ class AllPendingRequestSuccessState extends ChatsPageState {
   @override
   List<Object> get props => [data];
 }
+
+class GetAllCommunitySuccessState extends ChatsPageState {
+  final List<CommunityData> communities;
+
+  const GetAllCommunitySuccessState(this.communities);
+  @override
+  List<Object> get props => [communities];
+}
+
+class GetAllCommunityLoadingState extends ChatsPageState {
+  const GetAllCommunityLoadingState();
+  @override
+  List<Object?> get props => [];
+}
+
+class GetAllCommunityErrorState extends ChatsPageState {
+  final String message;
+  const GetAllCommunityErrorState(this.message);
+  @override
+  List<Object?> get props => [message];
+}
+
+class AddCommunitySuccessState extends ChatsPageState {
+  final String message;
+  const AddCommunitySuccessState(this.message);
+  @override
+  List<Object?> get props => [message];
+}
+
+class AddCommunityErrorState extends ChatsPageState {
+  final String message;
+  const AddCommunityErrorState(this.message);
+  @override
+  List<Object?> get props => [message];
+}
