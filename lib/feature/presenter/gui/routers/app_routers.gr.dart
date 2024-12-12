@@ -32,6 +32,7 @@ abstract class _$AppRouters extends RootStackRouter {
         child: ChatWithPage(
           key: args.key,
           friendId: args.friendId,
+          friendName: args.friendName,
         ),
       );
     },
@@ -42,6 +43,17 @@ abstract class _$AppRouters extends RootStackRouter {
         routeData: routeData,
         child: ChatsPage(
           uid: args.uid,
+          key: args.key,
+        ),
+      );
+    },
+    CommunityChatRoute.name: (routeData) {
+      final args = routeData.argsAs<CommunityChatRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: CommunityChatPage(
+          ownerId: args.ownerId,
+          communityName: args.communityName,
           key: args.key,
         ),
       );
@@ -238,12 +250,14 @@ class ChatWithRoute extends PageRouteInfo<ChatWithRouteArgs> {
   ChatWithRoute({
     Key? key,
     required String friendId,
+    required String friendName,
     List<PageRouteInfo>? children,
   }) : super(
           ChatWithRoute.name,
           args: ChatWithRouteArgs(
             key: key,
             friendId: friendId,
+            friendName: friendName,
           ),
           initialChildren: children,
         );
@@ -258,15 +272,18 @@ class ChatWithRouteArgs {
   const ChatWithRouteArgs({
     this.key,
     required this.friendId,
+    required this.friendName,
   });
 
   final Key? key;
 
   final String friendId;
 
+  final String friendName;
+
   @override
   String toString() {
-    return 'ChatWithRouteArgs{key: $key, friendId: $friendId}';
+    return 'ChatWithRouteArgs{key: $key, friendId: $friendId, friendName: $friendName}';
   }
 }
 
@@ -304,6 +321,49 @@ class ChatsRouteArgs {
   @override
   String toString() {
     return 'ChatsRouteArgs{uid: $uid, key: $key}';
+  }
+}
+
+/// generated route for
+/// [CommunityChatPage]
+class CommunityChatRoute extends PageRouteInfo<CommunityChatRouteArgs> {
+  CommunityChatRoute({
+    required String ownerId,
+    required String communityName,
+    Key? key,
+    List<PageRouteInfo>? children,
+  }) : super(
+          CommunityChatRoute.name,
+          args: CommunityChatRouteArgs(
+            ownerId: ownerId,
+            communityName: communityName,
+            key: key,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'CommunityChatRoute';
+
+  static const PageInfo<CommunityChatRouteArgs> page =
+      PageInfo<CommunityChatRouteArgs>(name);
+}
+
+class CommunityChatRouteArgs {
+  const CommunityChatRouteArgs({
+    required this.ownerId,
+    required this.communityName,
+    this.key,
+  });
+
+  final String ownerId;
+
+  final String communityName;
+
+  final Key? key;
+
+  @override
+  String toString() {
+    return 'CommunityChatRouteArgs{ownerId: $ownerId, communityName: $communityName, key: $key}';
   }
 }
 

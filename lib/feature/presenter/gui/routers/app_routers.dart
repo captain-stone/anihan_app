@@ -8,6 +8,7 @@ import '../pages/add_ons_blocs/check_friends_bloc/check_friends_bloc.dart';
 import '../pages/add_product_page/addproductform.dart';
 import '../pages/chats_bloc/chat_with_page.dart';
 import '../pages/chats_bloc/chats_page.dart';
+import '../pages/chats_bloc/community_chat_page.dart';
 import '../pages/chats_bloc/show_friends_page.dart';
 import '../pages/home_navigation_page.dart';
 import '../pages/home_page.dart';
@@ -47,6 +48,7 @@ class AppRouters extends _$AppRouters {
         AutoRoute(page: FriendRequestRoute.page),
         AutoRoute(page: MapRoute.page),
         AutoRoute(page: ChatWithRoute.page),
-        AutoRoute(page: MyLikeRoute.page)
+        AutoRoute(page: MyLikeRoute.page),
+        AutoRoute(page: CommunityChatRoute.page)
       ];
 }

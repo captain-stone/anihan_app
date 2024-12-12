@@ -8,7 +8,7 @@ import '../../widgets/addons/custom_alert_dialog.dart';
 class ShowFriendListToChat extends StatelessWidget {
   final String uid;
   final List<FirebaseDataModel?> users;
-  final Function(String userId) onChat;
+  final Function(String userId, String name) onChat;
 
   const ShowFriendListToChat(this.uid, this.users,
       {super.key, required this.onChat});
@@ -85,7 +85,9 @@ class ShowFriendListToChat extends StatelessWidget {
                   if (friend.status == FriendStatus.accepted.name) {
                     //openCHat
                     logger.w("HELLO");
-                    onChat(friend.key);
+
+                    logger.d(friend.value['fullName']);
+                    onChat(friend.key, friend.value['fullName']);
                   }
                 },
                 child: Container(

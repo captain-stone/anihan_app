@@ -42,8 +42,10 @@ import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/blocs/chat_pag
     as _i609;
 import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/blocs/chat_with_page_bloc/chat_with_bloc.dart'
     as _i1006;
-import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/blocs/join_community_cubit/join_community_cubit.dart'
-    as _i705;
+import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/blocs/community_chat_page.dart/community_chat_bloc.dart'
+    as _i643;
+import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/blocs/join_community_bloc/join_community_bloc.dart'
+    as _i210;
 import 'package:anihan_app/feature/presenter/gui/pages/checkout_page/cubit/remove_checkout_cubit.dart'
     as _i726;
 import 'package:anihan_app/feature/presenter/gui/pages/login_bloc/login_page_bloc.dart'
@@ -111,7 +113,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i1003.AddUpdateUserAddressCubit>(
         () => _i1003.AddUpdateUserAddressCubit());
     gh.factory<_i604.WishListPageBloc>(() => _i604.WishListPageBloc());
-    gh.factory<_i705.JoinCommunityCubit>(() => _i705.JoinCommunityCubit());
+    gh.factory<_i210.JoinCommunityBloc>(() => _i210.JoinCommunityBloc());
+    gh.factory<_i643.CommunityChatBloc>(() => _i643.CommunityChatBloc());
     gh.lazySingleton<_i345.DatabaseReference>(() => appModule.ref);
     gh.lazySingleton<_i519.Client>(() => appModule.httpClient);
     gh.lazySingleton<_i361.Dio>(() => appModule.dio);

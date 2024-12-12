@@ -1,11 +1,22 @@
+// ignore_for_file: unused_element
+
+import 'package:anihan_app/common/api_result.dart';
+import 'package:anihan_app/common/enum_files.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/notification_bloc/notification_page_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 
 class PanelContainerWidget extends StatelessWidget {
   final String notification;
+  final NotificationPageBloc notifBloc;
   final Map<String, dynamic> data;
   const PanelContainerWidget(
-      {required this.notification, required this.data, super.key});
+      {required this.notification,
+      required this.data,
+      required this.notifBloc,
+      super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +47,11 @@ class PanelContainerWidget extends StatelessWidget {
               width: 8,
             ),
             notification == "community"
-                ? CommunityNotificationWidgets("Community", data)
+                ? CommunityNotificationWidgets(
+                    "Community",
+                    data,
+                    bloc: notifBloc,
+                  )
                 : notification == "notifications"
                     ? TitleContentWidgetPanelContainer(
                         "Approval",
@@ -54,15 +69,25 @@ class PanelContainerWidget extends StatelessWidget {
 
 class CommunityNotificationWidgets extends StatelessWidget {
   final String title;
+  final NotificationPageBloc bloc;
   final Map<String, dynamic> data;
+  // late final bool isAccepted;
+  final logger = Logger();
 
-  const CommunityNotificationWidgets(this.title, this.data, {super.key});
+  CommunityNotificationWidgets(this.title, this.data,
+      {required this.bloc, super.key});
+
+  void _acceptFunction(Map<String, dynamic> data) =>
+      bloc.add(AcceptCommunityRequestEvent(data));
+  void _denyFunction(Map<String, dynamic> data) =>
+      bloc.add(DenyCommunityRequestEvent(data));
 
   @override
   Widget build(BuildContext context) {
     // TextAlign alingment = TextAlign.left;
     String formattedDate =
         DateFormat('MM-dd-yyyy h:mma').format(data["createdAt"]).toLowerCase();
+    logger.d(data);
     return Expanded(
       child: SizedBox(
         child: Column(
@@ -87,22 +112,50 @@ class CommunityNotificationWidgets extends StatelessWidget {
               softWrap: true,
               overflow: TextOverflow.clip,
             ),
-            Row(
-              children: [
-                ElevatedButton(onPressed: () {}, child: const Text('Accept')),
-                const SizedBox(
-                  width: 8,
-                ),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent),
-                  child: const Text(
-                    'Deny',
-                    style: TextStyle(color: Colors.black87),
-                  ),
-                ),
-              ],
+            BlocBuilder<NotificationPageBloc, NotificationPageState>(
+              bloc: bloc,
+              builder: (context, state) {
+                logger.d(state);
+
+                bool isShit = false;
+                if (state is NotificationCommunitiesSuccessState) {
+                  for (var stateData in state.communities) {
+                    var userId = stateData.members!['userId'];
+                    if (data['memberId'] == userId) {
+                      isShit = true;
+                    } else {
+                      isShit = false;
+                    }
+                  }
+                } else {
+                  isShit = false;
+                }
+
+                if (isShit) {
+                  return Row(
+                    children: [
+                      ElevatedButton(
+                          onPressed: () => _acceptFunction(data),
+                          child: const Text('Accept')),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _denyFunction(data), //denyFunction,
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent),
+                        child: const Text(
+                          'Deny',
+                          style: TextStyle(color: Colors.black87),
+                        ),
+                      ),
+                    ],
+                  );
+                } else {
+                  return const ElevatedButton(
+                      onPressed: null, child: Text('Accepted'));
+                }
+              },
             )
           ],
         ),

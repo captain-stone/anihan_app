@@ -4,7 +4,8 @@ import 'package:anihan_app/common/enum_files.dart';
 import 'package:anihan_app/feature/data/models/api/firebase_model.dart';
 import 'package:anihan_app/feature/domain/entities/community_data.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/blocs/chat_page/chats_page_bloc.dart';
-import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/blocs/join_community_cubit/join_community_cubit.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/blocs/join_community_bloc/join_community_bloc.dart';
+
 import 'package:anihan_app/feature/presenter/gui/routers/app_routers.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/addons/custom_alert_dialog.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/debugger/logger_debugger.dart';
@@ -28,13 +29,13 @@ class ChatsPage extends StatefulWidget {
 
 class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
   final _chatPageBloc = getIt<ChatsPageBloc>();
-  final _joinCommunity = getIt<JoinCommunityCubit>();
+  final _joinCommunityBloc = getIt<JoinCommunityBloc>();
   int _selectedIndex = 2;
   bool isFriendsExpanded = true;
   bool isFriendsSuggestionExpanded = false;
   bool isCommunitExpanded = false;
   bool isLoading = false;
-  JoinCommunity isJoin = JoinCommunity.join;
+  String isJoin = JoinCommunity.join.name;
 
   static const List<ChatItem> chatItems = [];
   List<FirebaseDataModel> users = [];
@@ -102,8 +103,9 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
     // logger.d(userId);
   }
 
-  void _onChatMessage(String userId) {
-    AutoRouter.of(context).push(ChatWithRoute(friendId: userId));
+  void _onChatMessage(String userId, String name) {
+    AutoRouter.of(context)
+        .push(ChatWithRoute(friendId: userId, friendName: name));
   }
 
   void _onPressedCommunit() {
@@ -166,6 +168,10 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
   }
 
   Widget _buildCommunityDialog(List<CommunityData> communities) {
+    // Trigger the event only for unique ownerIds not already fetched
+    logger.d(communities);
+    Map<String, dynamic> d = {};
+
     return CustomAlertDialog(
       height: MediaQuery.of(context).size.height * 0.4,
       colorMessage: Colors.green,
@@ -187,41 +193,105 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
         itemCount: communities.length,
         itemBuilder: (context, index) {
           CommunityData community = communities[index];
-          return Container(
-            margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: Colors.green,
-            ),
-            padding: const EdgeInsets.all(12.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(community.name),
-                community.ownerId == widget.uid
-                    ? const Text(
-                        "Admin",
-                        style: TextStyle(fontSize: 12),
-                      )
-                    : TextButton(
-                        onPressed: () async {
-                          // Handle j oin logic
+          community.members!.forEach((key, value) {
+            // Initialize the ownerId map if it doesn't exist
+            if (d[community.ownerId] == null) {
+              d[community.ownerId] = {}; // Initialize as an empty map
+            }
 
-                          // setState(() {
-                          //   isJoin = !isJoin;
-                          // });
-                          JoinCommunity _isJoin =
-                              await _joinCommunity.joinCommunity(
-                                  community.ownerId, JoinCommunity.requested);
-                          setState(() {
-                            isJoin = _isJoin;
-                          });
+            // Add or update the member under the ownerId
+            d[community.ownerId][key] = {
+              "status": value['status'],
+              "id": value['id'],
+            };
+          });
 
-                          logger.d(isJoin);
-                        },
-                        child: Text(isJoin.name),
-                      ),
-              ],
+          return GestureDetector(
+            onTap: () {
+              // community.members!.forEach((key, value) {
+              //   d[community.ownerId] = {
+              //     "status": value['status'],
+              //     "id": value['id']
+              //   }; // Modify the value but keep the key
+              // });
+
+              // logger.d(d);
+
+              final member = community.members!.values.firstWhere(
+                (member) => member['id'] == widget.uid,
+                orElse: () => null,
+              );
+
+              if (member != null && member['status'] == 'accepted') {
+                AutoRouter.of(context).push(CommunityChatRoute(
+                    ownerId: community.ownerId, communityName: community.name));
+              }
+
+              //     return true;
+              //   });
+              // } else {
+              //   logger.d(null);
+              // }
+            },
+            child: Container(
+              margin:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.green,
+              ),
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(community.name),
+                  community.ownerId == widget.uid
+                      ? const Text(
+                          "Admin",
+                          style: TextStyle(fontSize: 12),
+                        )
+                      : TextButton(
+                          onPressed: () {
+                            // Find the current user's member data
+                            logger.d(community.ownerId);
+                            final member = community.members!.values.firstWhere(
+                              (member) => member['id'] == widget.uid,
+                              orElse: () => null,
+                            );
+
+                            // Only proceed if the user is eligible to join (status is 'Join')
+                            if (member != null && member['status'] == 'Join') {
+                              _joinCommunityBloc.add(JoinCommunityByOwnerId(
+                                community.ownerId,
+                                JoinCommunity.requested,
+                              ));
+
+                              _chatPageBloc.add(const GetAllCommunityEvent());
+                            } else if (member == null) {
+                              _joinCommunityBloc.add(JoinCommunityByOwnerId(
+                                community.ownerId,
+                                JoinCommunity.requested,
+                              ));
+
+                              _chatPageBloc.add(const GetAllCommunityEvent());
+                              _chatPageBloc.add(
+                                  GetUserListEvent(currentUserId: widget.uid!));
+                              Navigator.of(context).pop();
+                            } else {
+                              logger.d(
+                                  'User cannot join. Status: ${member?['status']}');
+                            }
+                          },
+                          child: Text(community.members!.values.firstWhere(
+                                (member) =>
+                                    member['id'] ==
+                                    widget
+                                        .uid, // Or any other condition to find the member
+                                orElse: () => null,
+                              )?['status'] ??
+                              'Join')),
+                ],
+              ),
             ),
           );
         },
@@ -326,7 +396,7 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
                 ? ShowFriendListToChat(
                     widget.uid!,
                     notFriends,
-                    onChat: _onChatMessage,
+                    onChat: (id, name) => _onChatMessage(id, name),
                   )
                 : Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),

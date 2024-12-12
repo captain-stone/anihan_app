@@ -54,6 +54,7 @@ class _NotificationPageState extends State<NotificationPage> {
               var communityData = {
                 'community': {
                   'name': community.name,
+                  'memberId': community.members?['userId'] ?? 'None',
                   'membersName': community.members?['usersName'] ?? "None",
                   'createdAt': community.createdAt,
                 }
@@ -72,8 +73,9 @@ class _NotificationPageState extends State<NotificationPage> {
                 itemCount: data.length,
                 itemBuilder: (context, index) {
                   return PanelContainerWidget(
-                    notification: data[index]['type'] ?? "asdsad",
+                    notification: data[index]['type'] ?? "",
                     data: data[index]['data'],
+                    notifBloc: _notificationBloc,
                   );
                 });
           }

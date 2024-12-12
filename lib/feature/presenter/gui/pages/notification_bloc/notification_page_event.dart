@@ -20,3 +20,19 @@ class GetCommunityNotification extends NotificationPageEvent {
   @override
   List<Object?> get props => [];
 }
+
+class AcceptCommunityRequestEvent extends NotificationPageEvent {
+  final Map<String, dynamic> data;
+  const AcceptCommunityRequestEvent(this.data);
+
+  @override
+  List<Object?> get props => [data];
+}
+
+class DenyCommunityRequestEvent extends NotificationPageEvent {
+  final Map<String, dynamic> data;
+  const DenyCommunityRequestEvent(this.data);
+
+  @override
+  List<Object?> get props => [data];
+}

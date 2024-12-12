@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:anihan_app/common/api_result.dart';
 import 'package:anihan_app/common/enum_files.dart';
 import 'package:anihan_app/feature/data/models/api/user_information_service_api.dart';
 import 'package:anihan_app/feature/domain/entities/community_data.dart';
@@ -119,12 +120,13 @@ class NotificationPageBloc
                 // logger.d(value['status'] == JoinCommunity.requested);
                 if (value['status'] == JoinCommunity.requested.name) {
                   var userInformation =
-                      await _serviceApi.userInformation(value['id']);
+                      await _serviceApi.getUserInformationById(value['id']);
                   return CommunityData(
                     name: object['name'],
                     ownerId: object['ownerId'],
                     createdAt: DateTime.parse(object['createdAt']),
                     members: {
+                      'userId': value['id'],
                       'usersName': userInformation.displayName,
                       'status': value['status'],
                     },
@@ -132,12 +134,13 @@ class NotificationPageBloc
                 }
                 if (value['status'] == JoinCommunity.accepted.name) {
                   var userInformation =
-                      await _serviceApi.userInformation(value['id']);
+                      await _serviceApi.getUserInformationById(value['id']);
                   return CommunityData(
                     name: object['name'],
                     ownerId: object['ownerId'],
                     createdAt: DateTime.parse(object['createdAt']),
                     members: {
+                      'userId': value['id'],
                       'usersName': userInformation.displayName,
                       'status': value['status'],
                     },
@@ -146,6 +149,8 @@ class NotificationPageBloc
                 return null;
               }).where((e) => e != null),
             );
+
+            logger.d(comminities);
 
             comminities.addAll(memberDetails.cast<CommunityData>());
             if (!emit.isDone) {
@@ -165,6 +170,97 @@ class NotificationPageBloc
       } catch (e) {
         emit(
             NotificationCommunitiesErrorState("There's an error occurred: $e"));
+      }
+    });
+
+    on<AcceptCommunityRequestEvent>((event, emit) async {
+      emit(const AcceptDenyCommunitiesLoadingState());
+      var data = event.data;
+
+      User? user = FirebaseAuth.instance.currentUser;
+
+      try {
+        DatabaseReference _ref =
+            db.ref('community/community-id-${user!.uid}/members');
+
+        var updateStatus = {
+          "status": JoinCommunity.accepted.name,
+          "createdAt": DateTime.now().toIso8601String()
+        };
+
+        DataSnapshot snapshot = await _ref.get();
+        if (snapshot.exists) {
+          Map<dynamic, dynamic> members =
+              snapshot.value as Map<dynamic, dynamic>;
+          String? memberKey;
+
+          members.forEach((key, value) {
+            if (value['id'] == data['memberId']) {
+              memberKey = key;
+            }
+          });
+
+          if (memberKey != null) {
+            DatabaseReference memberRef = _ref.child(memberKey!);
+            await memberRef.update(updateStatus).then((_) {
+              emit(AcceptCommunitiesSuccessState({
+                "status": Status.success.name,
+              }));
+            }).catchError((error) {
+              emit(AcceptDenyCommunitiesErrorState(
+                  "There's an error updating data. (Error) $error"));
+            });
+          }
+        }
+      } catch (e) {
+        emit(AcceptDenyCommunitiesErrorState(
+            "There's an error updating data. (Error) $e"));
+      }
+
+      //update the data on members.
+    });
+    on<DenyCommunityRequestEvent>((event, emit) async {
+      emit(const AcceptDenyCommunitiesLoadingState());
+      var data = event.data;
+
+      User? user = FirebaseAuth.instance.currentUser;
+
+      try {
+        DatabaseReference _ref =
+            db.ref('community/community-id-${user!.uid}/members');
+
+        var updateStatus = {
+          "status": JoinCommunity.deny.name,
+          "createdAt": DateTime.now().toIso8601String()
+        };
+
+        DataSnapshot snapshot = await _ref.get();
+        if (snapshot.exists) {
+          Map<dynamic, dynamic> members =
+              snapshot.value as Map<dynamic, dynamic>;
+          String? memberKey;
+
+          members.forEach((key, value) {
+            if (value['id'] == data['memberId']) {
+              memberKey = key;
+            }
+          });
+
+          if (memberKey != null) {
+            DatabaseReference memberRef = _ref.child(memberKey!);
+            await memberRef.update(updateStatus).then((_) {
+              emit(AcceptCommunitiesSuccessState({
+                "status": Status.success.name,
+              }));
+            }).catchError((error) {
+              emit(AcceptDenyCommunitiesErrorState(
+                  "There's an error updating data. (Error) $error"));
+            });
+          }
+        }
+      } catch (e) {
+        emit(AcceptDenyCommunitiesErrorState(
+            "There's an error updating data. (Error) $e"));
       }
     });
   }

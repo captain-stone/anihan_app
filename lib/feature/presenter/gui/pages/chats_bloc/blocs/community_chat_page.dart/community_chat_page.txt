@@ -3,72 +3,68 @@ import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/blocs/chat_wit
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 
 import '../../../../../common/app_module.dart';
+import 'blocs/community_chat_page.dart/community_chat_bloc.dart';
 
 @RoutePage()
-class ChatWithPage extends StatefulWidget {
-  final String friendId;
-  final String friendName;
-  const ChatWithPage(
-      {super.key, required this.friendId, required this.friendName});
+class CommunityChatPage extends StatefulWidget {
+  final String ownerId;
+  final String communityName;
+  const CommunityChatPage(
+      {required this.ownerId, required this.communityName, super.key});
 
   @override
-  State<ChatWithPage> createState() => _ChatWithPageState();
+  State<CommunityChatPage> createState() => _CommunityChatPageState();
 }
 
-class _ChatWithPageState extends State<ChatWithPage> {
+class _CommunityChatPageState extends State<CommunityChatPage> {
   final TextEditingController _messageController = TextEditingController();
+
+  final logger = Logger();
   List<MessageData> _messages = [];
-  final Logger logger = Logger();
 
-  final _chatWithBloc = getIt<ChatWithBloc>();
-
-  void _sendMessage() {
-    // if (_messageController.text.trim().isNotEmpty) {
-    //   setState(() {
-    //     _messages.add(_messageController.text.trim());
-    //     _messageController.clear();
-    //   });
-    // }
-
-    _chatWithBloc
-        .add(SendAMessageEvent(widget.friendId, _messageController.text));
-    _messageController.clear();
-  }
-
+  final _communityChatBloc = getIt<CommunityChatBloc>();
   @override
   void initState() {
     super.initState();
+    _communityChatBloc.add(GetCommunityMessageEvent(widget.ownerId));
+  }
 
-    //get the chats using id.c
+  @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
+  }
 
-    _chatWithBloc.add(GetMessageEvent(widget.friendId));
+  void _sendMessage() {
+    _communityChatBloc.add(
+        SendCommunityAMessageEvent(widget.ownerId, _messageController.text));
+    _messageController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.friendName),
+        title: Text(widget.communityName),
       ),
       body: Column(
         children: [
           // Messages List
-          BlocBuilder<ChatWithBloc, ChatWithState>(
-            bloc: _chatWithBloc,
+          BlocBuilder<CommunityChatBloc, CommunityChatState>(
+            bloc: _communityChatBloc,
             builder: (context, state) {
               logger.d(state);
-              String friendId = "";
+              String ownerId = "";
 
-              if (state is ChatWithSuccessState) {
+              if (state is CommunityChatWithSuccessState) {
                 _messages.clear();
                 logger.d(state.messages);
 
-                friendId = widget.friendId;
+                ownerId = widget.ownerId;
 
                 _messages = state.messages;
                 _messages.sort((a, b) => b.datetime.compareTo(a.datetime));
@@ -79,31 +75,9 @@ class _ChatWithPageState extends State<ChatWithPage> {
                     itemCount: _messages.length,
                     itemBuilder: (context, index) {
                       final message = _messages[index];
-                      final isFriendId = message.sender == friendId;
+                      final isFriendId = message.sender == ownerId;
                       final time =
                           DateFormat('hh:mm a').format(message.datetime);
-                      // logger.e("SHITTTTT");
-                      // final message = _messages[_messages.length - 1 - index];
-                      // return Padding(
-                      //   padding: const EdgeInsets.symmetric(
-                      //       horizontal: 16.0, vertical: 8.0),
-                      //   child: Align(
-                      //     alignment: Alignment.centerRight,
-                      //     child: Container(
-                      //       decoration: BoxDecoration(
-                      //         color: Colors.blue,
-                      //         borderRadius: BorderRadius.circular(12),
-                      //       ),
-                      //       padding: const EdgeInsets.all(12),
-                      //       child: Text(
-                      //         message.message,
-                      //         style: const TextStyle(
-                      //           color: Colors.white,
-                      //         ),
-                      //       ),
-                      //     ),
-                      //   ),
-                      // );
 
                       return Align(
                         alignment: isFriendId
@@ -184,11 +158,5 @@ class _ChatWithPageState extends State<ChatWithPage> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _messageController.dispose();
-    super.dispose();
   }
 }

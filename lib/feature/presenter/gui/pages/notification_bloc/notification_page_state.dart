@@ -52,3 +52,38 @@ class NotificationCommunitiesErrorState extends NotificationPageState {
   @override
   List<Object> get props => [];
 }
+
+class AcceptCommunitiesSuccessState extends NotificationPageState {
+  // final List<CommunityData> communities;
+  final Map<String, dynamic> status;
+
+  const AcceptCommunitiesSuccessState(this.status);
+
+  @override
+  List<Object> get props => [status];
+}
+
+class DenyCommunitiesSuccessState extends NotificationPageState {
+  // final List<CommunityData> communities;
+  final Map<String, dynamic> status;
+  const DenyCommunitiesSuccessState(this.status);
+
+  @override
+  List<Object> get props => [status];
+}
+
+class AcceptDenyCommunitiesErrorState extends NotificationPageState {
+  // final List<CommunityData> communities;
+  final String message;
+  const AcceptDenyCommunitiesErrorState(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+class AcceptDenyCommunitiesLoadingState extends NotificationPageState {
+  const AcceptDenyCommunitiesLoadingState();
+
+  @override
+  List<Object> get props => [];
+}

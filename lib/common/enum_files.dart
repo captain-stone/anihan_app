@@ -12,6 +12,7 @@ enum JoinCommunity {
   pending,
   accepted,
   requested,
+  deny,
   error,
   none,
   join,

@@ -29,11 +29,40 @@ class UserInformationServiceApi {
     }
   }
 
-  Future<UserInformationDto> userInformation(String uid) async {
-    final logger = Logger();
-    User user = await gettingUserId();
+  Future<UserInformationDto> getUserInformationById(String uid) async {
+    try {
+      late final String approvalRemarks;
 
-    logger.d(uid);
+      DatabaseReference _refs = db.ref("users/$uid");
+      DataSnapshot dataSnapshot =
+          await _refs.once().then((event) => event.snapshot);
+      if (dataSnapshot.exists) {
+        Map<dynamic, dynamic> data =
+            dataSnapshot.value as Map<dynamic, dynamic>;
+
+        var name = data['fullName'];
+        var email = data['emailAddress'];
+        var phone = data['phoneNumber'];
+
+        if (!data.containsKey('farmers')) {
+          data['farmers'] = Approval.pendingApproval.name;
+          approvalRemarks = data['farmers'];
+        } else {
+          approvalRemarks = data['farmers'];
+        }
+
+        return UserInformationDto(name, approvalRemarks, email, phone);
+      } else {
+        throw Exception('No data found for this user');
+      }
+    } catch (e) {
+      logger.e(e);
+      throw Exception("Failed to fetch user information");
+    }
+  }
+
+  Future<UserInformationDto> userInformation(String uid) async {
+    User user = await gettingUserId();
 
     try {
       late final String approvalRemarks;
