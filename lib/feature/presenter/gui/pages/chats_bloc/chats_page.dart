@@ -59,9 +59,9 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
   @override
   void initState() {
     super.initState();
-    _chatPageBloc.add(GetUserListEvent(currentUserId: widget.uid!));
+    _chatPageBloc.add(GetChatUserListEvent(currentUserId: widget.uid!));
 
-    // _bloc.add(GetUserListEvent());
+    // _bloc.add(GetChatUserListEvent());
   }
 
   void _onItemTapped(int index) {
@@ -88,7 +88,7 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
         searchEmpty = true;
         friends = [];
         notFriends = [];
-        _chatPageBloc.add(GetUserListEvent(currentUserId: widget.uid!));
+        _chatPageBloc.add(GetChatUserListEvent(currentUserId: widget.uid!));
       });
     }
   }
@@ -179,8 +179,9 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
       actionOkayVisibility: true,
       actionLabel: "Add",
       onPressedCloseBtn: () {
+        _chatPageBloc.add(GetChatUserListEvent(currentUserId: widget.uid!));
+
         Navigator.of(context).pop();
-        _chatPageBloc.add(GetUserListEvent(currentUserId: widget.uid!));
       },
       onPressOkay: () {
         showDialog(
@@ -216,6 +217,7 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
               // });
 
               // logger.d(d);
+              // logger.d(community);
 
               final member = community.members!.values.firstWhere(
                 (member) => member['id'] == widget.uid,
@@ -223,6 +225,11 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
               );
 
               if (member != null && member['status'] == 'accepted') {
+                AutoRouter.of(context).push(CommunityChatRoute(
+                    ownerId: community.ownerId, communityName: community.name));
+              }
+
+              if (community.ownerId == widget.uid) {
                 AutoRouter.of(context).push(CommunityChatRoute(
                     ownerId: community.ownerId, communityName: community.name));
               }
@@ -274,8 +281,8 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
                               ));
 
                               _chatPageBloc.add(const GetAllCommunityEvent());
-                              _chatPageBloc.add(
-                                  GetUserListEvent(currentUserId: widget.uid!));
+                              _chatPageBloc.add(GetChatUserListEvent(
+                                  currentUserId: widget.uid!));
                               Navigator.of(context).pop();
                             } else {
                               logger.d(
@@ -305,7 +312,7 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
       title: "Success",
       onPressedCloseBtn: () {
         Navigator.of(context).pop();
-        _chatPageBloc.add(GetUserListEvent(currentUserId: widget.uid!));
+        _chatPageBloc.add(GetChatUserListEvent(currentUserId: widget.uid!));
       },
       child: Text(message),
     );
@@ -327,7 +334,7 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
       },
       onPressedCloseBtn: () {
         Navigator.of(context).pop();
-        _chatPageBloc.add(GetUserListEvent(currentUserId: widget.uid!));
+        _chatPageBloc.add(GetChatUserListEvent(currentUserId: widget.uid!));
       },
       child: Text(errorMessage),
     );
@@ -346,7 +353,7 @@ class _ChatsPageState extends State<ChatsPage> with LoggerEvent {
         },
         onPressedCloseBtn: () {
           Navigator.of(context).pop();
-          _chatPageBloc.add(GetUserListEvent(currentUserId: widget.uid!));
+          _chatPageBloc.add(GetChatUserListEvent(currentUserId: widget.uid!));
         },
         child: TextFormField(
           controller: communityController,

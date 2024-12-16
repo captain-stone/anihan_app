@@ -14,6 +14,9 @@ enum Approval {
   approved,
   notApproved,
   pendingApproval,
+  driver,
+  delivery,
+  done,
 }
 
 enum ProductDist {

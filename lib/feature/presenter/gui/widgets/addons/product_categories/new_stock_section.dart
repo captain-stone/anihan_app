@@ -5,6 +5,7 @@ import 'product_category.dart';
 import 'product_category_items.dart';
 
 class NewStockSection extends StatelessWidget {
+  final String uid;
   final logger = Logger();
   final List<ProductCategory> categories = [
     ProductCategory('Seeds', 'assets/seeds.jpg'),
@@ -15,7 +16,7 @@ class NewStockSection extends StatelessWidget {
     ProductCategory('Saplings', 'assets/sapling.jpg'),
   ];
 
-  NewStockSection({super.key});
+  NewStockSection({required this.uid, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +39,8 @@ class NewStockSection extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             itemCount: categories.length,
             itemBuilder: (context, index) {
-              return ProductCategoryItem(category: categories[index]);
+              return ProductCategoryItem(uid: uid, category: categories[index]);
+              // return Container();
             },
           ),
         ),

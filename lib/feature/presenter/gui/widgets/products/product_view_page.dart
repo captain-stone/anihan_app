@@ -17,8 +17,10 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
 
+import '../../../../domain/entities/add_to_cart_entity.dart';
 import '../../../../domain/entities/product_entity.dart';
 import '../../pages/add_ons_blocs/check_friends_bloc/check_friends_bloc.dart';
+import '../../pages/checkout_page/checkout_page.dart';
 import '../../pages/order_details/order_page.dart';
 import '../../routers/app_routers.dart';
 
@@ -54,6 +56,8 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
   List<ProductEntity> _productEntityList = [];
   int totalProduct = 0;
   int totalVariantQuantity = 0;
+  List<AllCartEntity> productsCart = [];
+  bool hasData = true;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -162,8 +166,9 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
                     children: [
                       ElevatedButton(
                         onPressed: () {
+                          logger.w("ADDDING TO CART BOTTOMSHEETTTTT");
                           if (cart.isNotEmpty) {
-                            logger.d(cart);
+                            // logger.d(cart);
                             var listOfParams = cart
                                 .map((val) => ProductAddCartParams(
                                     name: val['name'] as String,
@@ -199,10 +204,44 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
                         onPressed: () {
                           // Buy now action
 
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => OrdersPage(
-                                    uid: widget.uid,
-                                  )));
+                          if (cart.isNotEmpty) {
+                            logger.d(cart);
+                            var listOfParams = cart
+                                .map((val) => ProductAddCartParams(
+                                    name: val['name'] as String,
+                                    quantity: val['quantity'],
+                                    price: val['price'],
+                                    image: val['image']))
+                                .toList();
+
+                            _addToCartBloc.add(AddProductListToCart(
+                                widget.productEntity.storeId, listOfParams));
+
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => OrdersPage(
+                                      uid: widget.uid,
+                                    )));
+                          } else {
+                            showDialog(
+                                context: context,
+                                builder: (context) => CustomAlertDialog(
+                                    colorMessage: Colors.red,
+                                    title: "Error",
+                                    onPressedCloseBtn: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text(
+                                        "The cart is empty please add your product to proceed")));
+                          }
+
+                          // Navigator.of(context).push(MaterialPageRoute(
+                          // builder: (context) => CheckoutPage(
+                          //       uid: widget.uid,
+                          //       productEntity: productsCart,
+                          //     )));
+
+                          // _addToCartBloc.add(AddProductListToCart(
+                          //     widget.productEntity.storeId, listOfParams));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orange,
@@ -384,6 +423,8 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
   }
 
   _addProduct(StateSetter setState, List<String> image, int index) {
+    logger.e("ADDING CART");
+
     setState(() {
       // logger.d(cart);
 
@@ -462,7 +503,6 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
         }
       }
     });
-    logger.d(cart);
   }
 
   _removeProduct(StateSetter setState, List<String> image, int index) {
@@ -499,6 +539,13 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
       bloc: _addToCartBloc,
       listener: (context, state) {
         // logger.d(state);
+
+        if (state is AllCartSuccessState) {
+          setState(() {
+            hasData = true;
+            productsCart = state.dataModel;
+          });
+        }
         if (state is AddToCartLoadingState) {
           showDialog(
             context: context,
@@ -682,31 +729,32 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
                           iconSize: 30.0,
                         ),
                         // Chat Seller Button
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            // logger.d(variantImage);
-                            StoreUserServicesApi s = StoreUserServicesApi();
+                        // ElevatedButton.icon(
+                        //   onPressed: () {
+                        //     // logger.d(variantImage);
+                        //     StoreUserServicesApi s = StoreUserServicesApi();
 
-                            s.getStoreIdInfo(
-                                'storeId-um2CJNQK4EeVy4xFck5kciIEZHA3-id');
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green.shade700,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 10.0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                          ),
-                          icon: const Icon(Icons.chat_bubble_outline),
-                          label: const Text("Chat Seller"),
-                        ),
+                        //     s.getStoreIdInfo(
+                        //         'storeId-um2CJNQK4EeVy4xFck5kciIEZHA3-id');
+                        //   },
+                        //   style: ElevatedButton.styleFrom(
+                        //     backgroundColor: Colors.green.shade700,
+                        //     padding: const EdgeInsets.symmetric(
+                        //         horizontal: 16.0, vertical: 10.0),
+                        //     shape: RoundedRectangleBorder(
+                        //       borderRadius: BorderRadius.circular(8.0),
+                        //     ),
+                        //   ),
+                        //   icon: const Icon(Icons.chat_bubble_outline),
+                        //   label: const Text("Chat Seller"),
+                        // ),
 
                         const SizedBox(
                           width: 5,
                         ),
                         ElevatedButton(
                           onPressed: () {
+                            logger.d("ADDING TO CART PAGEVIEW");
                             _showBottomSheet(context);
                           },
                           style: ElevatedButton.styleFrom(

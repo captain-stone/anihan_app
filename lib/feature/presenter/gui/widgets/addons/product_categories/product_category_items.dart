@@ -13,9 +13,12 @@ import 'product_category.dart';
 import 'product_category_items/product_category_items_cubit.dart';
 
 class ProductCategoryItem extends StatefulWidget {
+  final String uid;
+
   final ProductCategory category;
 
-  const ProductCategoryItem({super.key, required this.category});
+  const ProductCategoryItem(
+      {super.key, required this.uid, required this.category});
 
   @override
   _ProductCategoryItemState createState() => _ProductCategoryItemState();
@@ -55,13 +58,16 @@ class _ProductCategoryItemState extends State<ProductCategoryItem>
       listener: (context, state) {
         if (state is ProductCategoryItemsSuccessState) {
           logger.d(state.productEntity);
-          AutoRouter.of(context).push(ShowProductByCategoryRoute(
-              label: widget.category.name, productData: state.productEntity));
+          AutoRouter.of(context).replace(ShowProductByCategoryRoute(
+              uid: widget.uid,
+              label: widget.category.name,
+              productData: state.productEntity));
         }
       },
       builder: (context, state) {
         return GestureDetector(
           onTap: () {
+            // logger.d("CICKED");
             context
                 .read<ProductCategoryItemsCubit>()
                 .getProductBaseOnCategory(widget.category.name);

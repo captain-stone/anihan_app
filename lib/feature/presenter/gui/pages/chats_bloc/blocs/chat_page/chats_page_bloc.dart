@@ -25,7 +25,7 @@ class ChatsPageBloc extends Bloc<ChatsPageEvent, ChatsPageState> {
   late StreamSubscription? _subscription;
 
   ChatsPageBloc() : super(ChatsPageInitial()) {
-    on<GetUserListEvent>((event, emit) async {
+    on<GetChatUserListEvent>((event, emit) async {
       emit(ChatsPageLoadingState());
 
       var currentUserId = event.currentUserId;
@@ -324,7 +324,8 @@ class ChatsPageBloc extends Bloc<ChatsPageEvent, ChatsPageState> {
 
         try {
           DatabaseReference _ref =
-              db.ref("community/community-id-${user!.uid}");
+              db.ref("community/community-id-${user!.uid}/members");
+          // DatabaseReference _pushRef =
 
           var data = {
             "name": event.communityName,

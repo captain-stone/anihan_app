@@ -49,15 +49,19 @@ class CommunityPostDataDto {
     };
   }
 
+  //THIS IS GETTING MAP to COMMUNITYPOSTDATA DTO
   factory CommunityPostDataDto.fromMap(Map<String, dynamic> map) {
     return CommunityPostDataDto(
+      id: map['id'],
       username: map['username'],
       userId: map['userId'],
       message: map['message'],
       createdAt: map['createdAt'],
       like: map['like'],
-      comments: (map['comments'] as List<dynamic>?)
-              ?.map((commentMap) => CommentMessageDto.fromMap(commentMap))
+      comments: (map['comments'] as Map<dynamic, dynamic>?)
+              ?.values
+              .map((commentMap) => CommentMessageDto.fromMap(
+                  Map<String, dynamic>.from(commentMap)))
               .toList() ??
           [],
     );

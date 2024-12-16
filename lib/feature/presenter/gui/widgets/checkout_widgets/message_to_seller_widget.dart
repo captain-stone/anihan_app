@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class MessageToSellerWidget extends StatelessWidget {
-  const MessageToSellerWidget({Key? key}) : super(key: key);
+  final TextEditingController messageController;
+  const MessageToSellerWidget({super.key, required this.messageController});
 
   @override
   Widget build(BuildContext context) {
@@ -12,6 +13,7 @@ class MessageToSellerWidget extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: TextField(
+          controller: messageController,
           decoration: InputDecoration(
             hintText: "Please leave a message...",
             hintStyle: Theme.of(context).inputDecorationTheme.hintStyle,

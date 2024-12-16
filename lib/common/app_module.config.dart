@@ -48,6 +48,12 @@ import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/blocs/join_com
     as _i210;
 import 'package:anihan_app/feature/presenter/gui/pages/checkout_page/cubit/remove_checkout_cubit.dart'
     as _i726;
+import 'package:anihan_app/feature/presenter/gui/pages/Journal/blocs/calendar_widget/calendar_widget_bloc.dart'
+    as _i88;
+import 'package:anihan_app/feature/presenter/gui/pages/Journal/blocs/journal_widget/journal_widget_bloc.dart'
+    as _i109;
+import 'package:anihan_app/feature/presenter/gui/pages/Journal/blocs/weather_widget/weather_widget_bloc.dart'
+    as _i285;
 import 'package:anihan_app/feature/presenter/gui/pages/login_bloc/login_page_bloc.dart'
     as _i550;
 import 'package:anihan_app/feature/presenter/gui/pages/map__page/map_page_cubit.dart'
@@ -58,6 +64,8 @@ import 'package:anihan_app/feature/presenter/gui/pages/register_bloc/register_pa
     as _i282;
 import 'package:anihan_app/feature/presenter/gui/pages/seller_registration_bloc/seller_registration_bloc.dart'
     as _i905;
+import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/checkout_info/checkout_inf_bloc.dart'
+    as _i266;
 import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/cubit/add_update_user_address_cubit.dart'
     as _i1003;
 import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/user_information_bloc_bloc.dart'
@@ -66,6 +74,8 @@ import 'package:anihan_app/feature/presenter/gui/pages/wish_list_page/wishlist_b
     as _i604;
 import 'package:anihan_app/feature/presenter/gui/widgets/products/add_to_cart/add_to_cart_bloc.dart'
     as _i786;
+import 'package:anihan_app/feature/presenter/gui/widgets/products/all_products_add_ons_bloc/all_products_add_ons_bloc.dart'
+    as _i691;
 import 'package:anihan_app/feature/presenter/gui/widgets/products/products_add_ons_bloc/product_add_ons_bloc.dart'
     as _i280;
 import 'package:anihan_app/feature/presenter/gui/widgets/sellers/seller_add_ons/seller_info_add_ons_bloc.dart'
@@ -115,6 +125,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i604.WishListPageBloc>(() => _i604.WishListPageBloc());
     gh.factory<_i210.JoinCommunityBloc>(() => _i210.JoinCommunityBloc());
     gh.factory<_i643.CommunityChatBloc>(() => _i643.CommunityChatBloc());
+    gh.factory<_i88.CalendarWidgetBloc>(() => _i88.CalendarWidgetBloc());
+    gh.factory<_i109.JournalWidgetBloc>(() => _i109.JournalWidgetBloc());
+    gh.factory<_i285.WeatherWidgetBloc>(() => _i285.WeatherWidgetBloc());
+    gh.factory<_i266.CheckoutInfBloc>(() => _i266.CheckoutInfBloc());
     gh.lazySingleton<_i345.DatabaseReference>(() => appModule.ref);
     gh.lazySingleton<_i519.Client>(() => appModule.httpClient);
     gh.lazySingleton<_i361.Dio>(() => appModule.dio);
@@ -128,6 +142,8 @@ extension GetItInjectableX on _i174.GetIt {
       () => appModule.internetConnectionChecker,
       instanceName: 'global',
     );
+    gh.factory<_i691.AllProductsAddOnsBloc>(
+        () => _i691.AllProductsAddOnsBloc(gh<_i345.DatabaseReference>()));
     gh.factory<_i280.ProductAddOnsBloc>(
         () => _i280.ProductAddOnsBloc(gh<_i345.DatabaseReference>()));
     gh.factory<_i908.SessionsRepositories>(() => _i457.SessionRepoImpl(

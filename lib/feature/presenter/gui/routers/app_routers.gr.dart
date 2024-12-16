@@ -187,6 +187,7 @@ abstract class _$AppRouters extends RootStackRouter {
         routeData: routeData,
         child: ShowProductByCategoryPage(
           key: args.key,
+          uid: args.uid,
           label: args.label,
           productData: args.productData,
         ),
@@ -805,6 +806,7 @@ class ShowProductByCategoryRoute
     extends PageRouteInfo<ShowProductByCategoryRouteArgs> {
   ShowProductByCategoryRoute({
     Key? key,
+    required String uid,
     required String label,
     required List<ProductEntity> productData,
     List<PageRouteInfo>? children,
@@ -812,6 +814,7 @@ class ShowProductByCategoryRoute
           ShowProductByCategoryRoute.name,
           args: ShowProductByCategoryRouteArgs(
             key: key,
+            uid: uid,
             label: label,
             productData: productData,
           ),
@@ -827,11 +830,14 @@ class ShowProductByCategoryRoute
 class ShowProductByCategoryRouteArgs {
   const ShowProductByCategoryRouteArgs({
     this.key,
+    required this.uid,
     required this.label,
     required this.productData,
   });
 
   final Key? key;
+
+  final String uid;
 
   final String label;
 
@@ -839,7 +845,7 @@ class ShowProductByCategoryRouteArgs {
 
   @override
   String toString() {
-    return 'ShowProductByCategoryRouteArgs{key: $key, label: $label, productData: $productData}';
+    return 'ShowProductByCategoryRouteArgs{key: $key, uid: $uid, label: $label, productData: $productData}';
   }
 }
 

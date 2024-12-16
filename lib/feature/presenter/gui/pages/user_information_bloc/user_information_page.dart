@@ -7,7 +7,9 @@ import 'package:anihan_app/common/api_result.dart';
 import 'package:anihan_app/common/app_module.dart';
 import 'package:anihan_app/feature/domain/parameters/params.dart';
 import 'package:anihan_app/feature/domain/parameters/user_information_params.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/checkout_info/checkout_inf_bloc.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/cubit/add_update_user_address_cubit.dart';
+import 'package:anihan_app/feature/presenter/gui/pages/user_information_bloc/payments_widget/on_pressed_payments.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/addons/custom_alert_dialog.dart';
 import 'package:anihan_app/feature/presenter/gui/widgets/addons/customer_order.dart';
 
@@ -29,6 +31,7 @@ import 'package:location/location.dart';
 import 'package:logger/logger.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../../data/models/dto/checkout_product_dto.dart';
 import '../../widgets/addons/informations_widgets/activities_widget.dart';
 import '../../widgets/addons/informations_widgets/header_widget.dart';
 import '../../widgets/addons/informations_widgets/orders_widget.dart';
@@ -36,6 +39,8 @@ import '../../widgets/addons/informations_widgets/sections_titles.dart';
 import '../../widgets/products/all_products_add_ons_bloc/all_products_add_ons_bloc.dart';
 import '../../widgets/products/your_suggestions.dart';
 import '../../widgets/products/products_add_ons_bloc/product_add_ons_bloc.dart';
+import 'helper/order_widget_helper.dart';
+import 'payments_widget/on_pressed_buyers,.dart';
 
 @RoutePage()
 class MyInformationPage extends StatefulWidget {
@@ -52,6 +57,7 @@ class _MyInformationPageState extends State<MyInformationPage> {
   final _bloc = getIt<UserInformationBlocBloc>();
   final _addUpdateCubit = getIt<AddUpdateUserAddressCubit>();
   final _cartBloc = getIt<AddToCartBloc>();
+  final _checkoutBloc = getIt<CheckoutInfBloc>();
   final _addProductBloc = getIt<ProductAddOnsBloc>();
   final logger = Logger();
   final ScrollController _scrollController = ScrollController();
@@ -113,6 +119,7 @@ class _MyInformationPageState extends State<MyInformationPage> {
     // context.updateUserInformation(widget.uid!);
     _bloc.add(GetUidEvent(UserUidParams(widget.uid!)));
     _addUpdateCubit.getAllTheSavedAddress(widget.uid!);
+    _checkoutBloc.add(const GetAllCheckoutProductEvent());
   }
 
   @override
@@ -151,77 +158,6 @@ class _MyInformationPageState extends State<MyInformationPage> {
     );
   }
 
-  onOrders(
-    String label,
-  ) {
-    showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          double _w = MediaQuery.of(context).size.width;
-          double _h = MediaQuery.of(context).size.height;
-          return Container(
-              width: _w,
-              height: label == 'Shipments' ? _h * 0.3 : _h * 0.5,
-              padding: const EdgeInsets.all(18),
-              child: label == "Payments"
-                  ? Column(
-                      children: [
-                        Text("$label (cash)"),
-                        // ...accessRolesLabel
-                        const SizedBox(
-                          height: 18,
-                        ),
-                        Container(
-                            height: 100,
-                            width: _w,
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: Colors.green.shade50,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text("User's Name"),
-                                TextButton(
-                                    onPressed: () {},
-                                    child: const Text("approved"))
-                              ],
-                            ))
-                      ],
-                    )
-                  : label == "Shipments"
-                      ? Column(
-                          children: [
-                            Text("$label And Delivery"),
-                            // ...accessRolesLabel
-                            const SizedBox(
-                              height: 18,
-                            ),
-                            Container(
-                                height: 100,
-                                width: _w,
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 24),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  color: Colors.green.shade50,
-                                ),
-                                child: const Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    CircleAvatar(),
-                                    CircleAvatar(),
-                                    CircleAvatar()
-                                  ],
-                                ))
-                          ],
-                        )
-                      : Container());
-        });
-  }
-
   Future<void> signOutUser() async {
     try {
       await FirebaseAuth.instance.signOut();
@@ -257,6 +193,432 @@ class _MyInformationPageState extends State<MyInformationPage> {
     });
 
     _addUpdateCubit.updateSelectedAddress(widget.uid!, _selectedAddress);
+  }
+
+  _onPressedPayments() {}
+
+  Widget _buildOrderWidget(
+    Map<String, dynamic> data,
+    String key,
+    Widget Function(OrderWidgetArgs args) widgetBuilder,
+    BuildContext context,
+    String name,
+  ) {
+    int countDataPayment = 0;
+    int countDataShipMents = 0;
+    int countDataPaymentBuyer = 0;
+    int countDataShipMentsBuyer = 0;
+    int countDataDone = 0;
+    List<CheckoutProductDto> dtoDataList = [];
+    List<CheckoutProductDto> dtoDataListShipMents = [];
+    List<CheckoutProductDto> dtoListBuyer = [];
+    List<CheckoutProductDto> dtoDataListBuyer = [];
+
+    List<CheckoutProductDto> dtoListOnDone = [];
+    List<CheckoutProductDto> dtoDataListOnDone = [];
+
+    List<CheckoutProductDto> dtoData = data[key];
+    List<String> options = ['Find drivers', 'On Delivery', 'Done'];
+    String? selectOption;
+    logger.d(dtoData.runtimeType);
+    if (key == "seller") {
+      if (dtoData.isNotEmpty) {
+        for (var dto in dtoData) {
+          if (dto.forApproval == Approval.pendingApproval.name) {
+            dtoDataList.add(dto);
+            countDataPayment++;
+          }
+
+          if (dto.forApproval == Approval.approved.name ||
+              dto.forApproval == Approval.delivery.name ||
+              dto.forApproval == Approval.driver.name ||
+              dto.forApproval == Approval.done.name) {
+            dtoDataListShipMents.add(dto);
+            countDataShipMents++;
+
+            if (dto.forApproval == Approval.done.name) {
+              dtoListOnDone.add(dto);
+              countDataDone++;
+            }
+          }
+        }
+        return widgetBuilder(
+          OrderWidgetArgs(
+            dataPaymentCount: countDataPayment,
+            dataShipMentCount: countDataShipMents,
+            dataDoneCount: countDataDone,
+            onPressedPayments: () {
+              onOrderPayments(
+                selectOption: selectOption,
+                options: options,
+                context: context,
+                data: dtoDataList,
+                label: "Payments",
+                name: name,
+                onChangeMenuButton: (id, val) {
+                  setState(() {
+                    selectOption = val;
+                  });
+                },
+                onPressedApproved: (id) {
+                  logger.d("NEED APPROVAL $id");
+                  _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                      id: id, approval: Approval.approved.name));
+
+                  _checkoutBloc.add(const GetAllCheckoutProductEvent());
+                },
+              );
+            },
+            onPressedShipments: () {
+              onOrderPayments(
+                context: context,
+                selectOption: selectOption,
+                options: options,
+                data: dtoDataListShipMents,
+                label: "Shipments",
+                name: name,
+                onChangeMenuButton: (id, val) {
+                  logger.d(val);
+
+                  if (val == options[0]) {
+                    _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                        id: id, approval: Approval.driver.name));
+                  }
+
+                  if (val == options[1]) {
+                    _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                        id: id, approval: Approval.delivery.name));
+                  }
+
+                  if (val == options[2]) {
+                    _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                        id: id, approval: Approval.done.name));
+                  }
+
+                  _checkoutBloc.add(const GetAllCheckoutProductEvent());
+                },
+                onPressedApproved: (id) {
+                  logger.d("NEED APPROVAL $id");
+                  _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                      id: id, approval: Approval.approved.name));
+
+                  _checkoutBloc.add(const GetAllCheckoutProductEvent());
+                },
+              );
+            },
+            onGoing: () {},
+            onDone: () {
+              onOrderPayments(
+                selectOption: selectOption,
+                options: options,
+                context: context,
+                data: dtoListOnDone,
+                label: "Done",
+                name: name,
+                onChangeMenuButton: (id, val) {
+                  setState(() {
+                    selectOption = val;
+                  });
+                },
+                onPressedApproved: (id) {
+                  logger.d("NEED APPROVAL $id");
+                  _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                      id: id, approval: Approval.approved.name));
+
+                  _checkoutBloc.add(const GetAllCheckoutProductEvent());
+                },
+              );
+            },
+          ),
+        );
+      } else {
+        return widgetBuilder(
+          OrderWidgetArgs(
+            dataPaymentCount: countDataPayment,
+            dataShipMentCount: countDataShipMents,
+            dataDoneCount: countDataDone,
+            onPressedPayments: () {
+              onOrderPayments(
+                context: context,
+                selectOption: selectOption,
+                options: options,
+                data: dtoDataList,
+                label: "Payments",
+                name: name,
+                onChangeMenuButton: (id, val) {
+                  setState(() {
+                    selectOption = val;
+                  });
+                },
+                onPressedApproved: (id) {
+                  logger.d("HELLO $id");
+                },
+              );
+            },
+            onPressedShipments: () {
+              onOrderPayments(
+                context: context,
+                selectOption: selectOption,
+                options: options,
+                data: dtoDataListShipMents,
+                label: "Shipments",
+                name: name,
+                onChangeMenuButton: (id, val) {
+                  logger.d(val);
+
+                  if (val == options[0]) {
+                    _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                        id: id, approval: Approval.driver.name));
+                  }
+
+                  if (val == options[1]) {
+                    _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                        id: id, approval: Approval.delivery.name));
+                  }
+
+                  if (val == options[2]) {
+                    _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                        id: id, approval: Approval.done.name));
+                  }
+
+                  _checkoutBloc.add(const GetAllCheckoutProductEvent());
+                },
+                onPressedApproved: (id) {
+                  logger.d("NEED APPROVAL $id");
+                  _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                      id: id, approval: Approval.approved.name));
+
+                  _checkoutBloc.add(const GetAllCheckoutProductEvent());
+                },
+              );
+            },
+            onGoing: () {},
+            onDone: () {
+              onOrderPayments(
+                selectOption: selectOption,
+                options: options,
+                context: context,
+                data: dtoListOnDone,
+                label: "Done",
+                name: name,
+                onChangeMenuButton: (id, val) {
+                  setState(() {
+                    selectOption = val;
+                  });
+                },
+                onPressedApproved: (id) {
+                  logger.d("NEED APPROVAL $id");
+                  _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                      id: id, approval: Approval.approved.name));
+
+                  _checkoutBloc.add(const GetAllCheckoutProductEvent());
+                },
+              );
+            },
+          ),
+        );
+      }
+    }
+
+    //BUYYYYYYYYYYYYYYERRRRRR
+    else {
+      if (dtoData.isNotEmpty) {
+        for (var dto in dtoData) {
+          logger.d(dto.buyerName);
+
+          if (dto.forApproval == Approval.pendingApproval.name) {
+            dtoListBuyer.add(dto);
+            countDataPaymentBuyer++;
+          }
+
+          if (dto.forApproval == Approval.approved.name ||
+              dto.forApproval == Approval.delivery.name ||
+              dto.forApproval == Approval.driver.name ||
+              dto.forApproval == Approval.done.name) {
+            dtoDataListBuyer.add(dto);
+            countDataShipMentsBuyer++;
+
+            if (dto.forApproval == Approval.done.name) {
+              dtoListOnDone.add(dto);
+              countDataDone++;
+            }
+          }
+        }
+        return widgetBuilder(
+          OrderWidgetArgs(
+            dataPaymentCount: countDataPaymentBuyer,
+            dataShipMentCount: countDataShipMentsBuyer,
+            dataDoneCount: countDataDone,
+            onPressedPayments: () {
+              onOrderBuyer(
+                context: context,
+                selectOption: selectOption,
+                options: options,
+                data: dtoListBuyer,
+                label: "To Pay",
+                name: name,
+                onChangeMenuButton: (id, val) {
+                  setState(() {
+                    selectOption = val;
+                  });
+                  logger.d(selectOption);
+                },
+                onPressedApproved: (id) {
+                  logger.d("HELLO To pya");
+                },
+              );
+            },
+            onPressedShipments: () {
+              onOrderBuyer(
+                context: context,
+                selectOption: selectOption,
+                options: options,
+                data: dtoDataListBuyer,
+                label: "To Ship",
+                name: name,
+                onChangeMenuButton: (id, val) {
+                  logger.d(val);
+
+                  if (val == options[0]) {
+                    _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                        id: id, approval: Approval.driver.name));
+                  }
+
+                  if (val == options[1]) {
+                    _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                        id: id, approval: Approval.delivery.name));
+                  }
+
+                  if (val == options[2]) {
+                    _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                        id: id, approval: Approval.done.name));
+                  }
+
+                  _checkoutBloc.add(const GetAllCheckoutProductEvent());
+                },
+                onPressedApproved: (id) {
+                  logger.d("NEED APPROVAL $id");
+                  _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                      id: id, approval: Approval.approved.name));
+
+                  _checkoutBloc.add(const GetAllCheckoutProductEvent());
+                },
+              );
+            },
+            onGoing: () {},
+            onDone: () {
+              onOrderBuyer(
+                selectOption: selectOption,
+                options: options,
+                context: context,
+                data: dtoListOnDone,
+                label: "Done",
+                name: name,
+                onChangeMenuButton: (id, val) {
+                  setState(() {
+                    selectOption = val;
+                  });
+                },
+                onPressedApproved: (id) {
+                  logger.d("NEED APPROVAL $id");
+                  _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                      id: id, approval: Approval.approved.name));
+
+                  _checkoutBloc.add(const GetAllCheckoutProductEvent());
+                },
+              );
+            },
+          ),
+        );
+      } else {
+        return widgetBuilder(
+          OrderWidgetArgs(
+            dataPaymentCount: countDataPayment,
+            dataShipMentCount: countDataShipMentsBuyer,
+            dataDoneCount: countDataDone,
+            onPressedPayments: () {
+              onOrderBuyer(
+                context: context,
+                selectOption: selectOption,
+                options: options,
+                data: dtoListBuyer,
+                label: "To Pay",
+                name: name,
+                onChangeMenuButton: (id, val) {
+                  setState(() {
+                    selectOption = val;
+                  });
+                },
+                onPressedApproved: (id) {
+                  logger.d("HELLO To pya");
+                },
+              );
+            },
+            onPressedShipments: () {
+              onOrderBuyer(
+                context: context,
+                selectOption: selectOption,
+                options: options,
+                data: dtoDataListBuyer,
+                label: "To Ship",
+                name: name,
+                onChangeMenuButton: (id, val) {
+                  logger.d(val);
+
+                  if (val == options[0]) {
+                    _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                        id: id, approval: Approval.driver.name));
+                  }
+
+                  if (val == options[1]) {
+                    _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                        id: id, approval: Approval.delivery.name));
+                  }
+
+                  if (val == options[2]) {
+                    _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                        id: id, approval: Approval.done.name));
+                  }
+
+                  _checkoutBloc.add(const GetAllCheckoutProductEvent());
+                },
+                onPressedApproved: (id) {
+                  logger.d("NEED APPROVAL $id");
+                  _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                      id: id, approval: Approval.approved.name));
+
+                  _checkoutBloc.add(const GetAllCheckoutProductEvent());
+                },
+              );
+            },
+            onGoing: () {},
+            onDone: () {
+              onOrderBuyer(
+                selectOption: selectOption,
+                options: options,
+                context: context,
+                data: dtoListOnDone,
+                label: "Done",
+                name: name,
+                onChangeMenuButton: (id, val) {
+                  setState(() {
+                    selectOption = val;
+                  });
+                },
+                onPressedApproved: (id) {
+                  logger.d("NEED APPROVAL $id");
+                  _checkoutBloc.add(UpdatedApprovedCheckoutEvent(
+                      id: id, approval: Approval.approved.name));
+
+                  _checkoutBloc.add(const GetAllCheckoutProductEvent());
+                },
+              );
+            },
+          ),
+        );
+      }
+    }
+    // return Container();
   }
 
   @override
@@ -386,37 +748,56 @@ class _MyInformationPageState extends State<MyInformationPage> {
                   });
                 },
               ),
-              BlocBuilder<SellerInfoAddOnsBloc, SellerInfoAddOnsState>(
-                  builder: (context, state) {
-                String isApproved = Approval.notApproved.name;
-                // logger.d(state);
-
-                if (state is SellerInfoAddOnsSuccessState) {
-                  isApproved = state.dataModel['isApproved'];
-                  isFarmers = state.dataModel['isApproved'];
-                  if (state.dataModel['farmers'] != null) {
-                    isFarmers = state.dataModel['farmers'];
+              BlocBuilder<CheckoutInfBloc, CheckoutInfState>(
+                bloc: _checkoutBloc,
+                builder: (context, state) {
+                  logger.d(state);
+                  if (state is ApprovalSuccessState) {
+                    _checkoutBloc.add(const GetAllCheckoutProductEvent());
+                  }
+                  if (state is ApprovalErrorState) {
+                    _checkoutBloc.add(const GetAllCheckoutProductEvent());
                   }
 
-                  if (isApproved == Approval.approved.name) {
-                    return CustomerOrder(
-                      onPressedPayments: () {
-                        print("Paymentsssss");
-                        onOrders("Payments");
-                      },
-                      onPressedShipments: () {
-                        print("Shipments");
-
-                        onOrders("Shipments");
-                      },
-                      onGoing: () {},
-                      onDone: () {},
+                  if (state is CheckoutInfSuccessState) {
+                    return Column(
+                      children: [
+                        _buildOrderWidget(
+                          state.data,
+                          "seller",
+                          (args) => CustomerOrder(
+                            dataPaymentCount: args.dataPaymentCount,
+                            dataShipMentCount: args.dataShipMentCount,
+                            dataDoneCount: args.dataDoneCount,
+                            onPressedPayments: args.onPressedPayments,
+                            onPressedShipments: args.onPressedShipments,
+                            onGoing: args.onGoing,
+                            onDone: args.onDone,
+                          ),
+                          context,
+                          name,
+                        ),
+                        _buildOrderWidget(
+                          state.data,
+                          "buyer",
+                          (args) => MyOrdersWidget(
+                            dataPaymentCount: args.dataPaymentCount,
+                            dataShipmentCount: args.dataShipMentCount,
+                            dataDoneCount: args.dataDoneCount,
+                            onPressedPayments: args.onPressedPayments,
+                            onPressedShipments: args.onPressedShipments,
+                            onGoing: args.onGoing,
+                            onDone: args.onDone,
+                          ),
+                          context,
+                          name,
+                        ),
+                      ],
                     );
                   }
-                }
-                return Container();
-              }),
-              const MyOrdersWidget(),
+                  return Container(); // Fallback when no data is available
+                },
+              ),
               ActivitiesWidget(
                 uid: widget.uid!,
               ),
@@ -461,12 +842,8 @@ class _MyInformationPageState extends State<MyInformationPage> {
               ),
               BlocBuilder<AllProductsAddOnsBloc, AllProductsAddOnsState>(
                   builder: (context, allProductState) {
-                // logger.f(state);
                 if (allProductState is AllProductSuccessState) {
-                  // logger.d(state.productEntity);
                   var data = allProductState.productEntity;
-
-                  // logger.d(data);
                   return YouMayLikeWidget(
                     sellerContext: context,
                     widget.uid!,

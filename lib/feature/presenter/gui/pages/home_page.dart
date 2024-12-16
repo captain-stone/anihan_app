@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
       var data = state.data;
       var buildContext = context.read<CheckFriendsBloc>();
 
-      logger.d(data);
+      // logger.d(data);
 
       AutoRouter.of(context).push(FriendRequestRoute(
           data: data, checkFriendBuildContext: buildContext));
@@ -90,7 +90,9 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 8.0),
             const LocationsLabel(),
             const SizedBox(height: 16.0),
-            NewStockSection(),
+            NewStockSection(
+              uid: widget.uid!,
+            ),
             const SizedBox(height: 16.0),
             BlocBuilder<AllProductsAddOnsBloc, AllProductsAddOnsState>(
               builder: (context, state) {

@@ -4,11 +4,11 @@ abstract class ChatsPageEvent extends Equatable {
   const ChatsPageEvent();
 }
 
-class GetUserListEvent extends ChatsPageEvent {
+class GetChatUserListEvent extends ChatsPageEvent {
   final String currentUserId;
   final String? toUserId;
 
-  const GetUserListEvent({required this.currentUserId, this.toUserId});
+  const GetChatUserListEvent({required this.currentUserId, this.toUserId});
   @override
   List<Object?> get props => [currentUserId, toUserId];
 }

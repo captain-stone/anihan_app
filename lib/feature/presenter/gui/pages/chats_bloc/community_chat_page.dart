@@ -2,6 +2,7 @@ import 'package:anihan_app/feature/data/models/dto/community_post_dto.dart';
 import 'package:anihan_app/feature/domain/entities/community_post_data.dart';
 import 'package:anihan_app/feature/domain/entities/message_data.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/blocs/chat_with_page_bloc/chat_with_bloc.dart';
+import 'package:anihan_app/feature/presenter/gui/widgets/addons/custom_alert_dialog.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -79,6 +80,28 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
     }
   }
 
+  void _postproduct(String data) {
+    // final tweetText = _tweetController.text;
+    if (data.isNotEmpty) {
+      setState(() {
+        final message = CommunityPostDataDto(
+          username: 'NewUser',
+          userId: '@newuser',
+          message: data,
+          like: 1,
+          createdAt: DateTime.now().toIso8601String(),
+
+          comments: [],
+          isCommentVisible:
+              false, // New tweet, no comment input visible initially
+        );
+
+        _communityBloc.add(SendCommunityAMessageEvent(widget.ownerId, message));
+        _tweetController.clear();
+      });
+    }
+  }
+
   void _toggleCommentSection(int tweetIndex) {
     setState(() {
       // Toggle the comment section visibility for the specific tweet
@@ -87,17 +110,13 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
     });
   }
 
-  void _postComment(int tweetIndex) {
+  void _postComment(String? commentId) {
     final commentText = _commentController.text;
+
     if (commentText.isNotEmpty) {
       setState(() {
-        final newComment = CommentMessageDto(
-          username: 'NewUser',
-          message: commentText,
-          createdAt: 'Just now',
-        );
-        final tweetId = tweets[tweetIndex].id; // Assuming each tweet has an ID
-        // _firebaseService.addComment(tweetId, newComment);  // Add the comment to Firebase
+        _communityBloc.add(SendCommentCommunityAMessageEvent(
+            widget.ownerId, commentId ?? "None", commentText));
         _commentController.clear();
       });
     }
@@ -122,7 +141,76 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
   Widget build(BuildContext context) {
     return BlocConsumer<CommunityChatBloc, CommunityChatState>(
       bloc: _communityBloc,
-      listener: (context, state) {},
+      listener: (context, state) {
+        if (state is GettingProductSuccessState) {
+          var data = state.data;
+          logger.d(data);
+          showDialog(
+              context: context,
+              builder: (context) {
+                return CustomAlertDialog(
+                    height: 300,
+                    colorMessage: Colors.green,
+                    title: "List of Porducts",
+                    onPressedCloseBtn: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: SizedBox(
+                        height: 500,
+                        child: ListView.builder(
+                          itemCount: data.length,
+                          itemBuilder: (context, index) {
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                  vertical: 8, horizontal: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 4,
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: Colors.green,
+                                  child: Text(
+                                    data[index]['name'][0]
+                                        .toUpperCase(), // First letter as avatar
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                                title: Text(
+                                  data[index]['name'],
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                subtitle: Padding(
+                                  padding: const EdgeInsets.only(top: 4.0),
+                                  child: Text(
+                                    "Descriptions: ${data[index]['itemDescriptions']}",
+                                    style: const TextStyle(
+                                        fontSize: 14, color: Colors.grey),
+                                  ),
+                                ),
+                                onTap: () {
+                                  // Handle item click
+                                  // print("Selected: ${data[index]['name']}");
+                                  var tobepost =
+                                      "\nI want to sell this product to anyone who is interested!\n\nProduct: ${data[index]['name']}\nDescription: ${data[index]['itemDescriptions']}\nPrice: ${data[index]['price']}";
+                                  setState(() {
+                                    _postproduct(tobepost);
+                                    // _commentController.text =
+                                    //     "Product: ${data[index]['name']}\nDescription: ${data[index]['itemDescriptions']}\nPrice: ${data[index]['price']}";
+                                  });
+
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            );
+                          },
+                        )));
+              });
+        }
+      },
       builder: (context, state) {
         if (state is CommunityListChatWithSuccessState) {
           tweets = [];
@@ -134,7 +222,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
         return Scaffold(
           appBar: AppBar(
             title: Text(widget.communityName),
-            backgroundColor: Colors.blue,
+            backgroundColor: Theme.of(context).primaryColor,
           ),
           body: Column(
             children: [
@@ -150,9 +238,36 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                     hintText: 'What\'s happening?',
                     border: const OutlineInputBorder(),
-                    suffixIcon: TextButton(
-                      onPressed: _postTweet,
-                      child: const Text("Post"),
+                    suffixIcon: Row(
+                      mainAxisSize: MainAxisSize
+                          .min, // Adjust to fit the content properly
+                      children: [
+                        TextButton(
+                          onPressed: _postTweet,
+                          child: const Text("Post"),
+                        ),
+                        PopupMenuButton<String>(
+                          icon: const Icon(
+                              Icons.more_vert), // Use the 3-dots icon
+                          onSelected: (String value) {
+                            // Handle the selected option
+                            switch (value) {
+                              case 'Barter':
+                                // print('Edit option selected');
+                                _communityBloc.add(GettingTheProductEvent());
+
+                                break;
+                            }
+                          },
+                          itemBuilder: (BuildContext context) =>
+                              <PopupMenuEntry<String>>[
+                            const PopupMenuItem<String>(
+                              value: 'Barter',
+                              child: Text('Barter'),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                   maxLines: null, // Allow multiple lines
@@ -163,9 +278,10 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                 child: ListView.builder(
                   itemCount: tweets.length,
                   itemBuilder: (context, index) {
+                    logger.d(tweets[index].id);
                     return TweetCard(
                       tweet: tweets[index],
-                      onPostComment: () => _postComment(index),
+                      onPostComment: () => _postComment(tweets[index].id),
                       commentController: _commentController,
                       onToggleComment: () => _toggleCommentSection(index),
                     );

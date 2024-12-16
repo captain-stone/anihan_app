@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 
 class CustomerOrder extends StatelessWidget {
+  final int dataPaymentCount;
+  final int dataShipMentCount;
+  final int dataDoneCount;
   final void Function() onPressedPayments;
   final void Function() onPressedShipments;
   final void Function() onGoing;
   final void Function() onDone;
   const CustomerOrder(
       {super.key,
+      required this.dataPaymentCount,
+      required this.dataShipMentCount,
+      required this.dataDoneCount,
       required this.onPressedPayments,
       required this.onPressedShipments,
       required this.onGoing,
@@ -27,7 +33,8 @@ class CustomerOrder extends StatelessWidget {
           children: [
             _buildOrdersHeader(),
             const SizedBox(height: 16),
-            _buildOrderStatusRow(),
+            _buildOrderStatusRow(
+                dataPaymentCount, dataShipMentCount, dataDoneCount),
           ],
         ),
       ),
@@ -60,14 +67,17 @@ class CustomerOrder extends StatelessWidget {
     );
   }
 
-  Row _buildOrderStatusRow() {
+  Row _buildOrderStatusRow(
+      int dataPaymentCount, int dataShipMentCount, int dataDoneCount) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildOrderStatusItem('Payments', Icons.payment, 0),
-        _buildOrderStatusItem('Shipments', Icons.local_shipping, 0),
-        _buildOrderStatusItem('Ongoing', Icons.sync, 0),
-        _buildOrderStatusItem('Done', Icons.check_circle_outline, 0),
+        _buildOrderStatusItem('Payments', Icons.payment, dataPaymentCount),
+        _buildOrderStatusItem(
+            'Shipments', Icons.local_shipping, dataShipMentCount),
+        // _buildOrderStatusItem('Ongoing', Icons.sync, 0),
+        _buildOrderStatusItem(
+            'Done', Icons.check_circle_outline, dataDoneCount),
       ],
     );
   }

@@ -4,6 +4,7 @@ import 'package:anihan_app/common/api_result.dart';
 import 'package:anihan_app/feature/data/models/api/community_service_api.dart';
 import 'package:anihan_app/feature/data/models/api/user_information_service_api.dart';
 import 'package:anihan_app/feature/data/models/dto/community_post_dto.dart';
+import 'package:anihan_app/feature/domain/entities/product_entity.dart';
 import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/community_chat_page.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -149,6 +150,7 @@ class CommunityChatBloc extends Bloc<CommunityChatEvent, CommunityChatState> {
                 }
               });
             }
+            logger.d(messages[0].id);
 
             if (!emit.isDone) {
               emit(CommunityListChatWithSuccessState(messages));
@@ -212,5 +214,48 @@ class CommunityChatBloc extends Bloc<CommunityChatEvent, CommunityChatState> {
     //     }
     //   },
     // );
+
+    on<GettingTheProductEvent>((event, emit) async {
+      List<String> imageUrls = [];
+      emit(const CommunityChatWithLoadingState());
+      FirebaseAuth auth = FirebaseAuth.instance;
+
+      User? user = auth.currentUser;
+      List<Map<String, dynamic>> productList = [];
+
+      try {
+        final DatabaseReference _ref =
+            FirebaseDatabase.instance.ref("products/product-id${user!.uid}");
+
+        DataSnapshot snapshot = await _ref.get();
+
+        if (snapshot.exists) {
+          var object = snapshot.value as Map?;
+          logger.d(object);
+          if (object != null) {
+            object.forEach((key, value) {
+              var data = {
+                "name": value['name'],
+                "itemDescriptions": value['itemDescriptions'],
+                "price": value['price'],
+              };
+
+              productList.add(data);
+            });
+          }
+
+          if (productList.isNotEmpty) {
+            emit(GettingProductSuccessState(productList));
+          } else {
+            emit(const CommunityChatWithErrorState("No products"));
+          }
+        } else {
+          emit(const CommunityChatWithErrorState("No saved products"));
+        }
+      } catch (e) {
+        logger.e(e.toString());
+        emit(CommunityChatWithErrorState("Error Occured: $e"));
+      }
+    });
   }
 }

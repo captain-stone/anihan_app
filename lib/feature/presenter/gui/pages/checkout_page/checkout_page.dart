@@ -37,6 +37,7 @@ class _CheckoutPageState extends State<CheckoutPage> with CheckoutApi {
   String _selectedAddress = "";
   final Logger logger = Logger();
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
   double totalProduct = 0.0;
 
   @override
@@ -155,7 +156,9 @@ class _CheckoutPageState extends State<CheckoutPage> with CheckoutApi {
             ItemsWidget(
               productEntity: widget.productEntity,
             ),
-            MessageToSellerWidget(),
+            MessageToSellerWidget(
+              messageController: _messageController,
+            ),
             ShippingOptionWidget(
               date: formattedDate,
             ),
@@ -187,6 +190,7 @@ class _CheckoutPageState extends State<CheckoutPage> with CheckoutApi {
           bool success = await saveCheckoutData(
             productEntity: widget.productEntity,
             total: totalProduct,
+            messageToSeller: _messageController.text,
             deliveryDate: DateFormat('MMMM d').format(
               DateTime.now().add(Duration(days: 7)),
             ),

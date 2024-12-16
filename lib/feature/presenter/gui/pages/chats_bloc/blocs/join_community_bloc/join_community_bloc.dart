@@ -1,3 +1,5 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers
+
 import 'package:anihan_app/common/enum_files.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -25,6 +27,7 @@ class JoinCommunityBloc extends Bloc<JoinCommunityEvent, JoinCommunityState> {
           User? user = FirebaseAuth.instance.currentUser;
 
           DatabaseReference _updateRef = _ref.push();
+          var genKey = _updateRef.key;
 
           var value = {
             "id": user?.uid ?? "None",
@@ -38,7 +41,7 @@ class JoinCommunityBloc extends Bloc<JoinCommunityEvent, JoinCommunityState> {
 
           if (object != null) {
             if (object['id'] != user!.uid) {
-              _ref.set(value);
+              _updateRef.set(value);
             }
             if (object['status'] == isJoin.name) {
               // return {"ownerId": ownerId, "status": isJoin};

@@ -83,6 +83,8 @@ class _FriendRequestPageState extends State<FriendRequestPage> {
                                   widget.checkFriendBuildContext.add(
                                       UpdateFriendRequestEvent(
                                           "accepted", userWhoRequest));
+
+                                  Navigator.of(context).pop();
                                 },
                                 child: const Text("Accept",
                                     style: TextStyle(color: Colors.white)),
@@ -102,6 +104,7 @@ class _FriendRequestPageState extends State<FriendRequestPage> {
                                   widget.checkFriendBuildContext.add(
                                       UpdateFriendRequestEvent(
                                           "deny", userWhoRequest));
+                                  Navigator.of(context).pop();
 
                                   // addFriendFunction(userId);
                                   // context.read<CheckFriendsBloc>()

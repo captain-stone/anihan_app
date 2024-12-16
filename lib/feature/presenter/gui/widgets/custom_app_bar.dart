@@ -89,7 +89,7 @@ class CustomAppBar extends StatelessWidget {
                   child: BlocBuilder<ChatsPageBloc, ChatsPageState>(
                     builder: (context, state) {
                       int numberOfRequest = 123;
-                      logger.d(state);
+                      // logger.d(state);
                       if (state is AllPendingRequestSuccessState) {
                         return Text(
                           '$numberOfRequest', // Notification count

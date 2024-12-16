@@ -150,11 +150,15 @@ class NotificationPageBloc
               }).where((e) => e != null),
             );
 
-            logger.d(comminities);
-
-            comminities.addAll(memberDetails.cast<CommunityData>());
-            if (!emit.isDone) {
-              emit(NotificationCommunitiesSuccessState(comminities));
+            if (comminities.isNotEmpty) {
+              comminities.addAll(memberDetails.cast<CommunityData>());
+              if (!emit.isDone) {
+                emit(NotificationCommunitiesSuccessState(comminities));
+              }
+            } else {
+              if (!emit.isDone) {
+                emit(const NotificationCommunitiesSuccessState([]));
+              }
             }
           }
         }, onError: (error) {
@@ -202,7 +206,10 @@ class NotificationPageBloc
 
           if (memberKey != null) {
             DatabaseReference memberRef = _ref.child(memberKey!);
-            await memberRef.update(updateStatus).then((_) {
+
+            // DatabaseReference _pushRef = memberRef.push();
+
+            await memberRef.set(updateStatus).then((_) {
               emit(AcceptCommunitiesSuccessState({
                 "status": Status.success.name,
               }));

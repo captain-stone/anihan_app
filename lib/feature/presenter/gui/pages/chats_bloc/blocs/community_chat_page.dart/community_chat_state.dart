@@ -46,3 +46,10 @@ class CommunityChatWithErrorState extends CommunityChatState {
   @override
   List<Object> get props => [message];
 }
+
+class GettingProductSuccessState extends CommunityChatState {
+  final List<Map<String, dynamic>> data;
+  const GettingProductSuccessState(this.data);
+  @override
+  List<Object> get props => [data];
+}

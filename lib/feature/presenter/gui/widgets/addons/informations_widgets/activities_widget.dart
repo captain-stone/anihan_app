@@ -33,7 +33,7 @@ class ActivitiesWidget extends StatelessWidget {
             const SizedBox(height: 16),
             _buildActivityRow([
               _buildActivityItem(
-                  'My Likes', Icons.favorite, Colors.red, context),
+                  'Wishlist', Icons.favorite, Colors.red, context),
               _buildActivityItem(
                   'Buy Again', Icons.shopping_bag, Colors.green, context),
             ]),

@@ -1,7 +1,22 @@
 import 'package:flutter/material.dart';
 
 class MyOrdersWidget extends StatelessWidget {
-  const MyOrdersWidget({super.key});
+  final int dataPaymentCount;
+  final int dataShipmentCount;
+  final int dataDoneCount;
+  final void Function() onPressedPayments;
+  final void Function() onPressedShipments;
+  final void Function() onGoing;
+  final void Function() onDone;
+  const MyOrdersWidget(
+      {super.key,
+      required this.dataPaymentCount,
+      required this.dataShipmentCount,
+      required this.dataDoneCount,
+      required this.onPressedPayments,
+      required this.onPressedShipments,
+      required this.onGoing,
+      required this.onDone});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +33,8 @@ class MyOrdersWidget extends StatelessWidget {
           children: [
             _buildOrdersHeader(),
             const SizedBox(height: 16),
-            _buildOrderStatusRow(),
+            _buildOrderStatusRow(
+                dataPaymentCount, dataShipmentCount, dataDoneCount),
           ],
         ),
       ),
@@ -51,14 +67,16 @@ class MyOrdersWidget extends StatelessWidget {
     );
   }
 
-  Row _buildOrderStatusRow() {
+  Row _buildOrderStatusRow(
+      int dataPaymentCount, int dataShipMentCount, int done) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildOrderStatusItem('To Pay', Icons.payment, 0),
-        _buildOrderStatusItem('To Ship', Icons.local_shipping, 0),
-        _buildOrderStatusItem('Ongoing', Icons.sync, 0),
-        _buildOrderStatusItem('Done', Icons.check_circle_outline, 0),
+        _buildOrderStatusItem('To Pay', Icons.payment, dataPaymentCount),
+        _buildOrderStatusItem(
+            'To Ship', Icons.local_shipping, dataShipMentCount),
+        // _buildOrderStatusItem('Ongoing', Icons.sync, 0),
+        _buildOrderStatusItem('Done', Icons.check_circle_outline, done),
       ],
     );
   }
@@ -66,7 +84,24 @@ class MyOrdersWidget extends StatelessWidget {
   Widget _buildOrderStatusItem(String label, IconData icon, int count) {
     return Expanded(
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          if (label == 'To Pay') {
+            //payments;
+            onPressedPayments();
+          }
+          if (label == 'To Ship') {
+            //shipments
+            onPressedShipments();
+          }
+          if (label == 'Ongoing') {
+            //ongoing
+            onGoing();
+          }
+          if (label == 'Done') {
+            //done
+            onDone();
+          }
+        },
         borderRadius: BorderRadius.circular(8.0),
         splashColor: Colors.green.withOpacity(0.2),
         child: AnimatedScale(

@@ -37,3 +37,8 @@ class SendCommentCommunityAMessageEvent extends CommunityChatEvent {
   @override
   List<Object> get props => [communityId, commentMessage];
 }
+
+class GettingTheProductEvent extends CommunityChatEvent {
+  @override
+  List<Object> get props => [];
+}

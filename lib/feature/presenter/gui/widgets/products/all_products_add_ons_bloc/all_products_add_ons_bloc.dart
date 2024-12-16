@@ -13,7 +13,7 @@ import '../../../../../domain/entities/product_entity.dart';
 part 'all_products_add_ons_event.dart';
 part 'all_products_add_ons_state.dart';
 
-// @injectable
+@injectable
 class AllProductsAddOnsBloc
     extends Bloc<AllProductsAddOnsEvent, AllProductsAddOnsState> {
   final DatabaseReference _refs;

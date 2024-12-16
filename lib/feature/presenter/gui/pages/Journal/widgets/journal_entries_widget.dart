@@ -1,13 +1,22 @@
+// ignore_for_file: library_private_types_in_public_api, deprecated_member_use, use_build_context_synchronously, unnecessary_cast, unnecessary_nullable_for_final_variable_declarations
+
+import 'package:anihan_app/feature/data/models/dto/journal_entry_dto.dart';
+import 'package:anihan_app/feature/domain/parameters/journal_entry_params.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/journal_bloc.dart';
+import 'package:intl/intl.dart';
+// import 'package:logger/logger.dart';
+import '../../../../../../common/app_module.dart';
+
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 
+import '../blocs/journal_widget/journal_widget_bloc.dart';
+
 class JournalEntriesWidget extends StatefulWidget {
-  const JournalEntriesWidget({Key? key}) : super(key: key);
+  const JournalEntriesWidget({super.key});
 
   @override
   _JournalEntriesWidgetState createState() => _JournalEntriesWidgetState();
@@ -15,19 +24,35 @@ class JournalEntriesWidget extends StatefulWidget {
 
 class _JournalEntriesWidgetState extends State<JournalEntriesWidget> {
   DateTimeRange? _selectedDateRange;
+  final _journalBloc = getIt<JournalWidgetBloc>();
+  // final Logger logger = Logger();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _journalBloc.add(const JournalOnLoadEvent());
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<JournalBloc, JournalState>(
+    return BlocBuilder<JournalWidgetBloc, JournalWidgetState>(
+      bloc: _journalBloc,
       builder: (context, state) {
-        List<JournalEntry> filteredEntries = [];
+        // logger.d(state);
+        // List<JournalEntryParams> filteredEntries = [];
+        List<JournalEntryDto> filteredDtoEntries = [];
 
-        // Filter entries based on the selected date range
-        if (state is JournalLoaded) {
+        if (state is JournalWidgetLoadingState) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (state is JournalWidgetSuccessState) {
           if (_selectedDateRange == null) {
-            filteredEntries = state.entries;
+            filteredDtoEntries = state.entry;
           } else {
-            filteredEntries = state.entries.where((entry) {
+            filteredDtoEntries = state.entry.where((entry) {
               final entryDate = DateTime.parse(entry.date);
               return entryDate.isAfter(_selectedDateRange!.start
                       .subtract(const Duration(days: 1))) &&
@@ -43,15 +68,18 @@ class _JournalEntriesWidgetState extends State<JournalEntriesWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header with Date Range Filter Button and "New Entry" Button
+              const Divider(
+                color: Colors.green,
+              ),
+              const SizedBox(height: 12),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Icon(Icons.book_outlined,
-                      color: Colors.black87, size: 28),
-                  const SizedBox(width: 2),
+                      color: Colors.black87, size: 24),
                   Text(
                     'Journal Entries',
-                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                   ),
@@ -60,14 +88,17 @@ class _JournalEntriesWidgetState extends State<JournalEntriesWidget> {
                     tooltip: 'Filter Entries',
                     onPressed: () => _selectDateRange(context),
                   ),
-                  const SizedBox(width: 4),
+                  const Spacer(),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.add, color: Colors.white),
-                    label: const Text('New Entry'),
+                    label: const Text(
+                      'New Entry',
+                      style: TextStyle(fontSize: 12),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0),
+                        borderRadius: BorderRadius.circular(12.0),
                       ),
                       padding: const EdgeInsets.symmetric(
                           vertical: 8.0, horizontal: 12.0),
@@ -75,7 +106,9 @@ class _JournalEntriesWidgetState extends State<JournalEntriesWidget> {
                     onPressed: () {
                       showDialog(
                         context: context,
-                        builder: (context) => const AddJournalEntryDialog(),
+                        builder: (context) => AddJournalEntryDialog(
+                          journalBloc: _journalBloc,
+                        ),
                       );
                     },
                   ),
@@ -85,13 +118,13 @@ class _JournalEntriesWidgetState extends State<JournalEntriesWidget> {
               // Display Date Range Filter Information
               if (_selectedDateRange != null)
                 Text(
-                  'Showing entries from ${_selectedDateRange!.start.toLocal()} to ${_selectedDateRange!.end.toLocal()}',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  'Showing entries from ${DateFormat('yyyy-MM-dd').format(_selectedDateRange!.start.toLocal())} to ${DateFormat('yyyy-MM-dd').format(_selectedDateRange!.end.toLocal())}',
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               const SizedBox(height: 12),
               // Entries List or Empty State
-              if (filteredEntries.isNotEmpty)
-                _buildEntriesList(context, filteredEntries)
+              if (filteredDtoEntries.isNotEmpty)
+                _buildEntriesList(context, filteredDtoEntries)
               else
                 _buildEmptyState(context),
             ],
@@ -154,13 +187,15 @@ class _JournalEntriesWidgetState extends State<JournalEntriesWidget> {
     }
   }
 
-  Widget _buildEntriesList(BuildContext context, List<JournalEntry> entries) {
+  Widget _buildEntriesList(
+      BuildContext context, List<JournalEntryDto> entries) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: entries.length,
       itemBuilder: (context, index) {
         final entry = entries[index];
+        // logger.d("${entry.title}\n${entry.photos}");
         return ExpandableJournalEntry(entry: entry);
       },
     );
@@ -175,18 +210,18 @@ class _JournalEntriesWidgetState extends State<JournalEntriesWidget> {
             size: 80,
             color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 18),
           Text(
             'No entries found for the selected date range!',
-            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                   color: Colors.black54,
                 ),
           ),
           const SizedBox(height: 8),
-          Text(
-            'Try adjusting the date range or add a new entry.',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          // Text(
+          //   'Try adjusting the date range or add a new entry.',
+          //   style: Theme.of(context).textTheme.bodyMedium,
+          // ),
         ],
       ),
     );
@@ -194,7 +229,8 @@ class _JournalEntriesWidgetState extends State<JournalEntriesWidget> {
 }
 
 class AddJournalEntryDialog extends StatefulWidget {
-  const AddJournalEntryDialog({Key? key}) : super(key: key);
+  final JournalWidgetBloc journalBloc;
+  const AddJournalEntryDialog({super.key, required this.journalBloc});
 
   @override
   _AddJournalEntryDialogState createState() => _AddJournalEntryDialogState();
@@ -204,7 +240,7 @@ class _AddJournalEntryDialogState extends State<AddJournalEntryDialog> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   DateTime? _selectedDate;
-  List<dynamic> _selectedPhotos =
+  List<Uint8List> _selectedPhotos =
       []; // Supports File (Mobile) or Uint8List (Web)
   final ImagePicker _picker = ImagePicker();
 
@@ -305,21 +341,13 @@ class _AddJournalEntryDialogState extends State<AddJournalEntryDialog> {
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4.0),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12.0),
-                          child: kIsWeb
-                              ? Image.memory(
-                                  _selectedPhotos[index] as Uint8List,
-                                  width: 100,
-                                  height: 100,
-                                  fit: BoxFit.cover,
-                                )
-                              : Image.file(
-                                  _selectedPhotos[index] as File,
-                                  width: 100,
-                                  height: 100,
-                                  fit: BoxFit.cover,
-                                ),
-                        ),
+                            borderRadius: BorderRadius.circular(12.0),
+                            child: Image.memory(
+                              _selectedPhotos[index] as Uint8List,
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            )),
                       );
                     },
                   ),
@@ -341,17 +369,16 @@ class _AddJournalEntryDialogState extends State<AddJournalEntryDialog> {
                       if (title.isNotEmpty &&
                           description.isNotEmpty &&
                           _selectedDate != null) {
-                        final newEntry = JournalEntry(
+                        final newEntry = JournalEntryParams(
                           date:
                               _selectedDate!.toIso8601String().split('T').first,
                           title: title,
                           description: description,
+                          photos: _selectedPhotos,
                         );
 
                         // Dispatch AddJournalEntry event
-                        context
-                            .read<JournalBloc>()
-                            .add(AddJournalEntry(newEntry));
+                        widget.journalBloc.add(AddJournalEvent(newEntry));
                         Navigator.of(context).pop();
                       } else {
                         // Show a validation error
@@ -393,31 +420,25 @@ class _AddJournalEntryDialogState extends State<AddJournalEntryDialog> {
   Future<void> _pickImages() async {
     final List<XFile>? pickedFiles = await _picker.pickMultiImage();
     if (pickedFiles != null) {
-      if (kIsWeb) {
-        // Web: Use asynchronous `readAsBytes()` for Uint8List
-        final List<Uint8List> webPhotos = [];
-        for (XFile file in pickedFiles) {
-          final Uint8List bytes = await file.readAsBytes();
-          webPhotos.add(bytes);
-        }
-        setState(() {
-          _selectedPhotos = webPhotos;
-        });
-      } else {
-        // Mobile: Use `File` for image data
-        setState(() {
-          _selectedPhotos = pickedFiles.map((file) => File(file.path)).toList();
-        });
+      // Convert the picked files to Uint8List
+      final List<Uint8List> photoBytes = [];
+      for (XFile file in pickedFiles) {
+        final Uint8List bytes = await File(file.path).readAsBytes();
+        photoBytes.add(bytes);
       }
+
+      setState(() {
+        _selectedPhotos =
+            photoBytes; // Assuming _selectedPhotos is List<Uint8List>
+      });
     }
   }
 }
 
 class ExpandableJournalEntry extends StatefulWidget {
-  final JournalEntry entry;
+  final JournalEntryDto entry;
 
-  const ExpandableJournalEntry({Key? key, required this.entry})
-      : super(key: key);
+  const ExpandableJournalEntry({super.key, required this.entry});
 
   @override
   _ExpandableJournalEntryState createState() => _ExpandableJournalEntryState();
@@ -425,6 +446,7 @@ class ExpandableJournalEntry extends StatefulWidget {
 
 class _ExpandableJournalEntryState extends State<ExpandableJournalEntry> {
   bool _isExpanded = false;
+  // final logger = Logger();
 
   @override
   Widget build(BuildContext context) {
@@ -507,31 +529,30 @@ class _ExpandableJournalEntryState extends State<ExpandableJournalEntry> {
                 ),
                 const SizedBox(height: 8),
                 // Display sample images if the entry is expanded
-                Row(
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12.0),
-                        child: Image.network(
-                          'https://via.placeholder.com/150',
-                          height: 100,
-                          fit: BoxFit.cover,
+                SizedBox(
+                  height: 150,
+                  width: 500,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: widget.entry.photos.length,
+                    itemBuilder: (context, index) {
+                      // logger.d(widget.entry.photos[index]);
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12.0),
+                          child: Image.network(
+                            widget.entry
+                                .photos[index], // Using the URL from the list
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12.0),
-                        child: Image.network(
-                          'https://via.placeholder.com/150',
-                          height: 100,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                      );
+                    },
+                  ),
+                )
               ],
             ),
         ],

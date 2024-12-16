@@ -4,9 +4,9 @@ class WeatherForecastWidget extends StatefulWidget {
   final List<Map<String, dynamic>> forecastData;
 
   const WeatherForecastWidget({
-    Key? key,
+    super.key,
     required this.forecastData,
-  }) : super(key: key);
+  });
 
   @override
   _WeatherForecastWidgetState createState() => _WeatherForecastWidgetState();
@@ -71,7 +71,7 @@ class _WeatherForecastWidgetState extends State<WeatherForecastWidget> {
                       width: 50,
                       height: 50,
                       errorBuilder: (context, error, stackTrace) {
-                        return Icon(
+                        return const Icon(
                           Icons.wb_sunny,
                           size: 50,
                           color: Colors.orange,
@@ -239,7 +239,7 @@ class _WeatherForecastWidgetState extends State<WeatherForecastWidget> {
         children: [
           Text(
             dayData['date'],
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+            style: Theme.of(context).textTheme.bodySmall!.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),

@@ -70,7 +70,7 @@ class _OrdersPageState extends State<OrdersPage> {
               color: Colors.white,
             ),
             title: Text(
-              'Orders',
+              'Cart',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     color: Colors.white,
                   ),
