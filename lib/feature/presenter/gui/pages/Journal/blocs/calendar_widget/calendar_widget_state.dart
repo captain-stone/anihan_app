@@ -36,3 +36,11 @@ class CalendarWidgetErrorState extends CalendarWidgetState {
   @override
   List<Object> get props => [message];
 }
+
+class CalendarWidgetUpdateState extends CalendarWidgetState {
+  final String message;
+
+  const CalendarWidgetUpdateState(this.message);
+  @override
+  List<Object> get props => [message];
+}

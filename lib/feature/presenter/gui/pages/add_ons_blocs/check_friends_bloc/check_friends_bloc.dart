@@ -10,11 +10,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 
 part 'check_friends_event.dart';
 part 'check_friends_state.dart';
 
+@injectable
 class CheckFriendsBloc extends Bloc<CheckFriendsEvent, CheckFriendsState> {
   final Logger logger = Logger();
   final FirebaseDatabase db = FirebaseDatabase.instance;

@@ -86,6 +86,7 @@ class _ProductCardState extends State<ProductCard> {
       },
       child: GestureDetector(
         onTap: () {
+          logger.d(widget.dist);
           // print(widget.product.storeId);
           widget.parentContext
               .read<CheckFriendsBloc>()

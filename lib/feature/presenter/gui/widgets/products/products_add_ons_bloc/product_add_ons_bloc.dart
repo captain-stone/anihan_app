@@ -59,7 +59,8 @@ class ProductAddOnsBloc extends Bloc<ProductAddOnsEvent, ProductAddOnsState>
                     String productLabel = value['label'];
                     double productPrice =
                         double.parse(value['price'].toString());
-                    int productQuantity = int.parse(value['price'].toString());
+                    int productQuantity =
+                        int.parse(value['productQuantity'].toString());
                     String itemDescriptions = value['itemDescriptions'];
                     String storeId = "storeId-${user!.uid}-id";
 

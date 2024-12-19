@@ -179,7 +179,7 @@ void onOrderBuyer({
                                                         : data[index]
                                                                     .forApproval ==
                                                                 "delivery"
-                                                            ? "On the way to your address"
+                                                            ? "On the way \nto your address"
                                                             : data[index]
                                                                         .forApproval ==
                                                                     "done"

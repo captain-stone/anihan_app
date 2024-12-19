@@ -115,19 +115,22 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
         backgroundColor: Colors.transparent,
         builder: (BuildContext context) =>
             StatefulBuilder(builder: (context, setState) {
+              double _w = MediaQuery.of(context).size.width;
+              double _h = MediaQuery.of(context).size.height;
+
               return DraggableScrollableSheet(
                 expand: false,
                 initialChildSize: 0.7,
                 maxChildSize: 0.9,
                 minChildSize: 0.5,
                 builder: (_, controller) {
-                  return _buildBottomSheetContent(setState);
+                  return _buildBottomSheetContent(Size(_w, _h), setState);
                 },
               );
             }));
   }
 
-  Widget _buildBottomSheetContent(StateSetter setState) {
+  Widget _buildBottomSheetContent(Size size, StateSetter setState) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey[200],
@@ -135,133 +138,129 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Column(
           children: [
-            // Left side - Product Grid
-            Expanded(
-              flex: 3, // Give more space to the left side
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Left Side - Product Grid
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: size.height * 0.58,
+                        width: size.width * 0.35, // Responsive height
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: allImageUrl.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 4.0),
+                              child: _buildProductCard(
+                                  setState, allImageUrl, index),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Action Buttons
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                // Right Side - Order Details
+                Expanded(
+                  flex: 3,
+                  child: SizedBox(
+                      height: size.height * 0.58,
+                      width: size.width * 0.58,
+                      child: _buildOrderDetails(setState)),
+                ),
+              ],
+            ),
+            const Spacer(),
+            SizedBox(
+              // width: size.width * 0.35,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  SizedBox(
-                    height: 500,
-                    width: 500,
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: allImageUrl.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                          child:
-                              _buildProductCard(setState, allImageUrl, index),
+                  // Add to Cart Button
+                  ElevatedButton(
+                    onPressed: () {
+                      if (cart.isNotEmpty) {
+                        var listOfParams = cart.map((val) {
+                          return ProductAddCartParams(
+                            name: val['name'] as String,
+                            quantity: val['quantity'],
+                            price: val['price'],
+                            image: val['image'],
+                          );
+                        }).toList();
+
+                        _addToCartBloc.add(
+                          AddProductListToCart(
+                              widget.productEntity.storeId, listOfParams),
                         );
-                      },
+                      } else {
+                        _showErrorDialog(
+                            "The cart is empty. Please add products to proceed.");
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 12.0),
+                    ),
+                    child: const Text(
+                      "Add to Cart",
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          logger.w("ADDDING TO CART BOTTOMSHEETTTTT");
-                          if (cart.isNotEmpty) {
-                            // logger.d(cart);
-                            var listOfParams = cart
-                                .map((val) => ProductAddCartParams(
-                                    name: val['name'] as String,
-                                    quantity: val['quantity'],
-                                    price: val['price'],
-                                    image: val['image']))
-                                .toList();
+                  const SizedBox(
+                    width: 12,
+                  ),
+                  // Buy Now Button
+                  ElevatedButton(
+                    onPressed: () {
+                      if (cart.isNotEmpty) {
+                        var listOfParams = cart.map((val) {
+                          return ProductAddCartParams(
+                            name: val['name'] as String,
+                            quantity: val['quantity'],
+                            price: val['price'],
+                            image: val['image'],
+                          );
+                        }).toList();
 
-                            _addToCartBloc.add(AddProductListToCart(
-                                widget.productEntity.storeId, listOfParams));
-                          } else {
-                            showDialog(
-                                context: context,
-                                builder: (context) => CustomAlertDialog(
-                                    colorMessage: Colors.red,
-                                    title: "Error",
-                                    onPressedCloseBtn: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text(
-                                        "The cart is empty please add your product to proceed")));
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 12.0),
-                        ),
-                        child: const Text("Add to Cart",
-                            style: TextStyle(color: Colors.white)),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Buy now action
+                        _addToCartBloc.add(
+                          AddProductListToCart(
+                              widget.productEntity.storeId, listOfParams),
+                        );
 
-                          if (cart.isNotEmpty) {
-                            logger.d(cart);
-                            var listOfParams = cart
-                                .map((val) => ProductAddCartParams(
-                                    name: val['name'] as String,
-                                    quantity: val['quantity'],
-                                    price: val['price'],
-                                    image: val['image']))
-                                .toList();
-
-                            _addToCartBloc.add(AddProductListToCart(
-                                widget.productEntity.storeId, listOfParams));
-
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => OrdersPage(
-                                      uid: widget.uid,
-                                    )));
-                          } else {
-                            showDialog(
-                                context: context,
-                                builder: (context) => CustomAlertDialog(
-                                    colorMessage: Colors.red,
-                                    title: "Error",
-                                    onPressedCloseBtn: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text(
-                                        "The cart is empty please add your product to proceed")));
-                          }
-
-                          // Navigator.of(context).push(MaterialPageRoute(
-                          // builder: (context) => CheckoutPage(
-                          //       uid: widget.uid,
-                          //       productEntity: productsCart,
-                          //     )));
-
-                          // _addToCartBloc.add(AddProductListToCart(
-                          //     widget.productEntity.storeId, listOfParams));
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 12.0),
-                        ),
-                        child: const Text("Buy Now",
-                            style: TextStyle(color: Colors.white)),
-                      ),
-                    ],
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => OrdersPage(uid: widget.uid),
+                        ));
+                      } else {
+                        _showErrorDialog(
+                            "The cart is empty. Please add products to proceed.");
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 12.0),
+                    ),
+                    child: const Text(
+                      "Buy Now",
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(width: 10),
-
-            // Right side - Order Details
-            Expanded(
-              flex: 2, // Make the right side wider
-              child: _buildOrderDetails(setState),
             ),
           ],
         ),
@@ -269,60 +268,166 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
     );
   }
 
+// Helper method to show error dialogs
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => CustomAlertDialog(
+        colorMessage: Colors.red,
+        title: "Error",
+        onPressedCloseBtn: () {
+          Navigator.of(context).pop();
+        },
+        child: Text(message),
+      ),
+    );
+  }
+
   Widget _buildProductCard(
       StateSetter setState, List<String> images, int index) {
     // logger.d(widget.productEntity.productVariant);
+
+    int getProductQuantity() {
+      int existingIndex = cart.indexWhere((item) {
+        String productName;
+
+        if (index + 1 > widget.productEntity.productImage.length) {
+          productName = widget
+              .productEntity
+              .productVariant![
+                  index - widget.productEntity.productImage.length]!
+              .varianName!;
+        } else {
+          productName = widget.productEntity.productName;
+        }
+
+        return item['name'] == productName;
+      });
+
+      return existingIndex >= 0 ? cart[existingIndex]['quantity'] : 0;
+    }
+
+    // Create a set to track displayed items (using a unique key: productName + image URL)
+    final Set<String> displayedItems = {};
+
+    String getProductName() {
+      if (index + 1 > widget.productEntity.productImage.length) {
+        return widget
+            .productEntity
+            .productVariant![index - widget.productEntity.productImage.length]!
+            .varianName!;
+      } else {
+        return widget.productEntity.productName;
+      }
+    }
+
+    String getPriceName() {
+      if (index + 1 > widget.productEntity.productImage.length) {
+        return widget
+            .productEntity
+            .productVariant![index - widget.productEntity.productImage.length]!
+            .variantPrice!;
+      } else {
+        return widget.productEntity.productPrice.toString();
+      }
+    }
+
+    String productName = getProductName();
+    String productPrice = getPriceName();
+    String imageUrl = allImageUrl[index];
+    String uniqueKey = '$productName|$imageUrl';
+
+    // Skip rendering if the unique combination has already been displayed
+    if (displayedItems.contains(uniqueKey)) {
+      return const SizedBox.shrink(); // Return an empty widget for duplicates
+    }
+
+    displayedItems.add(uniqueKey);
+
     return Card(
       elevation: 3.0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-              onPressed: () => _removeProduct(setState, images, index),
-              icon: const Icon(Icons.remove)),
-          Column(
-            children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width *
-                    0.25, // Constrained width
-                height: 100, // Fixed height for the image
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12.0, left: 8, right: 8),
-                  child: ClipRRect(
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(12.0)),
-                    child: Image.network(
-                      allImageUrl[index],
-                      fit: BoxFit.cover, // Ensures the image covers the area
+      child: SizedBox(
+        height: 100,
+        child: Stack(
+          children: [
+            Positioned(
+              left: 0,
+              top: 0,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width *
+                        0.15, // Constrained width
+                    height: 50, // Fixed height for the image
+                    child: Padding(
+                      padding:
+                          const EdgeInsets.only(top: 12.0, left: 8, right: 8),
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(12.0)),
+                        child: Image.network(
+                          // allImageUrl[index],
+                          imageUrl,
+                          fit:
+                              BoxFit.cover, // Ensures the image covers the area
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 8.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(
+                          height: 8,
+                        ),
+                        Text(
+                          // index + 1 > widget.productEntity.productImage.length
+                          //     ? widget
+                          //         .productEntity
+                          //         .productVariant![index -
+                          //             widget.productEntity.productImage.length]!
+                          //         .varianName!
+                          //     : widget.productEntity.productName,
+                          productName,
+                          style: const TextStyle(
+                              fontSize: 12.0, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          "₱${getPriceName()}",
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                ],
               ),
-              const SizedBox(height: 8.0),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text(
-                  index + 1 > widget.productEntity.productImage.length
-                      ? widget
-                          .productEntity
-                          .productVariant![
-                              index - widget.productEntity.productImage.length]!
-                          .varianName!
-                      : widget.productEntity.productName,
-                  style: const TextStyle(
-                      fontSize: 12.0, fontWeight: FontWeight.bold),
-                ),
+            ),
+            Positioned(
+              right: 0,
+              bottom: 0,
+              left: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                      onPressed: () => _removeProduct(setState, images, index),
+                      icon: const Icon(Icons.remove)),
+                  Text("${getProductQuantity()} KG"),
+                  IconButton(
+                      onPressed: () => _addProduct(setState, images, index),
+                      icon: const Icon(Icons.add)),
+                ],
               ),
-              const SizedBox(height: 8.0),
-            ],
-          ),
-          IconButton(
-              onPressed: () => _addProduct(setState, images, index),
-              icon: const Icon(Icons.add)),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -334,7 +439,9 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
             sum + (item['price'] as double) * (item['quantity'] as int));
 
     return Container(
-      // width: MediaQuery.of(context).size.width * 0.5,
+      // width: MediaQuery.of(context).size.width * 0.6,
+      // height: MediaQuery.of(context).size.width,
+      // height: 500,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12.0),
@@ -354,7 +461,7 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
                 itemBuilder: (context, index) {
                   return ListTile(
                     title: Text(
-                      '${cart[index]['name']} x${cart[index]['quantity']}',
+                      '${cart[index]['name']} x${cart[index]['quantity']} KG',
                       style: TextStyle(fontSize: 10),
                     ),
                     trailing: Text(
@@ -448,7 +555,7 @@ class _ProductSectionPageState extends State<ProductSectionPage> {
         return item['name'] == productName;
       });
 
-      logger.d(existingIndex);
+      // logger.d(existingIndex);
 
       if (existingIndex >= 0) {
         cart[existingIndex]['quantity']++;

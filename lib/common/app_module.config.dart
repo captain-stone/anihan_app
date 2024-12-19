@@ -36,6 +36,8 @@ import 'package:anihan_app/feature/domain/usecases/sign_up_usecase.dart'
     as _i341;
 import 'package:anihan_app/feature/domain/usecases/user_information_usecase.dart'
     as _i619;
+import 'package:anihan_app/feature/presenter/gui/pages/add_ons_blocs/check_friends_bloc/check_friends_bloc.dart'
+    as _i201;
 import 'package:anihan_app/feature/presenter/gui/pages/add_product_page/add_product_page_bloc.dart'
     as _i905;
 import 'package:anihan_app/feature/presenter/gui/pages/chats_bloc/blocs/chat_page/chats_page_bloc.dart'
@@ -76,6 +78,8 @@ import 'package:anihan_app/feature/presenter/gui/widgets/products/add_to_cart/ad
     as _i786;
 import 'package:anihan_app/feature/presenter/gui/widgets/products/all_products_add_ons_bloc/all_products_add_ons_bloc.dart'
     as _i691;
+import 'package:anihan_app/feature/presenter/gui/widgets/products/cubit/product_update_cubit.dart'
+    as _i269;
 import 'package:anihan_app/feature/presenter/gui/widgets/products/products_add_ons_bloc/product_add_ons_bloc.dart'
     as _i280;
 import 'package:anihan_app/feature/presenter/gui/widgets/sellers/seller_add_ons/seller_info_add_ons_bloc.dart'
@@ -115,20 +119,22 @@ extension GetItInjectableX on _i174.GetIt {
       () => appModule.notification,
       preResolve: true,
     );
+    gh.factory<_i201.CheckFriendsBloc>(() => _i201.CheckFriendsBloc());
     gh.factory<_i609.ChatsPageBloc>(() => _i609.ChatsPageBloc());
     gh.factory<_i1006.ChatWithBloc>(() => _i1006.ChatWithBloc());
-    gh.factory<_i726.RemoveCheckoutCubit>(() => _i726.RemoveCheckoutCubit());
-    gh.factory<_i445.MapPageCubit>(() => _i445.MapPageCubit());
-    gh.factory<_i517.NotificationPageBloc>(() => _i517.NotificationPageBloc());
-    gh.factory<_i1003.AddUpdateUserAddressCubit>(
-        () => _i1003.AddUpdateUserAddressCubit());
-    gh.factory<_i604.WishListPageBloc>(() => _i604.WishListPageBloc());
-    gh.factory<_i210.JoinCommunityBloc>(() => _i210.JoinCommunityBloc());
     gh.factory<_i643.CommunityChatBloc>(() => _i643.CommunityChatBloc());
+    gh.factory<_i210.JoinCommunityBloc>(() => _i210.JoinCommunityBloc());
+    gh.factory<_i726.RemoveCheckoutCubit>(() => _i726.RemoveCheckoutCubit());
     gh.factory<_i88.CalendarWidgetBloc>(() => _i88.CalendarWidgetBloc());
     gh.factory<_i109.JournalWidgetBloc>(() => _i109.JournalWidgetBloc());
     gh.factory<_i285.WeatherWidgetBloc>(() => _i285.WeatherWidgetBloc());
+    gh.factory<_i445.MapPageCubit>(() => _i445.MapPageCubit());
+    gh.factory<_i517.NotificationPageBloc>(() => _i517.NotificationPageBloc());
     gh.factory<_i266.CheckoutInfBloc>(() => _i266.CheckoutInfBloc());
+    gh.factory<_i1003.AddUpdateUserAddressCubit>(
+        () => _i1003.AddUpdateUserAddressCubit());
+    gh.factory<_i604.WishListPageBloc>(() => _i604.WishListPageBloc());
+    gh.factory<_i269.ProductUpdateCubit>(() => _i269.ProductUpdateCubit());
     gh.lazySingleton<_i345.DatabaseReference>(() => appModule.ref);
     gh.lazySingleton<_i519.Client>(() => appModule.httpClient);
     gh.lazySingleton<_i361.Dio>(() => appModule.dio);

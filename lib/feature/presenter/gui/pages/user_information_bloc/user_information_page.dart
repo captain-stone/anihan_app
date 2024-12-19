@@ -231,15 +231,14 @@ class _MyInformationPageState extends State<MyInformationPage> {
 
           if (dto.forApproval == Approval.approved.name ||
               dto.forApproval == Approval.delivery.name ||
-              dto.forApproval == Approval.driver.name ||
-              dto.forApproval == Approval.done.name) {
+              dto.forApproval == Approval.driver.name) {
             dtoDataListShipMents.add(dto);
             countDataShipMents++;
+          }
 
-            if (dto.forApproval == Approval.done.name) {
-              dtoListOnDone.add(dto);
-              countDataDone++;
-            }
+          if (dto.forApproval == Approval.done.name) {
+            dtoListOnDone.add(dto);
+            countDataDone++;
           }
         }
         return widgetBuilder(
@@ -433,15 +432,14 @@ class _MyInformationPageState extends State<MyInformationPage> {
 
           if (dto.forApproval == Approval.approved.name ||
               dto.forApproval == Approval.delivery.name ||
-              dto.forApproval == Approval.driver.name ||
-              dto.forApproval == Approval.done.name) {
+              dto.forApproval == Approval.driver.name) {
             dtoDataListBuyer.add(dto);
             countDataShipMentsBuyer++;
+          }
 
-            if (dto.forApproval == Approval.done.name) {
-              dtoListOnDone.add(dto);
-              countDataDone++;
-            }
+          if (dto.forApproval == Approval.done.name) {
+            dtoListOnDone.add(dto);
+            countDataDone++;
           }
         }
         return widgetBuilder(

@@ -98,7 +98,7 @@ class _YourProductState extends State<YourProduct> {
             uid: widget.uid,
             product: products[index],
             productList: products,
-            dist: ProductDist.suggestions,
+            dist: ProductDist.personal,
             isFavoriteProduct: null,
           );
         },

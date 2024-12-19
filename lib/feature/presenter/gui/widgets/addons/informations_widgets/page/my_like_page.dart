@@ -36,7 +36,7 @@ class _MyLikePageState extends State<MyLikePage> {
       create: (context) => ProductFavoriteCubit(),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("My Likes"),
+          title: const Text("Wishlist"),
         ),
         body: SingleChildScrollView(
           child: BlocBuilder<WishListPageBloc, WishListPageState>(

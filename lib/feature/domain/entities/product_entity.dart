@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:anihan_app/feature/domain/entities/app_entity.dart';
 
 class ProductEntity extends AppEntity {
+  // final String? productId;
   final List<String> productImage;
   final String productName;
   final String productLabel;
@@ -14,6 +15,7 @@ class ProductEntity extends AppEntity {
   final String storeId;
 
   ProductEntity(
+    // this.productId,
     this.productImage,
     this.productName,
     this.productLabel,

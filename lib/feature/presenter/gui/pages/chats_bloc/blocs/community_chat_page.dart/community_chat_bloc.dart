@@ -231,7 +231,7 @@ class CommunityChatBloc extends Bloc<CommunityChatEvent, CommunityChatState> {
 
         if (snapshot.exists) {
           var object = snapshot.value as Map?;
-          logger.d(object);
+          // logger.d(object);
           if (object != null) {
             object.forEach((key, value) {
               var data = {

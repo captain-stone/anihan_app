@@ -1,4 +1,4 @@
-// ignore_for_file: no_leading_underscores_for_local_identifiers
+// ignore_for_file: no_leading_underscores_for_local_identifiers, library_private_types_in_public_api
 
 import 'package:anihan_app/feature/domain/entities/product_entity.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -11,7 +11,8 @@ class ProductCarousel extends StatefulWidget {
   final int productsSold;
   final List<ProductVariantEntity?> productVariantEntity;
 
-  ProductCarousel({
+  const ProductCarousel({
+    super.key,
     required this.imageUrls,
     required this.productName,
     required this.price,

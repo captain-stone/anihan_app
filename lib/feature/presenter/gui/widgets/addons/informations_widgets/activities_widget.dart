@@ -74,7 +74,7 @@ class ActivitiesWidget extends StatelessWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(8.0),
             onTap: () {
-              if (label == 'My Likes') {
+              if (label == 'Wishlist') {
                 AutoRouter.of(context).push(MyLikeRoute(uid: uid));
               }
               if (label == "My Reviews") {
